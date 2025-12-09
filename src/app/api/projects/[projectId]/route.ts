@@ -1,7 +1,7 @@
 // src/app/api/projects/[projectId]/route.ts
 import { NextResponse } from 'next/server';
-import { deleteProject, getProjectById } from '../../../../services/project-service';
-import { findUserById } from '../../../../services/user-service';
+import { deleteProject, getProjectById } from '@/services/project-service';
+import { findUserById } from '@/services/user-service';
 
 export async function GET(
   request: Request,
