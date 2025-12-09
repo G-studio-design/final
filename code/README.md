@@ -39,15 +39,27 @@ Metode ini mengisolasi aplikasi Anda dalam sebuah "container" sehingga tidak men
 
 ### Langkah-langkah Deployment:
 
-1.  **Unggah Kode Proyek ke NAS Anda:**
+1.  **Siapkan Struktur Folder di NAS Anda:**
     -   Buka **File Station**.
-    -   Buat folder baru di NAS Anda jika belum ada, misalnya `docker`.
-    -   Unggah **semua file dan folder proyek Anda** (termasuk `Dockerfile`, `package.json`, dan folder `src`) ke dalam direktori `docker` tersebut. **PENTING**: Jangan unggah folder `node_modules` atau `.next`.
+    -   Buat folder baru di NAS Anda, misalnya di bawah `nasmsarchstudio`, dengan nama `docker`.
+    -   **PENTING**: Di dalam folder `docker` tersebut, unggah **semua file dan folder proyek Anda** (termasuk `Dockerfile`, `package.json`, dan folder `src`). Jangan menempatkannya di dalam sub-folder lagi.
+
+    Struktur folder yang benar di NAS akan terlihat seperti ini:
+    ```
+    /nasmsarchstudio/
+    └── docker/
+        ├── Dockerfile
+        ├── package.json
+        ├── .env
+        ├── src/
+        ├── database/
+        └── ...file dan folder proyek lainnya
+    ```
 
 2.  **Buat File `.env` di NAS:**
     -   Di dalam folder `docker` di File Station, buat file baru bernama `.env`.
     -   Klik kanan file `.env` tersebut dan pilih "Open with Text Editor".
-    -   Salin konten dari bagian **Konfigurasi Variabel Lingkungan** di bawah ini, tempelkan ke editor teks, lalu isi dengan kredensial Anda yang sebenarnya.
+    -   Salin konten dari bagian **Konfigurasi Variabel Lingkungan** di bawah ini, tempelkan ke editor, lalu isi dengan kredensial Anda.
 
 3.  **Buka Container Manager:**
     -   Jalankan aplikasi **Container Manager** dari menu utama DSM.
@@ -55,7 +67,7 @@ Metode ini mengisolasi aplikasi Anda dalam sebuah "container" sehingga tidak men
 4.  **Buat Proyek Baru:**
     -   Di Container Manager, navigasi ke bagian **Project** dan klik **Create**.
     -   **Project Name**: Beri nama `msarch-app`.
-    -   **Path**: Arahkan ke folder `docker` tempat Anda mengunggah semua file proyek.
+    -   **Path**: Arahkan ke folder `/nasmsarchstudio/docker`.
     -   **Source**: Pilih **Create docker-compose.yml**.
     -   Salin dan tempel konfigurasi berikut ini ke dalam editor:
         ```yaml
