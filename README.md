@@ -1,3 +1,4 @@
+
 # Msarch App
 
 Aplikasi starter Next.js untuk manajemen proyek dan tugas karyawan.
@@ -8,9 +9,9 @@ Aplikasi starter Next.js untuk manajemen proyek dan tugas karyawan.
 - **Editor Kode**: Disarankan menggunakan [Visual Studio Code](https://code.visualstudio.com/).
 - **Synology NAS**: Dengan akses admin untuk menginstal paket.
 
-## Deployment & Konfigurasi HTTPS di Synology NAS
+## Deployment & Konfigurasi HTTPS di Synology NAS (Metode Tailscale)
 
-Metode ini menggunakan Docker untuk isolasi, dan **Tailscale** untuk mendapatkan akses HTTPS yang aman dan gratis tanpa perlu konfigurasi router (port forwarding). HTTPS **wajib** untuk fitur seperti Notifikasi Push dan Absensi berbasis lokasi.
+Metode ini menggunakan Docker untuk isolasi, dan **Tailscale** untuk mendapatkan akses HTTPS yang aman dan gratis **tanpa perlu konfigurasi router (port forwarding)**. HTTPS **wajib** untuk fitur seperti Notifikasi Push dan Absensi berbasis lokasi.
 
 ### 1. Prasyarat di Synology
 
@@ -18,34 +19,53 @@ Metode ini menggunakan Docker untuk isolasi, dan **Tailscale** untuk mendapatkan
 2.  Cari dan instal **Container Manager** (mungkin bernama Docker pada versi DSM yang lebih lama).
 3.  Cari dan instal **Tailscale**.
 
-### 2. Siapkan Struktur Folder di NAS
+### 2. Konfigurasi Jaringan & Domain dengan Tailscale
 
-1.  Buka **File Station**.
-2.  Di bawah folder `docker`, buat folder baru bernama `msarch-app`.
-3.  Unggah **semua file dan folder proyek Anda** (termasuk `Dockerfile`, `package.json`, `src`, dll.) ke dalam folder `/docker/msarch-app` tersebut.
-
-### 3. Konfigurasi Jaringan & Domain dengan Tailscale
-
-**A. Instal dan Login ke Tailscale:**
+#### A. Instal dan Login ke Tailscale di NAS
 1.  Buka paket **Tailscale** yang sudah Anda instal di Synology.
 2.  Klik **Login**. Anda akan diarahkan ke browser untuk login menggunakan akun Google, Microsoft, atau GitHub. Gunakan akun yang mudah Anda ingat.
 3.  Setelah login, NAS Anda akan muncul di daftar mesin di [Admin Console Tailscale](https://login.tailscale.com/admin/machines).
 
-**B. Dapatkan Nama Domain HTTPS Anda:**
+#### B. Dapatkan Nama Domain HTTPS Anda
 1.  Di [Admin Console Tailscale](https://login.tailscale.com/admin/machines), cari mesin (NAS) Anda. Anda akan melihat nama domain yang diberikan, contohnya: `nama-nas.nama-akun.ts.net`. **Catat domain ini.** Inilah alamat HTTPS permanen Anda.
 
-**C. Atur Reverse Proxy:**
+#### C. Atur Reverse Proxy
 1.  Di DSM, buka **Control Panel** > **Login Portal** > tab **Advanced** > **Reverse Proxy**.
 2.  Klik **Create**.
-3.  **Source (Dari Internet via Tailscale):**
+3.  Isi bagian **Source** (Dari Internet via Tailscale):
     -   Protocol: `HTTPS`
     -   Hostname: Masukkan domain Tailscale Anda dari langkah B (misal: `nama-nas.nama-akun.ts.net`).
     -   Port: `443`
-4.  **Destination (Ke Aplikasi Docker):**
+4.  Isi bagian **Destination** (Ke Aplikasi Docker):
     -   Protocol: `HTTP`
     -   Hostname: `localhost`
     -   Port: `4000`
 5.  Klik **Save**.
+
+#### D. (PENTING) Konfigurasi Firewall Synology
+Firewall Synology mungkin memblokir koneksi dari Tailscale. Buat aturan untuk mengizinkannya.
+1.  Buka **Control Panel** > **Security** > tab **Firewall**.
+2.  Pastikan firewall diaktifkan. Jika tidak, aktifkan dan centang "Enable Firewall notifications".
+3.  Di bawah bagian "Firewall Profile", klik tombol **Edit Rules**.
+4.  Klik **Create**.
+5.  Di bagian **Ports**:
+    - Pilih **"Select from a list of built-in applications"**, lalu klik **Select**.
+    - Cari dan centang **Reverse Proxy (HTTPS)** (port 443). Klik **OK**.
+6.  Di bagian **Source IP**:
+    - Pilih **Specific IP**, lalu klik **Select**.
+    - Pilih tab **Subnet**.
+    - Masukkan Alamat IP: `100.64.0.0`
+    - Masukkan Subnet mask: `255.192.0.0`
+    - (Ini adalah rentang alamat IP standar yang digunakan oleh Tailscale).
+7.  Di bagian **Action**:
+    - Pilih **Allow**.
+8.  Klik **OK**, lalu **Save** profil firewall Anda.
+
+### 3. Siapkan Struktur Folder di NAS
+
+1.  Buka **File Station**.
+2.  Di bawah folder `docker`, buat folder baru bernama `msarch-app`.
+3.  **Pindahkan semua file dan folder proyek Anda** (termasuk `Dockerfile`, `package.json`, `src`, dll.) ke dalam folder `/docker/msarch-app` tersebut.
 
 ### 4. Buat dan Konfigurasi File `.env`
 
@@ -103,8 +123,14 @@ VAPID_PRIVATE_KEY="GANTI_DENGAN_PRIVATE_KEY_ANDA"
 
 ### 6. Akses Aplikasi Anda
 
-1.  **Instal Tailscale** di komputer atau ponsel yang ingin Anda gunakan untuk mengakses aplikasi. Login dengan akun yang sama seperti saat Anda login di NAS.
-2.  Setelah terinstal, buka browser dan akses aplikasi Anda melalui alamat **HTTPS** dari Tailscale:
+#### A. (WAJIB) Instal Tailscale di Komputer/Ponsel Anda
+1.  Download dan instal Tailscale untuk sistem operasi Anda dari [situs resmi Tailscale](https://tailscale.com/download/).
+2.  **Login dengan akun yang SAMA** seperti yang Anda gunakan untuk login di NAS.
+3.  Pastikan Tailscale berjalan di perangkat Anda.
+
+#### B. Buka Aplikasi di Browser
+1.  Buka browser (Chrome, Firefox, Safari, dll.).
+2.  Akses aplikasi Anda melalui alamat **HTTPS** dari Tailscale:
 
 **`https://nama-nas.nama-akun.ts.net`** (Ganti dengan domain Tailscale Anda)
 
