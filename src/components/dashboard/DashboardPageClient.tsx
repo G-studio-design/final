@@ -2,7 +2,7 @@
 // src/components/dashboard/DashboardPageClient.tsx
 'use client';
 
-import React, { useState, useMemo, useCallback, Suspense } from 'react';
+import React, { useState, useMemo, useCallback, Suspense, useEffect } from 'react';
 import {
   Card,
   CardContent,
