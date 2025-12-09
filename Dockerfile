@@ -1,29 +1,30 @@
-# Versi 1: Sederhana dan Andal (Direkomendasikan)
-# Menggunakan Node.js versi 18-alpine sebagai dasar yang ringan
-FROM node:18-alpine AS base
-
-# Mengatur direktori kerja di dalam container
+# Dockerfile
+# Stage 1: Install dependencies
+FROM node:18-alpine AS deps
 WORKDIR /app
-
-# Menyalin package.json dan package-lock.json terlebih dahulu
-# Ini memanfaatkan cache Docker. Langkah ini hanya akan dijalankan ulang jika file-file ini berubah.
-COPY package*.json ./
-
-# Menginstal dependensi
-# --legacy-peer-deps digunakan untuk mengatasi potensi konflik versi minor antar paket
+COPY package.json package-lock.json ./
 RUN npm install --legacy-peer-deps
 
-# Menyalin sisa kode aplikasi ke dalam container
+# Stage 2: Build the application
+FROM node:18-alpine AS builder
+WORKDIR /app
+COPY --from=deps /app/node_modules ./node_modules
 COPY . .
-
-# Menjalankan proses build Next.js untuk produksi
 RUN npm run build
 
-# Mengatur environment variable untuk mode produksi
+# Stage 3: Production image
+FROM node:18-alpine AS runner
+WORKDIR /app
+
 ENV NODE_ENV=production
 
-# Mengekspos port 4000 yang akan digunakan oleh aplikasi
-EXPOSE 4000
+# Copy built assets
+COPY --from=builder /app/public ./public
+COPY --from=builder /app/.next ./.next
+COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/package.json ./package.json
+# Copy database and other persistent files
+COPY database ./database
 
-# Perintah default untuk menjalankan aplikasi saat container dimulai
+EXPOSE 4000
 CMD ["npm", "start"]
