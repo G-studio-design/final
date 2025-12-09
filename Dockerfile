@@ -1,28 +1,29 @@
-# Gunakan base image Node.js versi 18-alpine yang ringan
-FROM node:18-alpine
+# Versi 1: Sederhana dan Andal (Direkomendasikan)
+# Menggunakan Node.js versi 18-alpine sebagai dasar yang ringan
+FROM node:18-alpine AS base
 
-# Set direktori kerja di dalam container
+# Mengatur direktori kerja di dalam container
 WORKDIR /app
 
-# Salin package.json dan package-lock.json (atau yarn.lock) terlebih dahulu
-# Ini memanfaatkan cache Docker. Layer ini hanya akan di-build ulang jika file-file ini berubah.
-COPY package.json package-lock.json* ./
+# Menyalin package.json dan package-lock.json terlebih dahulu
+# Ini memanfaatkan cache Docker. Langkah ini hanya akan dijalankan ulang jika file-file ini berubah.
+COPY package*.json ./
 
-# Instal dependensi. Flag --legacy-peer-deps seringkali membantu mengatasi
-# masalah konflik dependensi minor pada versi npm yang lebih baru.
+# Menginstal dependensi
+# --legacy-peer-deps digunakan untuk mengatasi potensi konflik versi minor antar paket
 RUN npm install --legacy-peer-deps
 
-# Salin sisa kode aplikasi ke dalam direktori kerja
+# Menyalin sisa kode aplikasi ke dalam container
 COPY . .
 
-# Build aplikasi Next.js untuk produksi
+# Menjalankan proses build Next.js untuk produksi
 RUN npm run build
 
-# Ekspos port yang akan digunakan oleh aplikasi
-EXPOSE 4000
-
-# Set environment variable untuk mode produksi
+# Mengatur environment variable untuk mode produksi
 ENV NODE_ENV=production
 
-# Perintah untuk menjalankan aplikasi saat container dimulai
+# Mengekspos port 4000 yang akan digunakan oleh aplikasi
+EXPOSE 4000
+
+# Perintah default untuk menjalankan aplikasi saat container dimulai
 CMD ["npm", "start"]

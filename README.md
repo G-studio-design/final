@@ -25,9 +25,9 @@ Sebelum Anda dapat menjalankan aplikasi ini, pastikan Node.js dan npm (yang teri
     npm run dev
     ```
 
-    Aplikasi sekarang akan berjalan di `http://localhost:4000`. Jika Anda ingin mengaksesnya dari perangkat lain di jaringan yang sama, gunakan alamat IP lokal komputer Anda (misalnya, `http://192.168.1.10:4000`).
+    Aplikasi sekarang akan berjalan di `http://localhost:4000`.
 
-## Deployment di Synology NAS (Metode Docker - Direkomendasikan)
+## Deployment di Synology NAS (Metode Docker)
 
 Metode ini mengisolasi aplikasi Anda dalam sebuah "container" sehingga tidak mengganggu sistem utama NAS Anda dan lebih mudah dikelola.
 
@@ -41,13 +41,13 @@ Metode ini mengisolasi aplikasi Anda dalam sebuah "container" sehingga tidak men
 
 1.  **Siapkan Struktur Folder di NAS Anda:**
     -   Buka **File Station**.
-    -   Buat folder baru di NAS Anda, misalnya di bawah `nasmsarchstudio`, dengan nama `docker`.
-    -   **PENTING**: Di dalam folder `docker` tersebut, unggah **semua file dan folder proyek Anda** (termasuk `Dockerfile`, `package.json`, dan folder `src`). Jangan menempatkannya di dalam sub-folder lagi.
+    -   Buat folder baru di NAS Anda, misalnya di bawah `docker`, dengan nama `msarch-app`. **PENTING: Semua file proyek Anda akan berada di sini.**
+    -   Unggah **semua file dan folder proyek Anda** (termasuk `Dockerfile`, `package.json`, `src`, dll.) ke dalam folder `msarch-app` tersebut.
 
     Struktur folder yang benar di NAS akan terlihat seperti ini:
     ```
-    /nasmsarchstudio/
-    └── docker/
+    /docker/
+    └── msarch-app/
         ├── Dockerfile
         ├── package.json
         ├── .env
@@ -57,7 +57,7 @@ Metode ini mengisolasi aplikasi Anda dalam sebuah "container" sehingga tidak men
     ```
 
 2.  **Buat File `.env` di NAS:**
-    -   Di dalam folder `docker` di File Station, buat file baru bernama `.env`.
+    -   Di dalam folder `/docker/msarch-app` di File Station, buat file baru bernama `.env`.
     -   Klik kanan file `.env` tersebut dan pilih "Open with Text Editor".
     -   Salin konten dari bagian **Konfigurasi Variabel Lingkungan** di bawah ini, tempelkan ke editor, lalu isi dengan kredensial Anda.
 
@@ -67,7 +67,7 @@ Metode ini mengisolasi aplikasi Anda dalam sebuah "container" sehingga tidak men
 4.  **Buat Proyek Baru:**
     -   Di Container Manager, navigasi ke bagian **Project** dan klik **Create**.
     -   **Project Name**: Beri nama `msarch-app`.
-    -   **Path**: Arahkan ke folder `/nasmsarchstudio/docker`.
+    -   **Path**: Arahkan ke folder `/docker/msarch-app`.
     -   **Source**: Pilih **Create docker-compose.yml**.
     -   Salin dan tempel konfigurasi berikut ini ke dalam editor:
         ```yaml
@@ -105,9 +105,9 @@ Aplikasi Anda sekarang berjalan 24/7 di Synology NAS Anda!
 
 ## Konfigurasi Variabel Lingkungan
 
-Untuk mengintegrasikan dengan layanan Google dan mengaktifkan Notifikasi Push, Anda perlu membuat file `.env` di dalam folder `docker` Anda.
+Untuk mengintegrasikan dengan layanan Google dan mengaktifkan Notifikasi Push, Anda perlu membuat file `.env` di dalam folder `docker/msarch-app` Anda.
 
-1.  Buat file baru bernama `.env` di dalam folder `docker`.
+1.  Buat file baru bernama `.env` di dalam folder `/docker/msarch-app`.
 2.  Salin dan tempel konten di bawah ini ke dalam file `.env`, lalu ganti placeholder dengan kredensial Anda yang sebenarnya.
 
 **PENTING:** Selalu apit nilai variabel dengan tanda kutip (`"`) untuk memastikan tidak ada kesalahan pembacaan, terutama untuk `PUBLIC_KEY` dan `PRIVATE_KEY`.
