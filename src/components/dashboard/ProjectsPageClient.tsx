@@ -1,3 +1,4 @@
+
 // src/components/dashboard/ProjectsPageClient.tsx
 'use client';
 
@@ -130,7 +131,7 @@ interface GroupedHistoryItem {
     files: FileEntry[];
 }
 
-const finalDocRequirements = ['Dokumen Final', 'Berita Acara', 'SKRD', 'Bukti Pembayaran', 'Ijin Terbit'];
+const finalDocRequirements = ['Dokumen Final', 'Berita Acara', 'SKRD', 'Bukti Pembayaran', 'Ijin Terbit', 'Pelunasan', 'Tanda Terima'];
 
 interface ProjectsPageClientProps {
     initialProjects: Project[];
