@@ -1,30 +1,28 @@
-# Stage 1: Install dependencies
-FROM node:18-alpine AS deps
+# Gunakan base image Node.js versi 18-alpine yang ringan
+FROM node:18-alpine
+
+# Set direktori kerja di dalam container
 WORKDIR /app
-COPY package.json ./
+
+# Salin package.json dan package-lock.json (atau yarn.lock) terlebih dahulu
+# Ini memanfaatkan cache Docker. Layer ini hanya akan di-build ulang jika file-file ini berubah.
+COPY package.json package-lock.json* ./
+
+# Instal dependensi. Flag --legacy-peer-deps seringkali membantu mengatasi
+# masalah konflik dependensi minor pada versi npm yang lebih baru.
 RUN npm install --legacy-peer-deps
 
-# Stage 2: Build the application
-FROM node:18-alpine AS builder
-WORKDIR /app
-COPY --from=deps /app/node_modules ./node_modules
+# Salin sisa kode aplikasi ke dalam direktori kerja
 COPY . .
+
+# Build aplikasi Next.js untuk produksi
 RUN npm run build
 
-# Stage 3: Production image
-FROM node:18-alpine AS runner
-WORKDIR /app
-
-ENV NODE_ENV=production
-
-# Copy built assets
-COPY --from=builder /app/public ./public
-COPY --from=builder /app/.next ./.next
-COPY --from=builder /app/node_modules ./node_modules
-COPY --from=builder /app/package.json ./package.json
-
-# Expose the port the app runs on
+# Ekspos port yang akan digunakan oleh aplikasi
 EXPOSE 4000
 
-# Start the app
+# Set environment variable untuk mode produksi
+ENV NODE_ENV=production
+
+# Perintah untuk menjalankan aplikasi saat container dimulai
 CMD ["npm", "start"]
