@@ -10,7 +10,7 @@ const ALLOWED_ROLES_TO_DELETE = ['Owner', 'Admin Proyek', 'Admin Developer'];
 
 export async function POST(request: Request) {
   // Define base directory safely within the handler
-  const PROJECT_FILES_BASE_DIR = path.resolve(process.cwd(), 'src', 'database', 'project_files');
+  const PROJECT_FILES_BASE_DIR = path.resolve(process.cwd(), 'database', 'project_files');
   
   try {
     const body = await request.json();

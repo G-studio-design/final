@@ -8,7 +8,7 @@ import { sanitizeForPath } from '@/lib/path-utils';
 import { addFilesToProject } from '@/services/project-service';
 
 const MAX_FILE_SIZE = 20 * 1024 * 1024; // 20MB
-const PROJECT_FILES_BASE_DIR = path.resolve(process.cwd(), 'src', 'database', 'project_files');
+const PROJECT_FILES_BASE_DIR = path.resolve(process.cwd(), 'database', 'project_files');
 
 async function ensureDirectoryExists(directoryPath: string) {
   try {

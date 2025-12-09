@@ -6,7 +6,7 @@ import type { User, AddUserData, UpdateProfileData, UpdatePasswordData, UpdateUs
 import { getAllUsers } from './data-access/user-data';
 import { writeDb } from '@/lib/database-utils';
 
-const DB_PATH = path.resolve(process.cwd(), 'src', 'database', 'users.json');
+const DB_PATH = path.resolve(process.cwd(), 'database', 'users.json');
 
 export async function findUserByUsername(username: string): Promise<User | null> {
     if (!username) return null;

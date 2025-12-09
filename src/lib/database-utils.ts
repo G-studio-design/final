@@ -16,13 +16,28 @@ export async function readDb<T>(dbPath: string, defaultData: T): Promise<T> {
         const data = await fs.readFile(dbPath, 'utf8');
         // Handle case where file is empty string
         if (data.trim() === "") {
-            return defaultData;
+            // If the file is empty, write the default data to it for future consistency.
+            // This part is problematic for Vercel's read-only filesystem.
+            // We should handle this gracefully.
+            try {
+              await writeDb(dbPath, defaultData);
+              return defaultData;
+            } catch (writeError) {
+              console.warn(`[DB Read/Write] Could not write default data to empty DB file at ${path.basename(dbPath)}. This is expected in read-only environments. Returning default data in memory. Error: ${(writeError as Error).message}`);
+              return defaultData;
+            }
         }
         return JSON.parse(data) as T;
     } catch (error: any) {
-        // If the file doesn't exist, return default data without trying to create it.
+        // If the file doesn't exist, try to create it with default data.
         if (error.code === 'ENOENT') {
-          return defaultData;
+          try {
+            await writeDb(dbPath, defaultData);
+            return defaultData;
+          } catch (writeError) {
+            console.error(`[DB Read/Write] CRITICAL: Could not create new DB file at ${path.basename(dbPath)}. Error: ${(writeError as Error).message}. Returning default data in memory.`);
+            return defaultData;
+          }
         }
         // For other errors (e.g., parsing error), log it and return default.
         console.error(`[DB Read Error] at ${path.basename(dbPath)}: ${error.message}. Returning default data.`);
