@@ -133,6 +133,12 @@ interface GroupedHistoryItem {
 
 const finalDocRequirements = ['Dokumen Final', 'Berita Acara', 'SKRD', 'Bukti Pembayaran', 'Ijin Terbit', 'Pelunasan', 'Tanda Terima'];
 
+interface UploadDialogState {
+  isOpen: boolean;
+  item: ChecklistItem | null;
+  division: string | null;
+}
+
 interface ProjectsPageClientProps {
     initialProjects: Project[];
 }
@@ -198,10 +204,11 @@ export default function ProjectsPageClient({ initialProjects }: ProjectsPageClie
   const [isRescheduleFromParallelDialogOpen, setIsRescheduleFromParallelDialogOpen] = React.useState(false);
   const [rescheduleFromParallelNote, setRescheduleFromParallelNote] = React.useState('');
   
-  // State for administrative file uploads
   const [adminFiles, setAdminFiles] = React.useState<File[]>([]);
   const [adminFileNote, setAdminFileNote] = React.useState('');
   const [isUploadingAdminFiles, setIsUploadingAdminFiles] = React.useState(false);
+  
+  const [uploadDialogState, setUploadDialogState] = React.useState<UploadDialogState>({ isOpen: false, item: null, division: null });
 
 
   const projectIdFromUrl = searchParams.get('projectId');
@@ -309,6 +316,9 @@ export default function ProjectsPageClient({ initialProjects }: ProjectsPageClie
                     const itemNameKeywords = item.name.toLowerCase().split(' ').filter(k => k);
                     const uploadedFile = divisionFiles.find(file => {
                         const fileNameLower = file.name.toLowerCase();
+                        // This logic becomes a fallback or can be adjusted.
+                        // The primary association will be through the explicit upload action.
+                        // For now, we check if the file name CONTAINS keywords.
                         return itemNameKeywords.every(keyword => fileNameLower.includes(keyword));
                     });
                     return {
@@ -503,7 +513,7 @@ export default function ProjectsPageClient({ initialProjects }: ProjectsPageClie
   }, [currentUser, selectedProject]);
 
 
-  const handleProgressSubmit = React.useCallback(async (actionTaken: string = 'submitted', filesToSubmit?: File[], descriptionForSubmit?: string) => {
+  const handleProgressSubmit = React.useCallback(async (actionTaken: string = 'submitted', filesToSubmit?: File[], descriptionForSubmit?: string, associatedChecklistItem?: string, divisionForFile?: string) => {
     if (!currentUser || !Array.isArray(currentUser.roles) || !selectedProject) {
       toast({ variant: 'destructive', title: projectsDict.toast.permissionDenied, description: projectsDict.toast.notYourTurn });
       return;
@@ -511,46 +521,6 @@ export default function ProjectsPageClient({ initialProjects }: ProjectsPageClie
 
     const currentFiles = filesToSubmit || uploadedFiles;
     const currentDescription = descriptionForSubmit || description;
-
-    const isParallelOrRevisionStatus =
-        selectedProject.status === 'Pending Parallel Design Uploads' ||
-        selectedProject.status === 'Pending Post-Sidang Revision';
-
-    if (isParallelOrRevisionStatus && currentFiles.length > 0 && parallelUploadChecklist) {
-      for (const role of currentUser.roles) {
-        const userDivision = role as keyof typeof parallelUploadChecklist;
-        const divisionChecklist = parallelUploadChecklist[userDivision];
-
-        if (divisionChecklist) {
-            const requiredNames = divisionChecklist.map(i => `"${i.name}"`).join(', ');
-            for (const file of currentFiles) {
-                let fileMatchesAnItem = false;
-                for (const item of divisionChecklist) {
-                    const itemNameKeywords = item.name.toLowerCase().split(' ').filter(k => k);
-                    const fileNameLower = file.name.toLowerCase();
-                    const allKeywordsMatch = itemNameKeywords.every(keyword => fileNameLower.includes(keyword));
-
-                    if (allKeywordsMatch) {
-                        fileMatchesAnItem = true;
-                        break;
-                    }
-                }
-
-                if (!fileMatchesAnItem) {
-                    toast({
-                        variant: 'destructive',
-                        title: projectsDict.toast.fileNameMismatchTitle,
-                        description: projectsDict.toast.fileNameMismatchDesc
-                            .replace('{fileName}', file.name)
-                            .replace('{requiredNames}', requiredNames),
-                        duration: 10000,
-                    });
-                    return;
-                }
-            }
-        }
-      }
-    }
 
     const isDecisionOrTerminalAction = ['approved', 'rejected', 'completed', 'revise_offer', 'revise_dp', 'canceled_after_sidang', 'revision_completed_proceed_to_invoice', 'all_files_confirmed', 'reschedule_sidang'].includes(actionTaken);
     const isSchedulingAction = actionTaken === 'scheduled' || actionTaken === 'reschedule_survey' || actionTaken === 'reschedule_survey_from_parallel';
@@ -577,12 +547,18 @@ export default function ProjectsPageClient({ initialProjects }: ProjectsPageClie
         const uploadedFileEntries: Omit<FileEntry, 'timestamp'>[] = [];
         if (currentFiles.length > 0) {
             for (const file of currentFiles) {
+                // Construct a new filename that includes the checklist item name for context
+                const sanitizedItemName = (associatedChecklistItem || "file").replace(/[^a-zA-Z0-9]/g, '_').toLowerCase();
+                const newFileName = `${sanitizedItemName}_${file.name}`;
+                const fileToUpload = new File([file], newFileName, { type: file.type });
+
+
                 const formData = new FormData();
-                formData.append('file', file);
+                formData.append('file', fileToUpload);
                 formData.append('projectId', selectedProject.id);
                 formData.append('userId', currentUser.id);
-                // Important: use the determined actingRole
-                formData.append('uploaderRole', actingRole || currentUser.roles[0]);
+                // Use the explicit division passed for the file, or the acting role
+                formData.append('uploaderRole', divisionForFile || actingRole || currentUser.roles[0]);
 
                 try {
                     const response = await fetch('/api/upload-file', { method: 'POST', body: formData });
@@ -592,7 +568,7 @@ export default function ProjectsPageClient({ initialProjects }: ProjectsPageClie
                     }
                     const result = await response.json();
                      uploadedFileEntries.push({
-                        name: result.name,
+                        name: result.name, // The server will return the contextual name
                         path: result.path,
                         uploadedBy: result.uploadedBy,
                     });
@@ -691,6 +667,10 @@ export default function ProjectsPageClient({ initialProjects }: ProjectsPageClie
             setInitialImageDescription('');
             setIsInitialImageUploadDialogOpen(false);
         }
+        if (uploadDialogState.isOpen) {
+          setUploadDialogState({ isOpen: false, item: null, division: null });
+        }
+
 
       } catch (error: any) {
          console.error("Error updating project:", error);
@@ -699,7 +679,7 @@ export default function ProjectsPageClient({ initialProjects }: ProjectsPageClie
          setIsSubmitting(false);
          if (isArchitectInitialImageUpload) setIsSubmittingInitialImages(false);
       }
-  }, [currentUser, selectedProject, uploadedFiles, description, scheduleDate, scheduleTime, scheduleLocation, surveyDate, surveyTime, surveyDescription, projectsDict, toast, getTranslatedStatus, initialImageFiles, initialImageDescription, rescheduleDate, rescheduleTime, parallelUploadChecklist, actingRole]);
+  }, [currentUser, selectedProject, uploadedFiles, description, scheduleDate, scheduleTime, scheduleLocation, surveyDate, surveyTime, surveyDescription, projectsDict, toast, getTranslatedStatus, initialImageFiles, initialImageDescription, rescheduleDate, rescheduleTime, actingRole, uploadDialogState.isOpen]);
 
   const handleAdminFileUpload = async () => {
     if (!currentUser || !Array.isArray(currentUser.roles) || !selectedProject || adminFiles.length === 0) {
@@ -1159,7 +1139,8 @@ export default function ProjectsPageClient({ initialProjects }: ProjectsPageClie
       const userIsDesignRole = currentUser.roles.some(role => designRoles.includes(role));
 
       if (selectedProject.status === 'Pending Parallel Design Uploads' || selectedProject.status === 'Pending Post-Sidang Revision') {
-          return userIsDesignRole;
+          // This section is now replaced by the per-item upload, so return false here.
+          return false;
       }
   
       if (!selectedProject.assignedDivision) return false;
@@ -1541,18 +1522,19 @@ export default function ProjectsPageClient({ initialProjects }: ProjectsPageClie
        const isSurveyDatePassed = surveyDateObj && new Date() >= surveyDateObj;
 
 
-       const renderChecklistItem = (item: ChecklistItem) => {
+       const renderChecklistItem = (item: ChecklistItem, division: string) => {
           const canAdminDelete = currentUser?.roles.includes('Admin Proyek') || currentUser?.roles.includes('Owner') || currentUser?.roles.includes('Admin Developer');
           const canUploaderDelete = currentUser?.roles.includes(item.uploadedBy || '');
           const canCurrentUserDelete = canAdminDelete || canUploaderDelete;
           const displayName = item.originalFileName || item.name;
 
           return (
-            <li key={`${item.name}-${item.filePath || 'no-path'}`} className="flex items-center text-sm p-2 border rounded-md hover:bg-secondary/50 gap-2">
+            <li key={`${division}-${item.name}`} className="flex items-center text-sm p-2 border rounded-md hover:bg-secondary/50 gap-2">
                 {item.uploaded ? <CheckCircle className="h-4 w-4 text-green-500 flex-shrink-0" /> : <CircleIcon className="h-4 w-4 text-muted-foreground flex-shrink-0" />}
                 <div className="flex items-center gap-2 flex-1 min-w-0">
                     <span className={cn("truncate", item.uploaded ? "text-foreground" : "text-muted-foreground")}>{displayName}</span>
                 </div>
+                
                 {item.uploaded && item.filePath && (
                     <div className="flex items-center gap-1 flex-shrink-0">
                         <Button variant="ghost" size="icon" onClick={() => handleDownloadFile({ name: item.originalFileName!, path: item.filePath!, uploadedBy: '', timestamp: '' })} disabled={isDownloading || !!isDeletingFile} title={projectsDict.downloadFileTooltip} className="h-7 w-7">
@@ -1581,6 +1563,12 @@ export default function ProjectsPageClient({ initialProjects }: ProjectsPageClie
                             </AlertDialog>
                         )}
                     </div>
+                )}
+
+                {!item.uploaded && currentUser?.roles.includes(division) && (
+                    <Button variant="outline" size="sm" className="h-7 px-2" onClick={() => setUploadDialogState({ isOpen: true, item: item, division: division })} disabled={isSubmitting}>
+                        <Upload className="h-3 w-3" />
+                    </Button>
                 )}
             </li>
           );
@@ -1676,7 +1664,7 @@ export default function ProjectsPageClient({ initialProjects }: ProjectsPageClie
                                         )}
                                     </div>
                                     <ul className="space-y-2">
-                                        {items?.map((item) => renderChecklistItem(item))}
+                                        {items?.map((item) => renderChecklistItem(item, division))}
                                     </ul>
                                 </div>
                             ))}
@@ -1828,14 +1816,6 @@ export default function ProjectsPageClient({ initialProjects }: ProjectsPageClie
                         <CardDescription>{project.nextAction || projectsDict.none}</CardDescription>
                     </CardHeader>
                    <CardContent className="p-4 sm:p-6 pt-0">
-                      {showDivisionalChecklist && currentUser && (
-                        <div className="space-y-4 border-t pt-4 mt-4">
-                            <h3 className="text-lg font-semibold">{`Checklist Unggahan Divisi Anda (${getTranslatedStatus(actingRole!)})`}</h3>
-                            <ul className="space-y-2">
-                                {parallelUploadChecklist?.[actingRole!]?.map(item => renderChecklistItem(item))}
-                            </ul>
-                        </div>
-                      )}
                       {showUploadSection && (
                          <div className="space-y-4 border-t pt-4 mt-4">
                            <h3 className="text-lg font-semibold">{project.status === 'Pending Post-Sidang Revision' ? projectsDict.uploadRevisedFilesTitle : (
@@ -1878,30 +1858,8 @@ export default function ProjectsPageClient({ initialProjects }: ProjectsPageClie
                                     <div>
                                         <h4 className="font-semibold mb-2">{projectsDict.finalDocsChecklistTitle}</h4>
                                         <ul className="space-y-2">
-                                            {finalDocsChecklistStatus?.map(item => renderChecklistItem(item))}
+                                            {finalDocsChecklistStatus?.map(item => renderChecklistItem(item, 'Admin Proyek'))}
                                         </ul>
-                                    </div>
-                                    <div className="space-y-4 border-t pt-4">
-                                        <h4 className="text-md font-semibold">{projectsDict.attachFilesLabel}</h4>
-                                        <div className="grid w-full items-center gap-1.5"><Label htmlFor="description">{projectsDict.descriptionLabel}</Label><Textarea id="description" placeholder={projectsDict.descriptionPlaceholder.replace('{division}', getTranslatedStatus(project.assignedDivision))} value={description} onChange={(e) => setDescription(e.target.value)} disabled={isSubmitting}/></div>
-                                        <div className="grid w-full items-center gap-1.5">
-                                            <div className="flex flex-col sm:flex-row items-center gap-2">
-                                                <Input id="project-files" type="file" multiple onChange={handleFileChange} disabled={isSubmitting || uploadedFiles.length >= MAX_FILES_UPLOAD} className="flex-grow"/>
-                                                <Upload className="h-5 w-5 text-muted-foreground flex-shrink-0" />
-                                            </div>
-                                        </div>
-                                        {uploadedFiles.length > 0 && (
-                                            <div className="space-y-2 rounded-md border p-3">
-                                            <Label>{projectsDict.selectedFilesLabel} ({uploadedFiles.length}/{MAX_FILES_UPLOAD})</Label>
-                                            <ul className="list-disc list-inside text-sm space-y-1 max-h-32 overflow-y-auto">
-                                                {uploadedFiles.map((file, index) => ( <li key={index} className="flex items-center justify-between group"><span className="truncate max-w-[calc(100%-4rem)] sm:max-w-xs text-muted-foreground group-hover:text-foreground">{file.name} <span className="text-xs">({(file.size / 1024).toFixed(1)} KB)</span></span><Button variant="ghost" size="sm" type="button" onClick={() => removeFile(index)} disabled={isSubmitting} className="opacity-50 group-hover:opacity-100 flex-shrink-0"><Trash2 className="h-4 w-4 text-destructive" /></Button></li>))}
-                                            </ul>
-                                            </div>
-                                        )}
-                                        <Button onClick={() => handleProgressSubmit('submitted')} disabled={isSubmitting || uploadedFiles.length === 0} className="w-full sm:w-auto">
-                                            {isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Send className="mr-2 h-4 w-4" />}
-                                            {isSubmitting ? projectsDict.submittingButton : projectsDict.submitButton}
-                                        </Button>
                                     </div>
                                 </CardContent>
                                 <CardFooter className="p-4 sm:p-6 border-t">
@@ -2211,6 +2169,38 @@ export default function ProjectsPageClient({ initialProjects }: ProjectsPageClie
                          </DialogFooter>
                      </DialogContent>
                  </Dialog>
+
+                <Dialog open={uploadDialogState.isOpen} onOpenChange={(isOpen) => setUploadDialogState({ ...uploadDialogState, isOpen })}>
+                    <DialogContent>
+                        <DialogHeader>
+                            <DialogTitle>Unggah File untuk: {uploadDialogState.item?.name}</DialogTitle>
+                            <DialogDescription>
+                                Pilih file yang akan diunggah untuk item checklist ini.
+                            </DialogDescription>
+                        </DialogHeader>
+                        <div className="space-y-4 py-4">
+                          <div className="grid w-full items-center gap-1.5"><Label htmlFor="checklist-file-description">Deskripsi (Opsional)</Label><Textarea id="checklist-file-description" placeholder={"Masukkan deskripsi singkat..."} value={description} onChange={(e) => setDescription(e.target.value)} disabled={isSubmitting}/></div>
+                          <div className="grid w-full items-center gap-1.5">
+                            <Label htmlFor="checklist-files">File</Label>
+                            <Input id="checklist-files" type="file" multiple onChange={handleFileChange} disabled={isSubmitting || uploadedFiles.length >= MAX_FILES_UPLOAD} />
+                          </div>
+                           {uploadedFiles.length > 0 && (
+                             <div className="space-y-2 rounded-md border p-3">
+                               <Label>{projectsDict.selectedFilesLabel} ({uploadedFiles.length}/{MAX_FILES_UPLOAD})</Label>
+                               <ul className="list-disc list-inside text-sm space-y-1 max-h-32 overflow-y-auto">
+                                 {uploadedFiles.map((file, index) => ( <li key={index} className="flex items-center justify-between group"><span className="truncate max-w-[calc(100%-4rem)] sm:max-w-xs text-muted-foreground group-hover:text-foreground">{file.name} <span className="text-xs">({(file.size / 1024).toFixed(1)} KB)</span></span><Button variant="ghost" size="sm" type="button" onClick={() => removeFile(index)} disabled={isSubmitting} className="opacity-50 group-hover:opacity-100 flex-shrink-0"><Trash2 className="h-4 w-4 text-destructive" /></Button></li>))}
+                               </ul>
+                             </div>
+                           )}
+                        </div>
+                        <DialogFooter>
+                            <Button variant="outline" onClick={() => setUploadDialogState({ isOpen: false, item: null, division: null })} disabled={isSubmitting}>Batal</Button>
+                            <Button onClick={() => handleProgressSubmit('submitted', uploadedFiles, description, uploadDialogState.item?.name, uploadDialogState.division || undefined)} disabled={isSubmitting || uploadedFiles.length === 0}>
+                                {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin"/>} Unggah
+                            </Button>
+                        </DialogFooter>
+                    </DialogContent>
+                </Dialog>
                 </>
        );
   }
