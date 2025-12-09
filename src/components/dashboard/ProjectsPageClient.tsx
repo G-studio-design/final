@@ -130,7 +130,7 @@ interface GroupedHistoryItem {
     files: FileEntry[];
 }
 
-const finalDocRequirements = ['Dokumen Final', 'Berita Acara', 'Bukti Pembayaran', 'SKRD', 'Ijin Terbit', 'Pelunasan', 'Tanda Terima'];
+const finalDocRequirements = ['Dokumen Final', 'Berita Acara', 'SKRD', 'Bukti Pembayaran', 'Ijin Terbit'];
 
 interface ProjectsPageClientProps {
     initialProjects: Project[];
