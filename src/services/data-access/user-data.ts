@@ -3,8 +3,8 @@
 'use server';
 
 import * as path from 'path';
-import type { User } from '@/types/user-types';
-import { readDb } from '@/lib/database-utils';
+import type { User } from '../../types/user-types';
+import { readDb } from '../../lib/database-utils';
 
 const DB_PATH = path.resolve(process.cwd(), 'database', 'users.json');
 

@@ -9,7 +9,7 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from '@/components/ui/card';
+} from "@/components/ui/card";
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/context/AuthContext';
@@ -52,12 +52,12 @@ import {
   ChartConfig,
 } from "@/components/ui/chart";
 import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, LabelList, Cell } from "recharts";
-import { getAllProjects } from '@/services/project-service';
-import { getApprovedLeaveRequests } from '@/services/leave-request-service';
-import { getAllHolidays } from '@/services/holiday-service';
-import { getAllUsersForDisplay } from '@/services/user-service';
-import { getTodaysAttendanceForAllUsers } from '@/services/attendance-service';
-import { getAppSettings } from '@/services/settings-service';
+import { getAllProjects } from '../../services/project-service';
+import { getApprovedLeaveRequests } from '../../services/leave-request-service';
+import { getAllHolidays } from '../../services/holiday-service';
+import { getAllUsersForDisplay } from '../../services/user-service';
+import { getTodaysAttendanceForAllUsers } from '../../services/attendance-service';
+import { getAppSettings } from '../../services/settings-service';
 import { Skeleton } from '@/components/ui/skeleton';
 
 

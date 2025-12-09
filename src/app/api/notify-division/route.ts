@@ -1,7 +1,7 @@
 // src/app/api/notify-division/route.ts
 import { NextResponse } from 'next/server';
-import { notifyUsersByRole, type NotificationPayload } from '@/services/notification-service';
-import { findUserById } from '@/services/user-service';
+import { notifyUsersByRole, type NotificationPayload } from '../../../services/notification-service';
+import { findUserById } from '../../../services/user-service';
 
 export async function POST(request: Request) {
     try {

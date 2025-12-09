@@ -3,7 +3,7 @@ import { NextResponse, type NextRequest } from 'next/server';
 import { stat, mkdir, writeFile } from 'fs/promises';
 import { join } from 'path';
 import mime from 'mime';
-import { updateUserProfilePicture } from '@/services/user-service';
+import { updateUserProfilePicture } from '../../../../services/user-service';
 
 const AVATAR_UPLOAD_DIR = join(process.cwd(), 'public', 'uploads', 'avatars');
 

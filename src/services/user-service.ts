@@ -2,9 +2,9 @@
 'use server';
 
 import * as path from 'path';
-import type { User, AddUserData, UpdateProfileData, UpdatePasswordData, UpdateUserGoogleTokensData } from '@/types/user-types';
+import type { User, AddUserData, UpdateProfileData, UpdatePasswordData, UpdateUserGoogleTokensData } from '../types/user-types';
 import { getAllUsers } from './data-access/user-data';
-import { writeDb } from '@/lib/database-utils';
+import { writeDb } from '../lib/database-utils';
 
 const DB_PATH = path.resolve(process.cwd(), 'database', 'users.json');
 

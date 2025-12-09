@@ -5,7 +5,7 @@
 import * as path from 'path';
 import webPush, { type PushSubscription } from 'web-push';
 import { getAllUsers } from './data-access/user-data';
-import { readDb, writeDb } from '@/lib/database-utils';
+import { readDb, writeDb } from '../lib/database-utils';
 
 export interface Notification {
     id: string;

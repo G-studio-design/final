@@ -1,6 +1,6 @@
+// src/components/dashboard/MonthlyReportClient.tsx
 'use client';
 
-// src/components/dashboard/MonthlyReportClient.tsx
 import * as React from 'react';
 import { Button } from '@/components/ui/button';
 import {
@@ -10,7 +10,7 @@ import {
   CardHeader,
   CardTitle,
   CardFooter,
-} from '@/components/ui/card';
+} from "@/components/ui/card";
 import {
   Select,
   SelectContent,
@@ -34,7 +34,7 @@ import { useLanguage } from '@/context/LanguageContext';
 import { getDictionary } from '@/lib/translations';
 import { useAuth } from '@/context/AuthContext';
 import { Skeleton } from '@/components/ui/skeleton';
-import { type Project } from '@/services/project-service';
+import { type Project } from '../../services/project-service';
 import { Badge } from '@/components/ui/badge';
 import { format, parseISO, getMonth, getYear } from 'date-fns';
 import { id as idLocale, enUS as enLocale } from 'date-fns/locale';
@@ -430,7 +430,7 @@ export default function MonthlyReportClient({ initialProjects }: MonthlyReportCl
                             </div>
                         ) : (
                             <ChartContainer config={chartConfig} className="h-[250px] sm:h-[300px]">
-                                <ResponsiveContainer width="100%" height="100%">
+                                <ResponsiveContainer>
                                     <BarChart
                                         data={chartDisplayData}
                                         layout="vertical"
