@@ -41,7 +41,7 @@ Metode ini mengisolasi aplikasi Anda dalam sebuah "container" sehingga tidak men
 
 1.  **Unggah Kode Proyek ke NAS Anda:**
     -   Buka **File Station**.
-    -   Buat folder baru di NAS Anda, misalnya `docker`.
+    -   Buat folder baru di NAS Anda jika belum ada, misalnya `docker`.
     -   Di dalam folder `docker`, buat lagi folder khusus untuk proyek ini bernama `msarch-app`.
     -   Unggah **semua file dan folder proyek Anda** ke dalam direktori `docker/msarch-app`. Pastikan file seperti `Dockerfile`, `package.json`, dan folder `src` ada di dalamnya.
 
@@ -56,26 +56,24 @@ Metode ini mengisolasi aplikasi Anda dalam sebuah "container" sehingga tidak men
 4.  **Buat Proyek Baru:**
     -   Di Container Manager, navigasi ke bagian **Project** dan klik **Create**.
     -   **Project Name**: Beri nama `msarch-app`.
-    -   **Path**: Arahkan ke folder `docker` (folder induk dari `msarch-app`).
+    -   **Path**: Arahkan ke folder `docker/msarch-app` (Pilih folder proyek Anda secara langsung).
     -   **Source**: Pilih **Create docker-compose.yml**.
-    -   Salin dan tempel konfigurasi **yang sudah diperbaiki** berikut ini ke dalam editor:
+    -   Salin dan tempel konfigurasi **yang sudah disederhanakan** berikut ini ke dalam editor:
         ```yaml
         version: '3.8'
         services:
           msarch-app:
             build:
-              context: ./msarch-app
+              context: .
             container_name: msarch-app-prod
             restart: unless-stopped
             ports:
               - "4000:4000"
             volumes:
-              # Penting: Mount folder agar data Anda tetap tersimpan
-              # bahkan jika container dihapus dan dibuat ulang.
-              - ./msarch-app/database:/app/database
-              - ./msarch-app/public/uploads:/app/public/uploads
+              - ./database:/app/database
+              - ./public/uploads:/app/public/uploads
             env_file:
-              - ./msarch-app/.env
+              - .env
         ```
     -   Klik **Next**.
 
