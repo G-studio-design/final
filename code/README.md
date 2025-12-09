@@ -41,11 +41,12 @@ Metode ini mengisolasi aplikasi Anda dalam sebuah "container" sehingga tidak men
 
 1.  **Unggah Kode Proyek ke NAS Anda:**
     -   Buka **File Station**.
-    -   Buat folder baru, misalnya `docker`. Di dalamnya, buat lagi folder untuk proyek ini, misalnya `msarch-app`.
-    -   Unggah semua file dan folder proyek Anda ke dalam direktori `docker/msarch-app`.
+    -   Buat folder baru di NAS Anda, misalnya `docker`.
+    -   Di dalam folder `docker`, buat lagi folder khusus untuk proyek ini bernama `msarch-app`.
+    -   Unggah **semua file dan folder proyek Anda** ke dalam direktori `docker/msarch-app`. Pastikan file seperti `Dockerfile`, `package.json`, dan folder `src` ada di dalamnya.
 
 2.  **Buat File `.env` di NAS:**
-    -   Di dalam folder `msarch-app` di File Station, klik kanan dan buat file baru bernama `.env`.
+    -   Di dalam folder `docker/msarch-app` di File Station, buat file baru bernama `.env`.
     -   Klik kanan file `.env` tersebut dan pilih "Open with Text Editor".
     -   Salin konten dari bagian **Konfigurasi Variabel Lingkungan** di bawah ini, tempelkan ke editor teks, lalu isi dengan kredensial Anda yang sebenarnya.
 
@@ -55,48 +56,51 @@ Metode ini mengisolasi aplikasi Anda dalam sebuah "container" sehingga tidak men
 4.  **Buat Proyek Baru:**
     -   Di Container Manager, navigasi ke bagian **Project** dan klik **Create**.
     -   **Project Name**: Beri nama `msarch-app`.
-    -   **Path**: Arahkan ke folder tempat Anda menyimpan kode, yaitu `/volume1/docker/msarch-app` (sesuaikan `volume1` jika berbeda).
+    -   **Path**: Arahkan ke folder `docker` (folder induk dari `msarch-app`).
     -   **Source**: Pilih **Create docker-compose.yml**.
-    -   Salin dan tempel konfigurasi berikut ke dalam editor:
+    -   Salin dan tempel konfigurasi **yang sudah diperbaiki** berikut ini ke dalam editor:
         ```yaml
         version: '3.8'
         services:
           msarch-app:
-            build: .
+            build:
+              context: ./msarch-app
             container_name: msarch-app-prod
             restart: unless-stopped
             ports:
               - "4000:4000"
             volumes:
-              # Penting: Mount folder database agar data Anda tetap tersimpan
+              # Penting: Mount folder agar data Anda tetap tersimpan
               # bahkan jika container dihapus dan dibuat ulang.
-              - ./database:/app/database
-              - ./public/uploads:/app/public/uploads
+              - ./msarch-app/database:/app/database
+              - ./msarch-app/public/uploads:/app/public/uploads
             env_file:
-              - .env
+              - ./msarch-app/.env
         ```
     -   Klik **Next**.
 
-5.  **Build dan Jalankan Proyek:**
-    -   Wizard akan menanyakan tentang Web Station, lewati saja jika ada.
+5.  **Lewati Konfigurasi Web Station:**
+    -   Jika wizard menanyakan tentang Web Station, lewati saja. Jangan centang apa pun, lalu klik **Next**.
+
+6.  **Build dan Jalankan Proyek:**
     -   Pada langkah terakhir, pastikan opsi **"Start the project once it is created"** dicentang.
     -   Klik **Done**.
 
-    Container Manager sekarang akan mulai membangun "image" Docker dari `Dockerfile` Anda. Proses ini mungkin memakan waktu beberapa menit, terutama saat pertama kali. Anda bisa melihat log-nya di tab **Log** pada halaman proyek di Container Manager.
+    Container Manager sekarang akan mulai membangun "image" Docker. Proses ini mungkin memakan waktu beberapa menit. Anda bisa melihat log-nya di tab **Log** pada halaman proyek di Container Manager.
 
-6.  **Akses Aplikasi Anda:**
+7.  **Akses Aplikasi Anda:**
     -   Setelah proses build selesai dan container berjalan, Anda dapat mengakses aplikasi dengan membuka browser dan menuju ke: `http://<IP_ADDRESS_NAS_ANDA>:4000`.
 
 Aplikasi Anda sekarang berjalan 24/7 di Synology NAS Anda!
 
 ## Konfigurasi Variabel Lingkungan
 
-Untuk mengintegrasikan dengan layanan Google dan mengaktifkan Notifikasi Push, Anda perlu membuat file `.env` di direktori root proyek.
+Untuk mengintegrasikan dengan layanan Google dan mengaktifkan Notifikasi Push, Anda perlu membuat file `.env` di dalam folder `msarch-app` Anda.
 
-1.  Buat file baru bernama `.env`.
+1.  Buat file baru bernama `.env` di dalam `docker/msarch-app`.
 2.  Salin dan tempel konten di bawah ini ke dalam file `.env`, lalu ganti placeholder dengan kredensial Anda yang sebenarnya.
 
-**PENTING:** Selalu apit nilai variabel dengan tanda kutip (`"`) untuk memastikan tidak ada kesalahan pembacaan.
+**PENTING:** Selalu apit nilai variabel dengan tanda kutip (`"`) untuk memastikan tidak ada kesalahan pembacaan, terutama untuk `PUBLIC_KEY` dan `PRIVATE_KEY`.
 
 ```env
 # Kredensial Google OAuth 2.0
