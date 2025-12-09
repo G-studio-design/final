@@ -1,15 +1,28 @@
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  output: 'standalone',
-  reactStrictMode: true,
+  images: {
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'picsum.photos',
+      },
+       {
+         protocol: 'https',
+         hostname: 'lh3.googleusercontent.com',
+       },
+       {
+         protocol: 'https',
+         hostname: 'placehold.co',
+       }
+    ],
+  },
   typescript: {
-    ignoreBuildErrors: true,
+    ignoreBuildErrors: false,
   },
   eslint: {
-    ignoreDuringBuilds: true,
+    ignoreDuringBuilds: false,
   },
 };
 
 module.exports = nextConfig;
-

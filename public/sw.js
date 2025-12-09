@@ -1,57 +1,56 @@
 // public/sw.js
 
-self.addEventListener('push', function(event) {
-  const data = event.data?.json() ?? {};
-  const title = data.title || "Msarch App Notification";
+self.addEventListener('push', event => {
+  console.log('[Service Worker] Push Received.');
+  let data;
+  try {
+    data = event.data.json();
+  } catch (e) {
+    console.error('[Service Worker] Push event but no data');
+    data = {
+        title: 'Pemberitahuan Baru',
+        body: 'Anda memiliki pembaruan baru.',
+        url: '/dashboard'
+    };
+  }
+
+  const title = data.title || 'Msarch App';
   const options = {
-    body: data.body || "You have a new update.",
-    icon: "/msarch-logo.png",
-    badge: "/msarch-logo-badge.png", // A monochrome badge icon
-    vibrate: [200, 100, 200],
+    body: data.body || 'Anda memiliki pesan baru.',
+    icon: '/msarch-logo.png',
+    badge: '/msarch-logo.png',
     data: {
-      url: data.url || '/dashboard' // URL to navigate to on click
+      url: data.url || '/dashboard'
     }
   };
+
   event.waitUntil(self.registration.showNotification(title, options));
 });
 
-self.addEventListener('notificationclick', function(event) {
-  const notificationData = event.notification.data;
-  const urlToOpen = new URL(notificationData.url, self.location.origin).href;
+self.addEventListener('notificationclick', event => {
+  console.log('[Service Worker] Notification click Received.');
 
   event.notification.close();
 
-  // This looks for an existing window and focuses it.
+  const urlToOpen = event.notification.data.url;
+
   event.waitUntil(
     clients.matchAll({
       type: 'window',
       includeUncontrolled: true
-    }).then(function(clientList) {
-      if (clientList.length > 0) {
-        let client = clientList[0];
-        for (let i = 0; i < clientList.length; i++) {
-          if (clientList[i].focused) {
-            client = clientList[i];
-          }
+    }).then(clientList => {
+      // If a window for this origin is already open, focus it.
+      for (const client of clientList) {
+        // You might want to check for a specific URL here
+        if (client.url === '/' && 'focus' in client) {
+          client.navigate(urlToOpen);
+          return client.focus();
         }
-        // Force a navigation and focus on the existing client
-        client.navigate(urlToOpen);
-        return client.focus();
       }
-      return clients.openWindow(urlToOpen);
-    }).then(() => {
-        // Send a message to the client(s) to let them know data has updated
-        clients.matchAll({ type: 'window' }).then(allClients => {
-            allClients.forEach(client => {
-                client.postMessage({ type: 'data-updated' });
-            });
-        });
+      // Otherwise, open a new window.
+      if (clients.openWindow) {
+        return clients.openWindow(urlToOpen);
+      }
     })
   );
-});
-
-self.addEventListener('message', (event) => {
-  if (event.data && event.data.type === 'SKIP_WAITING') {
-    self.skipWaiting();
-  }
 });

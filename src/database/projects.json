@@ -1,0 +1,835 @@
+[
+  {
+    "id": "project_1758857600164_wnk7h",
+    "title": "proyek pelabuhan sanur",
+    "status": "Completed",
+    "progress": 100,
+    "assignedDivision": "",
+    "nextAction": null,
+    "workflowId": "msa_workflow",
+    "workflowHistory": [
+      {
+        "division": "sudina",
+        "action": "Created Project with workflow: msa_workflow",
+        "timestamp": "2025-09-26T03:33:20.163Z",
+        "note": "Project entry created."
+      },
+      {
+        "division": "System",
+        "action": "Assigned to Admin Proyek for Unggah Dokumen Penawaran",
+        "timestamp": "2025-09-26T03:33:20.163Z"
+      },
+      {
+        "division": "Admin Proyek, MEP",
+        "action": "komangmerta (Admin Proyek, MEP) submitted for \"Unggah Dokumen Penawaran\"",
+        "timestamp": "2025-09-26T03:55:08.068Z",
+        "note": "dokumen"
+      },
+      {
+        "action": "sudina (undefined) requested revision.",
+        "timestamp": "2025-09-26T03:58:32.904Z",
+        "note": "perbaiki lagi"
+      },
+      {
+        "division": "Admin Proyek, MEP",
+        "action": "komangmerta (Admin Proyek, MEP) submitted for \"Revisi dan Unggah Ulang Dokumen Penawaran berdasarkan masukan Owner.\"",
+        "timestamp": "2025-09-26T04:07:19.702Z",
+        "note": "revisi 1"
+      },
+      {
+        "division": "Owner",
+        "action": "sudina (Owner) approved: Setujui Dokumen Penawaran",
+        "timestamp": "2025-09-26T04:11:18.402Z"
+      },
+      {
+        "division": "Akuntan",
+        "action": "oksi (Akuntan) submitted for \"Buat Faktur DP\"",
+        "timestamp": "2025-09-26T04:33:28.728Z"
+      },
+      {
+        "division": "Owner",
+        "action": "sudina (Owner) approved: Setujui Faktur DP",
+        "timestamp": "2025-09-26T04:36:19.291Z"
+      },
+      {
+        "division": "Admin Proyek, MEP",
+        "action": "komangmerta (Admin Proyek, MEP) submitted for \"Unggah Berkas Administrasi\"",
+        "timestamp": "2025-09-26T04:52:44.956Z",
+        "note": "berkas administrasi awal\n"
+      },
+      {
+        "division": "Arsitek",
+        "action": "arsitek (Arsitek) submitted Survey Details for 2025-09-26 at 12:58",
+        "timestamp": "2025-09-26T04:57:41.036Z"
+      },
+      {
+        "division": "komangmerta",
+        "action": "Uploaded additional file(s): dokumen penawaran.pdf",
+        "timestamp": "2025-09-26T05:13:57.426Z",
+        "note": "File administrasi tambahan diunggah oleh komangmerta."
+      },
+      {
+        "division": "komangmerta",
+        "action": "Uploaded additional file(s): monthly_report_2025_Juni_id.docx",
+        "timestamp": "2025-09-26T05:15:12.230Z",
+        "note": "File administrasi tambahan diunggah oleh komangmerta."
+      },
+      {
+        "division": "Arsitek",
+        "action": "arsitek (Arsitek) submitted Survey Details for 2025-09-26 at 12:58",
+        "timestamp": "2025-09-26T05:18:08.454Z",
+        "note": "surbvey selesai dengan data yang di dapatkan:"
+      },
+      {
+        "division": "Arsitek",
+        "action": "arsitek (Arsitek) submitted for \"Admin Proyek: Pantau unggahan. Arsitek/Struktur/MEP: Unggah berkas Anda sesuai checklist.\"",
+        "timestamp": "2025-09-26T05:18:46.688Z"
+      },
+      {
+        "division": "Admin Proyek, MEP",
+        "action": "komangmerta (Admin Proyek, MEP) submitted for \"Admin Proyek: Pantau unggahan. Arsitek/Struktur/MEP: Unggah berkas Anda sesuai checklist.\"",
+        "timestamp": "2025-09-26T05:40:56.681Z"
+      },
+      {
+        "division": "Admin Proyek, MEP",
+        "action": "komangmerta (Admin Proyek, MEP) submitted for \"Admin Proyek: Pantau unggahan. Arsitek/Struktur/MEP: Unggah berkas Anda sesuai checklist.\"",
+        "timestamp": "2025-09-26T06:10:06.820Z"
+      },
+      {
+        "division": "Admin Proyek, MEP",
+        "action": "komangmerta (Admin Proyek, MEP) submitted for \"Admin Proyek: Pantau unggahan. Arsitek/Struktur/MEP: Unggah berkas Anda sesuai checklist.\"",
+        "timestamp": "2025-09-26T06:23:06.951Z"
+      },
+      {
+        "division": "Admin Proyek, MEP",
+        "action": "komangmerta (Admin Proyek, MEP) submitted for \"Admin Proyek: Pantau unggahan. Arsitek/Struktur/MEP: Unggah berkas Anda sesuai checklist.\"",
+        "timestamp": "2025-09-26T06:49:49.694Z"
+      },
+      {
+        "division": "Admin Proyek, MEP",
+        "action": "komangmerta (Admin Proyek, MEP) submitted for \"Admin Proyek: Pantau unggahan. Arsitek/Struktur/MEP: Unggah berkas Anda sesuai checklist.\"",
+        "timestamp": "2025-09-26T06:52:31.708Z",
+        "note": "daftar simak"
+      },
+      {
+        "division": "Admin Proyek, MEP",
+        "action": "komangmerta (Admin Proyek, MEP) submitted for \"Admin Proyek: Pantau unggahan. Arsitek/Struktur/MEP: Unggah berkas Anda sesuai checklist.\"",
+        "timestamp": "2025-09-26T07:09:10.461Z"
+      },
+      {
+        "division": "Admin Proyek, MEP",
+        "action": "komangmerta (Admin Proyek, MEP) submitted for \"Admin Proyek: Pantau unggahan. Arsitek/Struktur/MEP: Unggah berkas Anda sesuai checklist.\"",
+        "timestamp": "2025-09-26T07:09:53.745Z"
+      },
+      {
+        "division": "Admin Proyek, MEP",
+        "action": "komangmerta (Admin Proyek, MEP) submitted for \"Admin Proyek: Pantau unggahan. Arsitek/Struktur/MEP: Unggah berkas Anda sesuai checklist.\"",
+        "timestamp": "2025-09-26T07:10:56.675Z"
+      },
+      {
+        "division": "Admin Proyek, MEP",
+        "action": "komangmerta (Admin Proyek, MEP) submitted for \"Admin Proyek: Pantau unggahan. Arsitek/Struktur/MEP: Unggah berkas Anda sesuai checklist.\"",
+        "timestamp": "2025-09-26T07:15:28.131Z"
+      },
+      {
+        "division": "komangmerta",
+        "action": "Marked their design/revision phase as complete.",
+        "timestamp": "2025-09-26T07:15:39.125Z",
+        "note": "Divisi undefined telah menyelesaikan tugasnya."
+      },
+      {
+        "division": "Struktur",
+        "action": "struktur (Struktur) submitted for \"Admin Proyek: Pantau unggahan. Arsitek/Struktur/MEP: Unggah berkas Anda sesuai checklist.\"",
+        "timestamp": "2025-09-26T08:01:36.864Z"
+      },
+      {
+        "division": "struktur",
+        "action": "Marked their design/revision phase as complete.",
+        "timestamp": "2025-09-26T08:01:45.357Z",
+        "note": "Divisi undefined telah menyelesaikan tugasnya."
+      },
+      {
+        "division": "Arsitek",
+        "action": "arsitek (Arsitek) submitted for \"Admin Proyek: Pantau unggahan. Arsitek/Struktur/MEP: Unggah berkas Anda sesuai checklist.\"",
+        "timestamp": "2025-09-26T08:06:59.698Z"
+      },
+      {
+        "division": "arsitek",
+        "action": "Marked their design/revision phase as complete.",
+        "timestamp": "2025-09-26T08:07:09.899Z",
+        "note": "Divisi undefined telah menyelesaikan tugasnya."
+      },
+      {
+        "division": "arsitek",
+        "action": "Marked their design/revision phase as complete.",
+        "timestamp": "2025-09-26T08:13:00.585Z",
+        "note": "Divisi undefined telah menyelesaikan tugasnya."
+      },
+      {
+        "division": "arsitek",
+        "action": "Marked their design/revision phase as complete.",
+        "timestamp": "2025-09-26T08:13:14.875Z",
+        "note": "Divisi undefined telah menyelesaikan tugasnya."
+      },
+      {
+        "division": "komangmerta",
+        "action": "Marked their design/revision phase as complete.",
+        "timestamp": "2025-09-26T08:13:53.402Z",
+        "note": "Divisi undefined telah menyelesaikan tugasnya."
+      },
+      {
+        "division": "komangmerta",
+        "action": "Marked their design/revision phase as complete.",
+        "timestamp": "2025-09-26T08:17:01.961Z",
+        "note": "Divisi undefined telah menyelesaikan tugasnya."
+      },
+      {
+        "division": "komangmerta",
+        "action": "Marked their design/revision phase as complete.",
+        "timestamp": "2025-09-26T08:21:18.487Z",
+        "note": "Divisi MEP telah menyelesaikan tugasnya."
+      },
+      {
+        "division": "Admin Proyek, MEP",
+        "action": "komangmerta (Admin Proyek, MEP) all_files_confirmed for \"Admin Proyek: Pantau unggahan. Arsitek/Struktur/MEP: Unggah berkas Anda sesuai checklist.\"",
+        "timestamp": "2025-09-26T08:21:29.261Z"
+      },
+      {
+        "division": "Admin Proyek, MEP",
+        "action": "komangmerta (Admin Proyek, MEP) scheduled Sidang on 2025-09-26 at 16:35",
+        "timestamp": "2025-09-26T08:34:40.953Z"
+      },
+      {
+        "division": "Admin Proyek, MEP",
+        "action": "komangmerta (Admin Proyek, MEP) declared Sidang outcome as: revise",
+        "timestamp": "2025-09-26T09:13:59.784Z",
+        "note": "perbaiki bagian ini"
+      },
+      {
+        "division": "Admin Proyek, MEP",
+        "action": "komangmerta (Admin Proyek, MEP) revision_completed_proceed_to_invoice for \"Lakukan revisi pasca-sidang. Notifikasi Arsitek/Struktur jika perlu, lalu selesaikan proyek.\"",
+        "timestamp": "2025-09-26T10:04:40.381Z"
+      },
+      {
+        "division": "Akuntan",
+        "action": "oksi (Akuntan) submitted for \"Unggah Invoice Pelunasan\"",
+        "timestamp": "2025-09-26T10:05:46.035Z"
+      },
+      {
+        "division": "Admin Proyek, MEP",
+        "action": "komangmerta (Admin Proyek, MEP) submitted for \"Unggah dokumen penyelesaian akhir: Berita Acara, SKRD, dll.\"",
+        "timestamp": "2025-09-26T10:07:07.550Z"
+      },
+      {
+        "division": "komangmerta",
+        "action": "Deleted file: \"dokumen pelunasan .pdf\"",
+        "timestamp": "2025-09-26T10:07:21.247Z"
+      },
+      {
+        "division": "Admin Proyek, MEP",
+        "action": "komangmerta (Admin Proyek, MEP) submitted for \"Unggah dokumen penyelesaian akhir: Berita Acara, SKRD, dll.\"",
+        "timestamp": "2025-09-26T10:07:50.277Z"
+      },
+      {
+        "division": "Admin Proyek, MEP",
+        "action": "komangmerta (Admin Proyek, MEP) submitted for \"Unggah dokumen penyelesaian akhir: Berita Acara, SKRD, dll.\"",
+        "timestamp": "2025-09-26T10:10:29.779Z"
+      },
+      {
+        "division": "Admin Proyek, MEP",
+        "action": "komangmerta (Admin Proyek, MEP) submitted for \"Unggah dokumen penyelesaian akhir: Berita Acara, SKRD, dll.\"",
+        "timestamp": "2025-09-26T10:12:44.980Z"
+      },
+      {
+        "division": "Admin Proyek, MEP",
+        "action": "komangmerta (Admin Proyek, MEP) submitted for \"Unggah dokumen penyelesaian akhir: Berita Acara, SKRD, dll.\"",
+        "timestamp": "2025-09-26T10:13:26.700Z"
+      },
+      {
+        "division": "Admin Proyek, MEP",
+        "action": "komangmerta (Admin Proyek, MEP) submitted for \"Unggah dokumen penyelesaian akhir: Berita Acara, SKRD, dll.\"",
+        "timestamp": "2025-09-26T10:13:36.997Z"
+      },
+      {
+        "division": "Admin Proyek, MEP",
+        "action": "komangmerta (Admin Proyek, MEP) submitted for \"Unggah dokumen penyelesaian akhir: Berita Acara, SKRD, dll.\"",
+        "timestamp": "2025-09-26T10:13:46.974Z"
+      },
+      {
+        "division": "Admin Proyek, MEP",
+        "action": "komangmerta (Admin Proyek, MEP) submitted for \"Unggah dokumen penyelesaian akhir: Berita Acara, SKRD, dll.\"",
+        "timestamp": "2025-09-26T10:13:56.230Z"
+      },
+      {
+        "division": "Admin Proyek, MEP",
+        "action": "komangmerta (Admin Proyek, MEP) declared Sidang outcome as: completed",
+        "timestamp": "2025-09-26T10:13:58.895Z"
+      }
+    ],
+    "files": [
+      {
+        "name": "dokumen penawaran .pdf",
+        "path": "project_1758857600164_wnk7h/dokumen_penawaran_.pdf",
+        "uploadedBy": "Admin Proyek",
+        "timestamp": "2025-09-26T03:55:08.068Z"
+      },
+      {
+        "name": "dokumen penawaran .pdf",
+        "path": "project_1758857600164_wnk7h/dokumen_penawaran_.pdf",
+        "uploadedBy": "Admin Proyek",
+        "timestamp": "2025-09-26T04:07:19.702Z"
+      },
+      {
+        "name": "invoice dp.pdf",
+        "path": "project_1758857600164_wnk7h/invoice_dp.pdf",
+        "uploadedBy": "Akuntan",
+        "timestamp": "2025-09-26T04:33:28.728Z"
+      },
+      {
+        "name": "berkas administrasi awal.pdf",
+        "path": "project_1758857600164_wnk7h/berkas_administrasi_awal.pdf",
+        "uploadedBy": "Admin Proyek",
+        "timestamp": "2025-09-26T04:52:44.956Z"
+      },
+      {
+        "name": "dokumen penawaran.pdf",
+        "path": "project_1758857600164_wnk7h/dokumen_penawaran.pdf",
+        "uploadedBy": "Admin Proyek",
+        "timestamp": "2025-09-26T05:13:57.426Z"
+      },
+      {
+        "name": "monthly_report_2025_Juni_id.docx",
+        "path": "project_1758857600164_wnk7h/monthly_report_2025_juni_id.docx",
+        "uploadedBy": "Admin Proyek",
+        "timestamp": "2025-09-26T05:15:12.230Z"
+      },
+      {
+        "name": "hasil survey.pdf",
+        "path": "project_1758857600164_wnk7h/hasil_survey.pdf",
+        "uploadedBy": "Arsitek",
+        "timestamp": "2025-09-26T05:18:08.454Z"
+      },
+      {
+        "name": "gambar arsitek.pdf",
+        "path": "project_1758857600164_wnk7h/gambar_arsitek.pdf",
+        "uploadedBy": "Arsitek",
+        "timestamp": "2025-09-26T05:18:46.688Z"
+      },
+      {
+        "name": "Gambar Mep .pdf",
+        "path": "project_1758857600164_wnk7h/gambar_mep_.pdf",
+        "uploadedBy": "Admin Proyek",
+        "timestamp": "2025-09-26T05:40:56.681Z"
+      },
+      {
+        "name": "daftar simak MEP .pdf",
+        "path": "project_1758857600164_wnk7h/daftar_simak_mep_.pdf",
+        "uploadedBy": "Admin Proyek",
+        "timestamp": "2025-09-26T06:10:06.820Z"
+      },
+      {
+        "name": "SPEKtek MEP .pdf",
+        "path": "project_1758857600164_wnk7h/spektek_mep_.pdf",
+        "uploadedBy": "Admin Proyek",
+        "timestamp": "2025-09-26T06:23:06.951Z"
+      },
+      {
+        "name": "daftar simak MEP .pdf",
+        "path": "project_1758857600164_wnk7h/daftar_simak_mep_.pdf",
+        "uploadedBy": "Admin Proyek",
+        "timestamp": "2025-09-26T06:49:49.694Z"
+      },
+      {
+        "name": "daftar simak MEP .pdf",
+        "path": "project_1758857600164_wnk7h/daftar_simak_mep_.pdf",
+        "uploadedBy": "MEP",
+        "timestamp": "2025-09-26T07:09:10.461Z"
+      },
+      {
+        "name": "Gambar Mep .pdf",
+        "path": "project_1758857600164_wnk7h/gambar_mep_.pdf",
+        "uploadedBy": "MEP",
+        "timestamp": "2025-09-26T07:09:10.461Z"
+      },
+      {
+        "name": "SPEKtek MEP .pdf",
+        "path": "project_1758857600164_wnk7h/spektek_mep_.pdf",
+        "uploadedBy": "MEP",
+        "timestamp": "2025-09-26T07:09:53.745Z"
+      },
+      {
+        "name": "RAP MEp.pdf",
+        "path": "project_1758857600164_wnk7h/rap_mep.pdf",
+        "uploadedBy": "MEP",
+        "timestamp": "2025-09-26T07:10:56.675Z"
+      },
+      {
+        "name": "LAporan Mep.pdf",
+        "path": "project_1758857600164_wnk7h/laporan_mep.pdf",
+        "uploadedBy": "MEP",
+        "timestamp": "2025-09-26T07:15:28.131Z"
+      },
+      {
+        "name": "Daftar Simak Struktur .pdf",
+        "path": "project_1758857600164_wnk7h/daftar_simak_struktur_.pdf",
+        "uploadedBy": "Struktur",
+        "timestamp": "2025-09-26T08:01:36.864Z"
+      },
+      {
+        "name": "SpekTek Struktur .pdf",
+        "path": "project_1758857600164_wnk7h/spektek_struktur_.pdf",
+        "uploadedBy": "Struktur",
+        "timestamp": "2025-09-26T08:01:36.864Z"
+      },
+      {
+        "name": "Hammer Test Struktur.pdf",
+        "path": "project_1758857600164_wnk7h/hammer_test_struktur.pdf",
+        "uploadedBy": "Struktur",
+        "timestamp": "2025-09-26T08:01:36.864Z"
+      },
+      {
+        "name": "Analisa Laporan Struktur .pdf",
+        "path": "project_1758857600164_wnk7h/analisa_laporan_struktur_.pdf",
+        "uploadedBy": "Struktur",
+        "timestamp": "2025-09-26T08:01:36.864Z"
+      },
+      {
+        "name": "GAmbar Struktur .pdf",
+        "path": "project_1758857600164_wnk7h/gambar_struktur_.pdf",
+        "uploadedBy": "Struktur",
+        "timestamp": "2025-09-26T08:01:36.864Z"
+      },
+      {
+        "name": "Spektek .pdf",
+        "path": "project_1758857600164_wnk7h/spektek_.pdf",
+        "uploadedBy": "Arsitek",
+        "timestamp": "2025-09-26T08:06:59.698Z"
+      },
+      {
+        "name": "Daftar Simak Arsitek.pdf",
+        "path": "project_1758857600164_wnk7h/daftar_simak_arsitek.pdf",
+        "uploadedBy": "Arsitek",
+        "timestamp": "2025-09-26T08:06:59.698Z"
+      },
+      {
+        "name": "gambar arsitek.pdf",
+        "path": "project_1758857600164_wnk7h/gambar_arsitek.pdf",
+        "uploadedBy": "Arsitek",
+        "timestamp": "2025-09-26T08:06:59.698Z"
+      },
+      {
+        "name": "Rap arditek.pdf",
+        "path": "project_1758857600164_wnk7h/rap_arditek.pdf",
+        "uploadedBy": "Arsitek",
+        "timestamp": "2025-09-26T08:06:59.698Z"
+      },
+      {
+        "name": "surat undangan sidang.pdf",
+        "path": "project_1758857600164_wnk7h/surat_undangan_sidang.pdf",
+        "uploadedBy": "Admin Proyek",
+        "timestamp": "2025-09-26T08:34:40.953Z"
+      },
+      {
+        "name": "hasil sidang .pdf",
+        "path": "project_1758857600164_wnk7h/hasil_sidang_.pdf",
+        "uploadedBy": "Admin Proyek",
+        "timestamp": "2025-09-26T09:13:59.784Z"
+      },
+      {
+        "name": "invoice pelunasan.pdf",
+        "path": "project_1758857600164_wnk7h/invoice_pelunasan.pdf",
+        "uploadedBy": "Akuntan",
+        "timestamp": "2025-09-26T10:05:46.035Z"
+      },
+      {
+        "name": "dokumen final .pdf",
+        "path": "project_1758857600164_wnk7h/dokumen_final_.pdf",
+        "uploadedBy": "Admin Proyek",
+        "timestamp": "2025-09-26T10:07:50.277Z"
+      },
+      {
+        "name": "Berita Acara.pdf",
+        "path": "project_1758857600164_wnk7h/berita_acara.pdf",
+        "uploadedBy": "Admin Proyek",
+        "timestamp": "2025-09-26T10:10:29.779Z"
+      },
+      {
+        "name": "Bukti Pembayaran .pdf",
+        "path": "project_1758857600164_wnk7h/bukti_pembayaran_.pdf",
+        "uploadedBy": "Admin Proyek",
+        "timestamp": "2025-09-26T10:12:44.980Z"
+      },
+      {
+        "name": "SKRD .pdf",
+        "path": "project_1758857600164_wnk7h/skrd_.pdf",
+        "uploadedBy": "Admin Proyek",
+        "timestamp": "2025-09-26T10:13:26.700Z"
+      },
+      {
+        "name": "Ijin Terbit .pdf",
+        "path": "project_1758857600164_wnk7h/ijin_terbit_.pdf",
+        "uploadedBy": "Admin Proyek",
+        "timestamp": "2025-09-26T10:13:36.997Z"
+      },
+      {
+        "name": "Pelunasan .pdf",
+        "path": "project_1758857600164_wnk7h/pelunasan_.pdf",
+        "uploadedBy": "Admin Proyek",
+        "timestamp": "2025-09-26T10:13:46.974Z"
+      },
+      {
+        "name": "Tanda Terima .pdf",
+        "path": "project_1758857600164_wnk7h/tanda_terima_.pdf",
+        "uploadedBy": "Admin Proyek",
+        "timestamp": "2025-09-26T10:13:56.230Z"
+      }
+    ],
+    "createdAt": "2025-09-26T03:33:20.163Z",
+    "createdBy": "sudina",
+    "surveyDetails": {
+      "date": "2025-09-26",
+      "time": "12:58",
+      "description": "survey di 111"
+    },
+    "parallelUploadsCompletedBy": [
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      "MEP"
+    ],
+    "scheduleDetails": {
+      "date": "2025-09-26",
+      "time": "16:35",
+      "location": "puspem"
+    }
+  },
+  {
+    "id": "project_1758892730571_j2arl",
+    "title": "proyek villa seminyak",
+    "status": "Completed",
+    "progress": 100,
+    "assignedDivision": "",
+    "nextAction": null,
+    "workflowId": "msa_workflow",
+    "workflowHistory": [
+      {
+        "division": "sudina",
+        "action": "Created Project with workflow: msa_workflow",
+        "timestamp": "2025-09-26T13:18:50.571Z",
+        "note": "Project entry created."
+      },
+      {
+        "division": "System",
+        "action": "Assigned to Admin Proyek for Unggah Dokumen Penawaran",
+        "timestamp": "2025-09-26T13:18:50.571Z"
+      },
+      {
+        "division": "Admin Proyek, MEP",
+        "action": "komangmerta (Admin Proyek, MEP) submitted for \"Unggah Dokumen Penawaran\"",
+        "timestamp": "2025-09-26T13:19:36.419Z",
+        "note": "dokumen penawaran"
+      },
+      {
+        "division": "Owner",
+        "action": "sudina (Owner) approved: Setujui Dokumen Penawaran",
+        "timestamp": "2025-09-26T13:20:04.120Z"
+      },
+      {
+        "division": "Akuntan",
+        "action": "oksi (Akuntan) submitted for \"Buat Faktur DP\"",
+        "timestamp": "2025-09-26T13:20:38.475Z",
+        "note": "dp"
+      },
+      {
+        "division": "Owner",
+        "action": "sudina (Owner) approved: Setujui Faktur DP",
+        "timestamp": "2025-09-26T13:21:16.902Z"
+      },
+      {
+        "division": "Admin Proyek, MEP",
+        "action": "komangmerta (Admin Proyek, MEP) submitted for \"Unggah Berkas Administrasi\"",
+        "timestamp": "2025-09-26T13:21:52.130Z"
+      },
+      {
+        "division": "Arsitek",
+        "action": "arsitek (Arsitek) submitted Survey Details for 2025-09-26 at 21:23",
+        "timestamp": "2025-09-26T13:22:26.235Z"
+      },
+      {
+        "division": "Arsitek",
+        "action": "arsitek (Arsitek) submitted Survey Details for 2025-09-26 at 21:23",
+        "timestamp": "2025-09-26T13:22:56.183Z",
+        "note": "survey berhasil"
+      },
+      {
+        "division": "Arsitek",
+        "action": "arsitek (Arsitek) submitted for \"Admin Proyek: Pantau unggahan. Arsitek/Struktur/MEP: Unggah berkas Anda sesuai checklist.\"",
+        "timestamp": "2025-09-26T13:23:19.563Z"
+      },
+      {
+        "division": "arsitek",
+        "action": "Marked their design/revision phase as complete.",
+        "timestamp": "2025-09-26T13:23:23.176Z",
+        "note": "Divisi Arsitek telah menyelesaikan tugasnya."
+      },
+      {
+        "division": "Struktur",
+        "action": "struktur (Struktur) submitted for \"Admin Proyek: Pantau unggahan. Arsitek/Struktur/MEP: Unggah berkas Anda sesuai checklist.\"",
+        "timestamp": "2025-09-26T13:24:17.878Z"
+      },
+      {
+        "division": "struktur",
+        "action": "Marked their design/revision phase as complete.",
+        "timestamp": "2025-09-26T13:24:19.684Z",
+        "note": "Divisi Struktur telah menyelesaikan tugasnya."
+      },
+      {
+        "division": "Admin Proyek, MEP",
+        "action": "komangmerta (Admin Proyek, MEP) submitted for \"Admin Proyek: Pantau unggahan. Arsitek/Struktur/MEP: Unggah berkas Anda sesuai checklist.\"",
+        "timestamp": "2025-09-26T13:25:09.542Z"
+      },
+      {
+        "division": "Admin Proyek, MEP",
+        "action": "komangmerta (Admin Proyek, MEP) all_files_confirmed for \"Admin Proyek: Pantau unggahan. Arsitek/Struktur/MEP: Unggah berkas Anda sesuai checklist.\"",
+        "timestamp": "2025-09-26T13:25:14.515Z"
+      },
+      {
+        "division": "Admin Proyek, MEP",
+        "action": "komangmerta (Admin Proyek, MEP) submitted for \"Unggah Bukti Pendaftaran Sidang\"",
+        "timestamp": "2025-09-26T13:25:48.070Z"
+      },
+      {
+        "division": "Admin Proyek, MEP",
+        "action": "komangmerta (Admin Proyek, MEP) scheduled Sidang on 2025-09-26 at 21:26",
+        "timestamp": "2025-09-26T13:26:29.660Z"
+      },
+      {
+        "division": "Admin Proyek, MEP",
+        "action": "komangmerta (Admin Proyek, MEP) declared Sidang outcome as: revise",
+        "timestamp": "2025-09-26T13:26:56.018Z",
+        "note": "perbaiki beberapa file"
+      },
+      {
+        "division": "Admin Proyek, MEP",
+        "action": "komangmerta (Admin Proyek, MEP) revision_completed_proceed_to_invoice for \"Lakukan revisi pasca-sidang. Notifikasi Arsitek/Struktur jika perlu, lalu selesaikan proyek.\"",
+        "timestamp": "2025-09-26T13:27:09.979Z"
+      },
+      {
+        "division": "Akuntan",
+        "action": "oksi (Akuntan) submitted for \"Unggah Invoice Pelunasan\"",
+        "timestamp": "2025-09-26T13:28:16.015Z",
+        "note": "pelunasan"
+      },
+      {
+        "division": "Admin Proyek, MEP",
+        "action": "komangmerta (Admin Proyek, MEP) submitted for \"Unggah dokumen penyelesaian akhir: Berita Acara, SKRD, dll.\"",
+        "timestamp": "2025-09-26T13:32:10.439Z"
+      },
+      {
+        "division": "Owner",
+        "action": "sudina (Owner) submitted for \"Unggah dokumen penyelesaian akhir: Berita Acara, SKRD, dll.\"",
+        "timestamp": "2025-09-26T13:34:39.149Z"
+      },
+      {
+        "division": "Admin Proyek, MEP",
+        "action": "komangmerta (Admin Proyek, MEP) submitted for \"Unggah dokumen penyelesaian akhir: Berita Acara, SKRD, dll.\"",
+        "timestamp": "2025-09-26T13:35:36.710Z"
+      },
+      {
+        "division": "Admin Proyek, MEP",
+        "action": "komangmerta (Admin Proyek, MEP) declared Sidang outcome as: completed",
+        "timestamp": "2025-09-26T13:35:58.293Z"
+      }
+    ],
+    "files": [
+      {
+        "name": "dokumen penawaran.pdf",
+        "path": "project_1758892730571_j2arl/dokumen_penawaran.pdf",
+        "uploadedBy": "Admin Proyek",
+        "timestamp": "2025-09-26T13:19:36.419Z"
+      },
+      {
+        "name": "invoice dp.pdf",
+        "path": "project_1758892730571_j2arl/invoice_dp.pdf",
+        "uploadedBy": "Akuntan",
+        "timestamp": "2025-09-26T13:20:38.475Z"
+      },
+      {
+        "name": "berkas administrasi awal.pdf",
+        "path": "project_1758892730571_j2arl/berkas_administrasi_awal.pdf",
+        "uploadedBy": "Admin Proyek",
+        "timestamp": "2025-09-26T13:21:52.130Z"
+      },
+      {
+        "name": "hasil survey.pdf",
+        "path": "project_1758892730571_j2arl/hasil_survey.pdf",
+        "uploadedBy": "Arsitek",
+        "timestamp": "2025-09-26T13:22:56.183Z"
+      },
+      {
+        "name": "Daftar Simak Arsitek.pdf",
+        "path": "project_1758892730571_j2arl/daftar_simak_arsitek.pdf",
+        "uploadedBy": "Arsitek",
+        "timestamp": "2025-09-26T13:23:19.563Z"
+      },
+      {
+        "name": "gambar arsitek.pdf",
+        "path": "project_1758892730571_j2arl/gambar_arsitek.pdf",
+        "uploadedBy": "Arsitek",
+        "timestamp": "2025-09-26T13:23:19.563Z"
+      },
+      {
+        "name": "Rap arditek.pdf",
+        "path": "project_1758892730571_j2arl/rap_arditek.pdf",
+        "uploadedBy": "Arsitek",
+        "timestamp": "2025-09-26T13:23:19.563Z"
+      },
+      {
+        "name": "Spektek .pdf",
+        "path": "project_1758892730571_j2arl/spektek_.pdf",
+        "uploadedBy": "Arsitek",
+        "timestamp": "2025-09-26T13:23:19.563Z"
+      },
+      {
+        "name": "Analisa Laporan Struktur .pdf",
+        "path": "project_1758892730571_j2arl/analisa_laporan_struktur_.pdf",
+        "uploadedBy": "Struktur",
+        "timestamp": "2025-09-26T13:24:17.878Z"
+      },
+      {
+        "name": "Daftar Simak Struktur .pdf",
+        "path": "project_1758892730571_j2arl/daftar_simak_struktur_.pdf",
+        "uploadedBy": "Struktur",
+        "timestamp": "2025-09-26T13:24:17.878Z"
+      },
+      {
+        "name": "GAmbar Struktur .pdf",
+        "path": "project_1758892730571_j2arl/gambar_struktur_.pdf",
+        "uploadedBy": "Struktur",
+        "timestamp": "2025-09-26T13:24:17.878Z"
+      },
+      {
+        "name": "Hammer Test Struktur.pdf",
+        "path": "project_1758892730571_j2arl/hammer_test_struktur.pdf",
+        "uploadedBy": "Struktur",
+        "timestamp": "2025-09-26T13:24:17.878Z"
+      },
+      {
+        "name": "SpekTek Struktur .pdf",
+        "path": "project_1758892730571_j2arl/spektek_struktur_.pdf",
+        "uploadedBy": "Struktur",
+        "timestamp": "2025-09-26T13:24:17.878Z"
+      },
+      {
+        "name": "daftar simak MEP .pdf",
+        "path": "project_1758892730571_j2arl/daftar_simak_mep_.pdf",
+        "uploadedBy": "MEP",
+        "timestamp": "2025-09-26T13:25:09.542Z"
+      },
+      {
+        "name": "Gambar Mep .pdf",
+        "path": "project_1758892730571_j2arl/gambar_mep_.pdf",
+        "uploadedBy": "MEP",
+        "timestamp": "2025-09-26T13:25:09.542Z"
+      },
+      {
+        "name": "LAporan Mep.pdf",
+        "path": "project_1758892730571_j2arl/laporan_mep.pdf",
+        "uploadedBy": "MEP",
+        "timestamp": "2025-09-26T13:25:09.542Z"
+      },
+      {
+        "name": "RAP MEp.pdf",
+        "path": "project_1758892730571_j2arl/rap_mep.pdf",
+        "uploadedBy": "MEP",
+        "timestamp": "2025-09-26T13:25:09.542Z"
+      },
+      {
+        "name": "SPEKtek MEP .pdf",
+        "path": "project_1758892730571_j2arl/spektek_mep_.pdf",
+        "uploadedBy": "MEP",
+        "timestamp": "2025-09-26T13:25:09.542Z"
+      },
+      {
+        "name": "Bukti file telah di upload .pdf",
+        "path": "project_1758892730571_j2arl/bukti_file_telah_di_upload_.pdf",
+        "uploadedBy": "Admin Proyek",
+        "timestamp": "2025-09-26T13:25:48.070Z"
+      },
+      {
+        "name": "hasil sidang .pdf",
+        "path": "project_1758892730571_j2arl/hasil_sidang_.pdf",
+        "uploadedBy": "Admin Proyek",
+        "timestamp": "2025-09-26T13:26:56.018Z"
+      },
+      {
+        "name": "invoice pelunasan .pdf",
+        "path": "project_1758892730571_j2arl/invoice_pelunasan_.pdf",
+        "uploadedBy": "Akuntan",
+        "timestamp": "2025-09-26T13:28:16.015Z"
+      },
+      {
+        "name": "Berita Acara.pdf",
+        "path": "project_1758892730571_j2arl/berita_acara.pdf",
+        "uploadedBy": "Admin Proyek",
+        "timestamp": "2025-09-26T13:32:10.439Z"
+      },
+      {
+        "name": "dokumen final .pdf",
+        "path": "project_1758892730571_j2arl/dokumen_final_.pdf",
+        "uploadedBy": "Admin Proyek",
+        "timestamp": "2025-09-26T13:32:10.439Z"
+      },
+      {
+        "name": "Bukti Pembayaran .pdf",
+        "path": "project_1758892730571_j2arl/bukti_pembayaran_.pdf",
+        "uploadedBy": "Owner",
+        "timestamp": "2025-09-26T13:34:39.149Z"
+      },
+      {
+        "name": "Ijin Terbit .pdf",
+        "path": "project_1758892730571_j2arl/ijin_terbit_.pdf",
+        "uploadedBy": "Admin Proyek",
+        "timestamp": "2025-09-26T13:35:36.710Z"
+      },
+      {
+        "name": "Pelunasan .pdf",
+        "path": "project_1758892730571_j2arl/pelunasan_.pdf",
+        "uploadedBy": "Admin Proyek",
+        "timestamp": "2025-09-26T13:35:36.710Z"
+      },
+      {
+        "name": "SKRD .pdf",
+        "path": "project_1758892730571_j2arl/skrd_.pdf",
+        "uploadedBy": "Admin Proyek",
+        "timestamp": "2025-09-26T13:35:36.710Z"
+      },
+      {
+        "name": "Tanda Terima .pdf",
+        "path": "project_1758892730571_j2arl/tanda_terima_.pdf",
+        "uploadedBy": "Admin Proyek",
+        "timestamp": "2025-09-26T13:35:36.710Z"
+      }
+    ],
+    "createdAt": "2025-09-26T13:18:50.571Z",
+    "createdBy": "sudina",
+    "surveyDetails": {
+      "date": "2025-09-26",
+      "time": "21:23",
+      "description": "bebas"
+    },
+    "parallelUploadsCompletedBy": [
+      "Arsitek",
+      "Struktur"
+    ],
+    "scheduleDetails": {
+      "date": "2025-09-26",
+      "time": "21:26",
+      "location": "puspem"
+    }
+  }
+]

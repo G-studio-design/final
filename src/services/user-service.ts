@@ -1,60 +1,195 @@
-
+// src/services/user-service.ts
 'use server';
 
-import type { User } from '@/types/user-types';
-import { readDb } from '@/lib/database-utils';
+import * as path from 'path';
+import type { User, AddUserData, UpdateProfileData, UpdatePasswordData, UpdateUserGoogleTokensData } from '@/types/user-types';
+import { getAllUsers } from './data-access/user-data';
+import { writeDb } from '@/lib/database-utils';
 
-const USERS_DB_PATH = 'users.json';
+const DB_PATH = path.resolve(process.cwd(), 'src', 'database', 'users.json');
 
-/**
- * Reads all users from the database.
- * Returns an empty array if the database file cannot be read or is empty.
- * @returns A promise that resolves to an array of users.
- */
-async function getAllUsers(): Promise<User[]> {
-    try {
-        // readDb is designed to be safe and return default data on failure.
-        return await readDb<User[]>(USERS_DB_PATH, []);
-    } catch (error) {
-        console.error('[user-service] Critical error in getAllUsers:', error);
-        // Return an empty array to prevent downstream crashes.
-        return [];
-    }
+export async function findUserByUsername(username: string): Promise<User | null> {
+    if (!username) return null;
+    const users = await getAllUsers();
+    const user = users.find(u => u.username.toLowerCase() === username.toLowerCase());
+    return user || null;
 }
 
-/**
- * Verifies user credentials against the database.
- * This function is designed to be robust and never throw an unhandled exception.
- * @param usernameInput The username to verify.
- * @param passwordInput The password to verify.
- * @returns A promise that resolves to the user object (without password) on success, or null on failure.
- */
-export async function verifyUserCredentials(usernameInput: string, passwordInput: string): Promise<Omit<User, 'password'> | null> {
+export async function findUserByEmail(email: string): Promise<User | null> {
+    if (!email) return null;
     const users = await getAllUsers();
-    
-    // If the database is empty or could not be read, no user can be verified.
-    if (!users || users.length === 0) {
-        console.error("[user-service] No users found in database or database is unreadable.");
+    const user = users.find(u => u.email && u.email.toLowerCase() === email.toLowerCase());
+    return user || null;
+}
+
+export async function findUserById(userId: string): Promise<User | null> {
+    if(!userId) return null;
+    const users = await getAllUsers();
+    const user = users.find(u => u.id === userId);
+    return user || null;
+}
+
+export async function verifyUserCredentials(usernameInput: string, passwordInput: string): Promise<Omit<User, 'password'> | null> {
+    const user = await findUserByUsername(usernameInput);
+
+    if (!user || !user.password || passwordInput !== user.password) {
         return null;
     }
 
-    const user = users.find(u => u.username.toLowerCase() === usernameInput.toLowerCase());
-
-    // User not found.
-    if (!user) {
-        console.log(`[user-service] Login attempt failed: username '${usernameInput}' not found.`);
-        return null;
-    }
-
-    // Password does not match.
-    if (user.password !== passwordInput) {
-        console.log(`[user-service] Login attempt failed: incorrect password for username '${usernameInput}'.`);
-        return null;
-    }
-
-    // On successful verification, return user data without the password.
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { password, ...userWithoutPassword } = user;
+    const { password: _p, ...userWithoutPassword } = user;
     return userWithoutPassword;
 }
 
+export async function addUser(userData: AddUserData): Promise<Omit<User, 'password'>> {
+    const users = await getAllUsers();
+
+    if (userData.roles.includes('Admin Developer')) {
+        throw new Error('INVALID_ROLE_CREATION_ATTEMPT');
+    }
+
+    if (users.some(u => u.username.toLowerCase() === userData.username.toLowerCase())) {
+        throw new Error('USERNAME_EXISTS');
+    }
+    if (userData.email && users.some(u => u.email && u.email.toLowerCase() === userData.email!.toLowerCase())) {
+        throw new Error('EMAIL_EXISTS');
+    }
+
+    const newUser: User = {
+        id: `usr_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`,
+        username: userData.username,
+        password: userData.password,
+        roles: userData.roles,
+        email: userData.email || `${userData.username.toLowerCase().replace(/\s+/g, '_')}@example.com`,
+        displayName: userData.displayName || userData.username,
+        createdAt: new Date().toISOString(),
+    };
+
+    users.push(newUser);
+    await writeDb(DB_PATH, users);
+    const { password: _p, ...newUserWithoutPassword } = newUser;
+    return newUserWithoutPassword;
+}
+
+export async function deleteUser(userId: string): Promise<void> {
+    let users = await getAllUsers();
+    const userToDelete = users.find(user => user.id === userId);
+
+    if (!userToDelete) {
+        throw new Error('USER_NOT_FOUND');
+    }
+
+    if (userToDelete.roles.includes('Admin Developer')) {
+        throw new Error('CANNOT_DELETE_ADMIN_DEVELOPER');
+    }
+
+    const remainingUsers = users.filter(user => user.id !== userId);
+    await writeDb(DB_PATH, remainingUsers);
+}
+
+export async function updateUserProfile(updateData: UpdateProfileData): Promise<Omit<User, 'password'>> {
+    let users = await getAllUsers();
+    const userIndex = users.findIndex(u => u.id === updateData.userId);
+
+    if (userIndex === -1) {
+        throw new Error('USER_NOT_FOUND');
+    }
+
+    const currentUserState = users[userIndex];
+
+    // Prevent assigning 'Admin Developer' role
+    if (updateData.roles && updateData.roles.includes('Admin Developer')) {
+        throw new Error('CANNOT_SET_ADMIN_DEVELOPER_ROLE');
+    }
+    // Prevent removing 'Admin Developer' role from an existing admin dev
+    if (currentUserState.roles.includes('Admin Developer') && updateData.roles && !updateData.roles.includes('Admin Developer')) {
+        throw new Error('CANNOT_CHANGE_ADMIN_DEVELOPER_ROLE');
+    }
+
+    if (updateData.username && updateData.username.toLowerCase() !== currentUserState.username.toLowerCase()) {
+        if (users.some(u => u.id !== updateData.userId && u.username.toLowerCase() === updateData.username!.toLowerCase())) {
+            throw new Error('USERNAME_EXISTS');
+        }
+    }
+    if (updateData.email && updateData.email.toLowerCase() !== (currentUserState.email || '').toLowerCase()) {
+        if (users.some(u => u.id !== updateData.userId && u.email && u.email.toLowerCase() === updateData.email!.toLowerCase())) {
+            throw new Error('EMAIL_EXISTS');
+        }
+    }
+    
+    const updatedUser = { ...currentUserState, ...updateData };
+    users[userIndex] = updatedUser;
+    await writeDb(DB_PATH, users);
+    
+    const { password: _p, ...userWithoutPassword } = updatedUser;
+    return userWithoutPassword;
+}
+
+export async function updatePassword(updateData: UpdatePasswordData): Promise<void> {
+    let users = await getAllUsers();
+    const userIndex = users.findIndex(u => u.id === updateData.userId);
+
+    if (userIndex === -1) {
+        throw new Error('USER_NOT_FOUND');
+    }
+
+    const user = users[userIndex];
+
+    if (updateData.currentPassword) {
+        if (!user.password || updateData.currentPassword !== user.password) {
+            throw new Error('PASSWORD_MISMATCH');
+        }
+    }
+
+    users[userIndex].password = updateData.newPassword;
+    await writeDb(DB_PATH, users);
+}
+
+export async function getAllUsersForDisplay(): Promise<Omit<User, 'password'>[]> {
+    const users = await getAllUsers();
+    return users.map(user => {
+            const { password: _p, ...userWithoutPassword } = user;
+            return userWithoutPassword;
+        });
+}
+
+export async function updateUserGoogleTokens(
+    userId: string,
+    tokens: UpdateUserGoogleTokensData
+): Promise<void> {
+    let users = await getAllUsers();
+    const userIndex = users.findIndex(u => u.id === userId);
+
+    if (userIndex === -1) {
+        throw new Error('USER_NOT_FOUND');
+    }
+
+    users[userIndex] = {
+        ...users[userIndex],
+        googleRefreshToken: tokens.refreshToken !== undefined ? tokens.refreshToken : users[userIndex].googleRefreshToken,
+        googleAccessToken: tokens.accessToken !== undefined ? tokens.accessToken : users[userIndex].googleAccessToken,
+        accessTokenExpiresAt: tokens.accessTokenExpiresAt !== undefined ? tokens.accessTokenExpiresAt : users[userIndex].accessTokenExpiresAt,
+    };
+    
+    await writeDb(DB_PATH, users);
+}
+
+export async function clearUserGoogleTokens(userId: string): Promise<Omit<User, 'password'>> {
+    let users = await getAllUsers();
+    const userIndex = users.findIndex(u => u.id === userId);
+
+    if (userIndex === -1) {
+        throw new Error('USER_NOT_FOUND');
+    }
+
+    const user = { ...users[userIndex] };
+    
+    delete user.googleRefreshToken;
+    delete user.googleAccessToken;
+    delete user.accessTokenExpiresAt;
+
+    users[userIndex] = user;
+    
+    await writeDb(DB_PATH, users);
+    const { password: _p, ...userWithoutPassword } = users[userIndex];
+    return userWithoutPassword;
+}
