@@ -1236,11 +1236,11 @@ export default function ProjectsPageClient({ initialProjects }: ProjectsPageClie
         return isCorrectStatus && canTakeAction;
     }, [selectedProject, currentUser]);
     
-    const showAdminFileUploadDuringSurvey = React.useMemo(() => {
+    const showAdminFileUploadSection = React.useMemo(() => {
         if (!selectedProject || !currentUser || !Array.isArray(currentUser.roles)) return false;
         const canTakeAction = currentUser.roles.includes('Admin Proyek');
-        const isCorrectStatus = ['Pending Survey Details', 'Survey Scheduled'].includes(selectedProject.status);
-        return isCorrectStatus && canTakeAction;
+        const isProjectActive = !['Completed', 'Canceled'].includes(selectedProject.status);
+        return isProjectActive && canTakeAction;
     }, [selectedProject, currentUser]);
 
 
@@ -2030,7 +2030,7 @@ export default function ProjectsPageClient({ initialProjects }: ProjectsPageClie
                                 </div>
                             </div>
                         )}
-                        {showAdminFileUploadDuringSurvey && (
+                        {showAdminFileUploadSection && (
                             <div className="space-y-4 border-t pt-4 mt-4">
                                 <h3 className="text-lg font-semibold">Unggah Dokumen Administrasi Tambahan</h3>
                                 <div className="space-y-1.5">
