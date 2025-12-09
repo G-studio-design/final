@@ -1,7 +1,7 @@
 // src/app/api/auth/google/callback/route.ts
 import { google } from 'googleapis';
 import { NextResponse } from 'next/server';
-import { findUserByEmail, updateUserGoogleTokens } from '../../../../services/user-service'; 
+import { findUserByEmail, updateUserGoogleTokens } from '@/services/user-service'; 
 
 export async function GET(request: Request) {
   // DEFER client instantiation until request time

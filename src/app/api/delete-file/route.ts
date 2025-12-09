@@ -3,8 +3,8 @@ import { NextResponse } from 'next/server';
 import * as fs from 'fs/promises';
 import * as fsSync from 'fs';
 import * as path from 'path';
-import { deleteProjectFile as deleteFileRecord, getProjectById } from '../../services/project-service';
-import { findUserById } from '../../services/user-service';
+import { deleteProjectFile as deleteFileRecord, getProjectById } from '@/services/project-service';
+import { findUserById } from '@/services/user-service';
 
 const ALLOWED_ROLES_TO_DELETE = ['Owner', 'Admin Proyek', 'Admin Developer'];
 

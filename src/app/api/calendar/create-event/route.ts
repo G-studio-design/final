@@ -1,7 +1,7 @@
 // src/app/api/calendar/create-event/route.ts
 import { google } from 'googleapis';
 import { NextResponse } from 'next/server';
-import { findUserById, updateUserGoogleTokens } from '../../../../services/user-service';
+import { findUserById, updateUserGoogleTokens } from '@/services/user-service';
 import type { CalendarEvent } from '@/types/google-types';
 
 export async function POST(request: Request) {
