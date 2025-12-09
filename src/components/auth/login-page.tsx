@@ -42,15 +42,15 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gray-100">
-      <div className="w-full max-w-md space-y-8 rounded-lg bg-white p-8 shadow-md">
+    <div className="flex min-h-screen items-center justify-center bg-background">
+      <div className="w-full max-w-md space-y-8 rounded-lg border bg-card p-8 shadow-md">
         <div>
-          <h2 className="mt-6 text-center text-3xl font-bold tracking-tight text-gray-900">
+          <h2 className="mt-6 text-center text-3xl font-bold tracking-tight text-card-foreground">
             Sign in to your account
           </h2>
         </div>
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
-          <div className="space-y-4 rounded-md shadow-sm">
+          <div className="space-y-4 rounded-md">
             <div>
               <Label htmlFor="username">Username</Label>
               <Input
@@ -82,7 +82,7 @@ export default function LoginPage() {
           </div>
 
           {error && (
-            <p className="text-sm text-red-600">{error}</p>
+            <p className="text-sm text-destructive">{error}</p>
           )}
 
           <div>
