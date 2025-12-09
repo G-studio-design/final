@@ -1,7 +1,7 @@
 // src/app/api/users/[userId]/password/route.ts
 import { NextResponse } from 'next/server';
-import { updatePassword } from '../../../../services/user-service';
-import type { UpdatePasswordData } from '../../../../types/user-types';
+import { updatePassword } from '@/services/user-service';
+import type { UpdatePasswordData } from '@/types/user-types';
 
 export async function POST(
   request: Request,

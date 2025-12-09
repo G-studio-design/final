@@ -1,7 +1,7 @@
 // src/app/api/users/route.ts
 import { NextResponse } from 'next/server';
-import { addUser, getAllUsersForDisplay } from '../../../services/user-service';
-import type { AddUserData } from '../../../types/user-types';
+import { addUser, getAllUsersForDisplay } from '@/services/user-service';
+import type { AddUserData } from '@/types/user-types';
 
 export async function POST(request: Request) {
   try {
