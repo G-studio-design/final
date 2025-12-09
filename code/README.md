@@ -43,7 +43,7 @@ Metode ini mengisolasi aplikasi Anda dalam sebuah "container" sehingga tidak men
     -   Buka **File Station**.
     -   Buat folder baru di NAS Anda jika belum ada, misalnya `docker`.
     -   Di dalam folder `docker`, buat lagi folder khusus untuk proyek ini bernama `msarch-app`.
-    -   Unggah **semua file dan folder proyek Anda** ke dalam direktori `docker/msarch-app`. Pastikan file seperti `Dockerfile`, `package.json`, dan folder `src` ada di dalamnya.
+    -   Unggah **semua file dan folder proyek Anda** (termasuk `Dockerfile`, `package.json`, `package-lock.json`, dan folder `src`) ke dalam direktori `docker/msarch-app`.
 
 2.  **Buat File `.env` di NAS:**
     -   Di dalam folder `docker/msarch-app` di File Station, buat file baru bernama `.env`.
@@ -58,7 +58,7 @@ Metode ini mengisolasi aplikasi Anda dalam sebuah "container" sehingga tidak men
     -   **Project Name**: Beri nama `msarch-app`.
     -   **Path**: Arahkan ke folder `docker/msarch-app` (Pilih folder proyek Anda secara langsung).
     -   **Source**: Pilih **Create docker-compose.yml**.
-    -   Salin dan tempel konfigurasi **yang sudah disederhanakan** berikut ini ke dalam editor:
+    -   Salin dan tempel konfigurasi berikut ini ke dalam editor:
         ```yaml
         version: '3.8'
         services:
