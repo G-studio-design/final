@@ -42,7 +42,7 @@ export async function POST(request: Request) {
     headers.append('Content-Disposition', `attachment; filename="attendance_report_${year}_${monthName.replace(/ /g, '_')}.docx"`);
     headers.append('Content-Type', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document');
 
-    return new Response(buffer, { headers });
+    return new NextResponse(buffer, { headers });
 
   } catch (error: any) {
     console.error("[API/AttendanceReport] Error generating Word report:", error);
