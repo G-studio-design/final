@@ -1,0 +1,633 @@
+[
+  {
+    "id": "project_seed_01_pending_offer",
+    "title": "Proyek Renovasi Fasad Ruko (Tahap Penawaran)",
+    "status": "Pending Offer",
+    "progress": 10,
+    "assignedDivision": "Admin Proyek",
+    "nextAction": "Unggah Dokumen Penawaran",
+    "workflowId": "msa_workflow",
+    "workflowHistory": [
+      {
+        "division": "sudina",
+        "action": "Created Project with workflow: msa_workflow",
+        "timestamp": "2025-09-27T01:00:00.000Z",
+        "note": "Project entry created for testing."
+      },
+      {
+        "division": "System",
+        "action": "Assigned to Admin Proyek for Unggah Dokumen Penawaran",
+        "timestamp": "2025-09-27T01:00:00.000Z"
+      }
+    ],
+    "files": [],
+    "createdAt": "2025-09-27T01:00:00.000Z",
+    "createdBy": "sudina"
+  },
+  {
+    "id": "project_seed_02_pending_approval",
+    "title": "Proyek Villa Pribadi di Canggu (Persetujuan Penawaran)",
+    "status": "Pending Approval",
+    "progress": 20,
+    "assignedDivision": "Owner",
+    "nextAction": "Setujui Dokumen Penawaran",
+    "workflowId": "msa_workflow",
+    "workflowHistory": [
+      {
+        "division": "sudina",
+        "action": "Created Project with workflow: msa_workflow",
+        "timestamp": "2025-09-27T02:00:00.000Z"
+      },
+      {
+        "division": "Admin Proyek",
+        "action": "komangmerta (Admin Proyek) submitted for \"Unggah Dokumen Penawaran\"",
+        "timestamp": "2025-09-27T02:05:00.000Z",
+        "note": "Dokumen penawaran awal terlampir."
+      }
+    ],
+    "files": [
+      {
+        "name": "penawaran_villa_canggu.pdf",
+        "path": "seed/penawaran_villa_canggu.pdf",
+        "uploadedBy": "Admin Proyek",
+        "timestamp": "2025-09-27T02:05:00.000Z"
+      }
+    ],
+    "createdAt": "2025-09-27T02:00:00.000Z",
+    "createdBy": "sudina"
+  },
+  {
+    "id": "project_seed_03_pending_dp",
+    "title": "Proyek Interior Kantor Startup (Menunggu Faktur DP)",
+    "status": "Pending DP Invoice",
+    "progress": 25,
+    "assignedDivision": "Akuntan",
+    "nextAction": "Buat Faktur DP",
+    "workflowId": "msa_workflow",
+    "workflowHistory": [
+      {
+        "division": "sudina",
+        "action": "Created Project with workflow: msa_workflow",
+        "timestamp": "2025-09-27T03:00:00.000Z"
+      },
+      {
+        "division": "Admin Proyek",
+        "action": "komangmerta (Admin Proyek) submitted for \"Unggah Dokumen Penawaran\"",
+        "timestamp": "2025-09-27T03:05:00.000Z"
+      },
+      {
+        "division": "Owner",
+        "action": "sudina (Owner) approved: Setujui Dokumen Penawaran",
+        "timestamp": "2025-09-27T03:10:00.000Z"
+      }
+    ],
+    "files": [],
+    "createdAt": "2025-09-27T03:00:00.000Z",
+    "createdBy": "sudina"
+  },
+  {
+    "id": "project_seed_04_pending_survey",
+    "title": "Proyek Guest House Ubud (Menunggu Jadwal Survei)",
+    "status": "Pending Survey Details",
+    "progress": 45,
+    "assignedDivision": "Arsitek",
+    "nextAction": "Input Jadwal Survei",
+    "workflowId": "msa_workflow",
+    "workflowHistory": [
+      {
+        "division": "Admin Proyek",
+        "action": "komangmerta (Admin Proyek) submitted for \"Unggah Berkas Administrasi\"",
+        "timestamp": "2025-09-27T04:00:00.000Z",
+        "note": "Semua berkas administrasi awal lengkap."
+      }
+    ],
+    "files": [],
+    "createdAt": "2025-09-27T03:55:00.000Z",
+    "createdBy": "komangmerta"
+  },
+  {
+    "id": "project_seed_05_survey_scheduled",
+    "title": "Proyek Cafe di Seminyak (Survei Terjadwal)",
+    "status": "Survey Scheduled",
+    "progress": 48,
+    "assignedDivision": "Arsitek",
+    "nextAction": "Konfirmasi penyelesaian survei dan unggah laporan (opsional).",
+    "workflowId": "msa_workflow",
+    "surveyDetails": {
+      "date": "2025-09-30",
+      "time": "10:00",
+      "description": "Survei lokasi untuk Cafe Seminyak"
+    },
+    "workflowHistory": [
+      {
+        "division": "Arsitek",
+        "action": "arsitek (Arsitek) submitted Survey Details for 2025-09-30 at 10:00",
+        "timestamp": "2025-09-27T05:00:00.000Z"
+      }
+    ],
+    "files": [],
+    "createdAt": "2025-09-27T04:55:00.000Z",
+    "createdBy": "arsitek"
+  },
+  {
+    "id": "project_seed_06_parallel_design",
+    "title": "Proyek Kompleks Perumahan (Desain Paralel)",
+    "status": "Pending Parallel Design Uploads",
+    "progress": 50,
+    "assignedDivision": "Admin Proyek",
+    "nextAction": "Admin Proyek: Pantau unggahan. Arsitek/Struktur/MEP: Unggah berkas Anda sesuai checklist.",
+    "workflowId": "msa_workflow",
+    "workflowHistory": [
+      {
+        "division": "Arsitek",
+        "action": "arsitek (Arsitek) submitted for \"Konfirmasi penyelesaian survei...\"",
+        "timestamp": "2025-09-27T06:00:00.000Z",
+        "note": "Survei selesai."
+      }
+    ],
+    "files": [],
+    "createdAt": "2025-09-27T05:55:00.000Z",
+    "createdBy": "arsitek",
+    "parallelUploadsCompletedBy": []
+  },
+  {
+    "id": "project_seed_07_parallel_arsitek_done",
+    "title": "Proyek Gedung Serbaguna (Struktur & MEP Ditunggu)",
+    "status": "Pending Parallel Design Uploads",
+    "progress": 65,
+    "assignedDivision": "Admin Proyek",
+    "nextAction": "Admin Proyek: Pantau unggahan. Arsitek/Struktur/MEP: Unggah berkas Anda sesuai checklist.",
+    "workflowId": "msa_workflow",
+    "workflowHistory": [
+      {
+        "division": "System",
+        "action": "...",
+        "timestamp": "2025-09-27T07:00:00.000Z"
+      },
+      {
+        "division": "arsitek",
+        "action": "Marked their design/revision phase as complete.",
+        "timestamp": "2025-09-27T07:05:00.000Z",
+        "note": "Divisi Arsitek telah menyelesaikan tugasnya."
+      },
+      {
+        "division": "Struktur",
+        "action": "struktur (Struktur) submitted for \"Admin Proyek: Pantau unggahan. Arsitek/Struktur/MEP: Unggah berkas Anda sesuai checklist.\"",
+        "timestamp": "2025-11-30T06:34:29.192Z",
+        "note": "hammer test kurang lagi 2"
+      }
+    ],
+    "files": [
+      {
+        "name": "Gambar_Gedung_Serbaguna.pdf",
+        "path": "seed/Gedung_Serbaguna_Arsitek_Gambar.pdf",
+        "uploadedBy": "Arsitek",
+        "timestamp": "2025-09-27T07:05:00.000Z"
+      },
+      {
+        "name": "Daftar_Simak_Arsitek.xlsx",
+        "path": "seed/Gedung_Serbaguna_Arsitek_Simak.xlsx",
+        "uploadedBy": "Arsitek",
+        "timestamp": "2025-09-27T07:05:00.000Z"
+      },
+      {
+        "name": "SpekTek_Arsitektur.docx",
+        "path": "seed/Gedung_Serbaguna_Arsitek_SpekTek.docx",
+        "uploadedBy": "Arsitek",
+        "timestamp": "2025-09-27T07:05:00.000Z"
+      },
+      {
+        "name": "RAP_Arsitektur.xlsx",
+        "path": "seed/Gedung_Serbaguna_Arsitek_RAP.xlsx",
+        "uploadedBy": "Arsitek",
+        "timestamp": "2025-09-27T07:05:00.000Z"
+      },
+      {
+        "name": "Hammer Test.png",
+        "path": "project_seed_07_parallel_arsitek_done/hammer_test.png",
+        "uploadedBy": "Struktur",
+        "checklistKey": "Struktur_HammerTest",
+        "timestamp": "2025-11-30T06:34:29.192Z"
+      }
+    ],
+    "createdAt": "2025-09-27T06:55:00.000Z",
+    "createdBy": "arsitek",
+    "parallelUploadsCompletedBy": [
+      "Arsitek"
+    ]
+  },
+  {
+    "id": "project_seed_08_pending_sidang_proof",
+    "title": "Proyek Hotel Bintang 5 (Menunggu Bukti Daftar Sidang)",
+    "status": "Pending Sidang Registration Proof",
+    "progress": 85,
+    "assignedDivision": "Admin Proyek",
+    "nextAction": "Unggah Bukti Pendaftaran Sidang",
+    "workflowId": "msa_workflow",
+    "workflowHistory": [
+      {
+        "division": "System",
+        "action": "...",
+        "timestamp": "2025-09-27T08:00:00.000Z"
+      },
+      {
+        "division": "Admin Proyek",
+        "action": "komangmerta (Admin Proyek) all_files_confirmed for \"...\"",
+        "timestamp": "2025-09-27T08:05:00.000Z"
+      }
+    ],
+    "files": [],
+    "createdAt": "2025-09-27T07:55:00.000Z",
+    "createdBy": "komangmerta",
+    "parallelUploadsCompletedBy": [
+      "Arsitek",
+      "Struktur",
+      "MEP"
+    ]
+  },
+  {
+    "id": "project_seed_09_pending_scheduling",
+    "title": "Proyek Apartemen Mewah (Menunggu Jadwal Sidang)",
+    "status": "Pending Scheduling",
+    "progress": 90,
+    "assignedDivision": "Admin Proyek",
+    "nextAction": "Jadwalkan Sidang",
+    "workflowId": "msa_workflow",
+    "workflowHistory": [
+      {
+        "division": "Admin Proyek",
+        "action": "komangmerta (Admin Proyek) submitted for \"Unggah Bukti Pendaftaran Sidang\"",
+        "timestamp": "2025-09-27T09:00:00.000Z"
+      }
+    ],
+    "files": [
+      {
+        "name": "bukti_daftar_sidang_apartemen.pdf",
+        "path": "seed/bukti_daftar_sidang_apartemen.pdf",
+        "uploadedBy": "Admin Proyek",
+        "timestamp": "2025-09-27T09:00:00.000Z"
+      }
+    ],
+    "createdAt": "2025-09-27T08:55:00.000Z",
+    "createdBy": "komangmerta"
+  },
+  {
+    "id": "project_seed_10_scheduled",
+    "title": "Proyek Restoran Tepi Pantai (Sidang Terjadwal)",
+    "status": "Scheduled",
+    "progress": 95,
+    "assignedDivision": "Admin Proyek",
+    "nextAction": "Nyatakan Hasil Sidang",
+    "workflowId": "msa_workflow",
+    "scheduleDetails": {
+      "date": "2025-10-05",
+      "time": "14:00",
+      "location": "Kantor Dinas Tata Ruang Kota"
+    },
+    "workflowHistory": [
+      {
+        "division": "Admin Proyek",
+        "action": "komangmerta (Admin Proyek) scheduled Sidang on 2025-10-05 at 14:00",
+        "timestamp": "2025-09-27T10:00:00.000Z"
+      }
+    ],
+    "files": [],
+    "createdAt": "2025-09-27T09:55:00.000Z",
+    "createdBy": "komangmerta"
+  },
+  {
+    "id": "project_seed_11_post_sidang_revision",
+    "title": "Proyek Pembangunan Sekolah (Revisi Pasca-Sidang)",
+    "status": "Pending Post-Sidang Revision",
+    "progress": 85,
+    "assignedDivision": "Admin Proyek",
+    "nextAction": "Lakukan revisi pasca-sidang. Notifikasi Arsitek/Struktur jika perlu, lalu selesaikan proyek.",
+    "workflowId": "msa_workflow",
+    "workflowHistory": [
+      {
+        "division": "Admin Proyek",
+        "action": "komangmerta (Admin Proyek) declared Sidang outcome as: revise",
+        "timestamp": "2025-09-27T11:00:00.000Z",
+        "note": "Perlu penyesuaian pada jalur evakuasi dan spesifikasi material MEP."
+      }
+    ],
+    "files": [],
+    "createdAt": "2025-09-27T10:55:00.000Z",
+    "createdBy": "komangmerta"
+  },
+  {
+    "id": "project_seed_12_pending_final_invoice",
+    "title": "Proyek Klinik Kesehatan (Menunggu Invoice Pelunasan)",
+    "status": "Pending Pelunasan Invoice",
+    "progress": 97,
+    "assignedDivision": "Akuntan",
+    "nextAction": "Unggah Invoice Pelunasan",
+    "workflowId": "msa_workflow",
+    "workflowHistory": [
+      {
+        "division": "Admin Proyek",
+        "action": "komangmerta (Admin Proyek) declared Sidang outcome as: completed",
+        "timestamp": "2025-09-27T12:00:00.000Z"
+      }
+    ],
+    "files": [],
+    "createdAt": "2025-09-27T11:55:00.000Z",
+    "createdBy": "komangmerta"
+  },
+  {
+    "id": "project_seed_13_pending_final_docs",
+    "title": "Proyek Pusat Perbelanjaan (Menunggu Dokumen Akhir)",
+    "status": "Pending Final Documents",
+    "progress": 98,
+    "assignedDivision": "Admin Proyek",
+    "nextAction": "Unggah dokumen penyelesaian akhir: Berita Acara, SKRD, dll.",
+    "workflowId": "msa_workflow",
+    "workflowHistory": [
+      {
+        "division": "Akuntan",
+        "action": "oksi (Akuntan) submitted for \"Unggah Invoice Pelunasan\"",
+        "timestamp": "2025-09-27T13:00:00.000Z"
+      },
+      {
+        "division": "Admin Proyek, MEP",
+        "action": "komangmerta (Admin Proyek, MEP) submitted for \"Unggah dokumen penyelesaian akhir: Berita Acara, SKRD, dll.\"",
+        "timestamp": "2025-11-30T05:51:55.960Z"
+      },
+      {
+        "division": "komangmerta",
+        "action": "Deleted file: \"pexels-photo-771742.webp\"",
+        "timestamp": "2025-11-30T05:52:09.046Z"
+      },
+      {
+        "division": "Admin Proyek, MEP",
+        "action": "komangmerta (Admin Proyek, MEP) submitted for \"Unggah dokumen penyelesaian akhir: Berita Acara, SKRD, dll.\"",
+        "timestamp": "2025-11-30T05:53:04.126Z"
+      },
+      {
+        "division": "komangmerta",
+        "action": "Deleted file: \"pexels-photo-771742.webp\"",
+        "timestamp": "2025-11-30T05:53:25.796Z"
+      },
+      {
+        "division": "komangmerta",
+        "action": "Deleted file: \"pria-3862-210205033009-l.png\"",
+        "timestamp": "2025-11-30T05:53:30.573Z"
+      },
+      {
+        "division": "Admin Proyek, MEP",
+        "action": "komangmerta (Admin Proyek, MEP) submitted for \"Unggah dokumen penyelesaian akhir: Berita Acara, SKRD, dll.\"",
+        "timestamp": "2025-11-30T05:55:10.818Z"
+      },
+      {
+        "division": "komangmerta",
+        "action": "Deleted file: \"bukti pembayaran 1.webp\"",
+        "timestamp": "2025-11-30T05:55:36.207Z"
+      },
+      {
+        "division": "komangmerta",
+        "action": "Deleted file: \"bukti pembayaran 2.png\"",
+        "timestamp": "2025-11-30T05:55:39.547Z"
+      },
+      {
+        "division": "Admin Proyek, MEP",
+        "action": "komangmerta (Admin Proyek, MEP) submitted for \"Unggah dokumen penyelesaian akhir: Berita Acara, SKRD, dll.\"",
+        "timestamp": "2025-11-30T05:56:36.926Z",
+        "note": "kurang lagi 1 bukti pembayaranya"
+      },
+      {
+        "division": "komangmerta",
+        "action": "Deleted file: \"bukti pembayaran 1.webp\"",
+        "timestamp": "2025-11-30T06:16:45.012Z"
+      },
+      {
+        "division": "Admin Proyek, MEP",
+        "action": "komangmerta (Admin Proyek, MEP) submitted for \"Unggah dokumen penyelesaian akhir: Berita Acara, SKRD, dll.\"",
+        "timestamp": "2025-11-30T06:17:12.610Z"
+      }
+    ],
+    "files": [
+      {
+        "name": "invoice_pelunasan_mall.pdf",
+        "path": "seed/invoice_pelunasan_mall.pdf",
+        "uploadedBy": "Akuntan",
+        "timestamp": "2025-09-27T13:00:00.000Z"
+      },
+      {
+        "name": "bukti pembayaran 2.png",
+        "path": "project_seed_13_pending_final_docs/bukti_pembayaran_2.png",
+        "uploadedBy": "Admin Proyek",
+        "checklistKey": "Bukti Pembayaran",
+        "timestamp": "2025-11-30T05:56:36.926Z"
+      },
+      {
+        "name": "bukti pembayaran 1.webp",
+        "path": "project_seed_13_pending_final_docs/bukti_pembayaran_1.webp",
+        "uploadedBy": "Admin Proyek",
+        "checklistKey": "Bukti Pembayaran",
+        "timestamp": "2025-11-30T06:17:12.610Z"
+      }
+    ],
+    "createdAt": "2025-09-27T12:55:00.000Z",
+    "createdBy": "oksi"
+  },
+  {
+    "id": "project_seed_14_completed",
+    "title": "Proyek Jembatan Antar Desa (Selesai)",
+    "status": "Completed",
+    "progress": 100,
+    "assignedDivision": "",
+    "nextAction": null,
+    "workflowId": "msa_workflow",
+    "workflowHistory": [
+      {
+        "division": "Admin Proyek",
+        "action": "komangmerta (Admin Proyek) declared Sidang outcome as: completed",
+        "timestamp": "2025-09-27T14:00:00.000Z"
+      }
+    ],
+    "files": [],
+    "createdAt": "2025-09-27T13:55:00.000Z",
+    "createdBy": "komangmerta"
+  },
+  {
+    "id": "project_seed_15_canceled",
+    "title": "Proyek Taman Kota (Dibatalkan)",
+    "status": "Canceled",
+    "progress": 20,
+    "assignedDivision": "",
+    "nextAction": null,
+    "workflowId": "msa_workflow",
+    "workflowHistory": [
+      {
+        "division": "Owner",
+        "action": "sudina (Owner) rejected: Setujui Dokumen Penawaran",
+        "timestamp": "2025-09-27T15:00:00.000Z",
+        "note": "Anggaran tidak disetujui oleh klien."
+      }
+    ],
+    "files": [],
+    "createdAt": "2025-09-27T14:55:00.000Z",
+    "createdBy": "sudina"
+  },
+  {
+    "id": "project_1764485650524_43lkn",
+    "title": "Proyek Bandara Buleleng",
+    "status": "Pending Survey Details",
+    "progress": 45,
+    "assignedDivision": "Arsitek",
+    "nextAction": "Input Jadwal Survei",
+    "workflowId": "msa_workflow",
+    "workflowHistory": [
+      {
+        "division": "sudina",
+        "action": "Created Project with workflow: msa_workflow",
+        "timestamp": "2025-11-30T06:54:10.524Z",
+        "note": "Project entry created."
+      },
+      {
+        "division": "System",
+        "action": "Assigned to Admin Proyek for Unggah Dokumen Penawaran",
+        "timestamp": "2025-11-30T06:54:10.524Z"
+      },
+      {
+        "division": "sudina",
+        "action": "Uploaded additional file(s): file Berkas Bandara.png",
+        "timestamp": "2025-11-30T06:54:11.323Z",
+        "note": "File administrasi tambahan diunggah oleh sudina."
+      },
+      {
+        "division": "Admin Proyek, MEP",
+        "action": "komangmerta (Admin Proyek, MEP) submitted for \"Unggah Dokumen Penawaran\"",
+        "timestamp": "2025-11-30T06:56:28.495Z",
+        "note": "dokumen penawaran proyek"
+      },
+      {
+        "division": "Owner",
+        "action": "sudina (Owner) requested revision.",
+        "timestamp": "2025-11-30T06:57:57.186Z",
+        "note": "revisi lagi"
+      },
+      {
+        "division": "Admin Proyek, MEP",
+        "action": "komangmerta (Admin Proyek, MEP) submitted for \"Revisi dan Unggah Ulang Dokumen Penawaran berdasarkan masukan Owner.\"",
+        "timestamp": "2025-11-30T07:02:01.503Z",
+        "note": "revisi"
+      },
+      {
+        "division": "Owner",
+        "action": "sudina (Owner) requested revision.",
+        "timestamp": "2025-11-30T07:06:25.812Z",
+        "note": "revisi lagi dikit"
+      },
+      {
+        "division": "Admin Proyek, MEP",
+        "action": "komangmerta (Admin Proyek, MEP) submitted for \"Revisi dan Unggah Ulang Dokumen Penawaran berdasarkan masukan Owner.\"",
+        "timestamp": "2025-11-30T07:10:29.120Z",
+        "note": "revisi penawaran proyek"
+      },
+      {
+        "division": "Owner",
+        "action": "sudina (Owner) requested revision.",
+        "timestamp": "2025-11-30T07:12:00.883Z",
+        "note": "naikan harga lagi 10%"
+      },
+      {
+        "division": "Admin Proyek, MEP",
+        "action": "komangmerta (Admin Proyek, MEP) submitted for \"Revisi dan Unggah Ulang Dokumen Penawaran berdasarkan masukan Owner.\"",
+        "timestamp": "2025-11-30T07:25:10.728Z"
+      },
+      {
+        "division": "Owner",
+        "action": "sudina (Owner) approved: Setujui Dokumen Penawaran",
+        "timestamp": "2025-11-30T16:05:42.405Z"
+      },
+      {
+        "division": "Akuntan",
+        "action": "oksi (Akuntan) submitted for \"Buat Faktur DP\"",
+        "timestamp": "2025-11-30T16:08:10.346Z",
+        "note": "invoice dp"
+      },
+      {
+        "division": "Owner",
+        "action": "sudina (Owner) approved: Setujui Faktur DP",
+        "timestamp": "2025-11-30T16:10:39.930Z"
+      },
+      {
+        "division": "Admin Proyek, MEP",
+        "action": "komangmerta (Admin Proyek, MEP) submitted for \"Unggah Berkas Administrasi\"",
+        "timestamp": "2025-11-30T16:18:26.729Z"
+      }
+    ],
+    "files": [
+      {
+        "name": "file Berkas Bandara.png",
+        "path": "project_1764485650524_43lkn/file_berkas_bandara.png",
+        "timestamp": "2025-11-30T06:54:11.323Z",
+        "uploadedBy": "sudina"
+      },
+      {
+        "name": "dokumen penawaran proyek.png",
+        "path": "project_1764485650524_43lkn/dokumen_penawaran_proyek.png",
+        "uploadedBy": "Admin Proyek",
+        "timestamp": "2025-11-30T06:56:28.495Z"
+      },
+      {
+        "name": "dokumen penawaran proyek.png",
+        "path": "project_1764485650524_43lkn/dokumen_penawaran_proyek.png",
+        "uploadedBy": "Admin Proyek",
+        "timestamp": "2025-11-30T07:02:01.503Z"
+      },
+      {
+        "name": "dokumen penawaran proyek.png",
+        "path": "project_1764485650524_43lkn/dokumen_penawaran_proyek.png",
+        "uploadedBy": "Admin Proyek",
+        "timestamp": "2025-11-30T07:10:29.120Z"
+      },
+      {
+        "name": "dokumen penawaran proyek.png",
+        "path": "project_1764485650524_43lkn/dokumen_penawaran_proyek.png",
+        "uploadedBy": "Admin Proyek",
+        "timestamp": "2025-11-30T07:25:10.728Z"
+      },
+      {
+        "name": "BankSaqu_e-Statement_Juni_2025.pdf",
+        "path": "project_1764485650524_43lkn/banksaqu_e-statement_juni_2025.pdf",
+        "uploadedBy": "Akuntan",
+        "timestamp": "2025-11-30T16:08:10.346Z"
+      },
+      {
+        "name": "dokumen kelengkapan administrasi.png",
+        "path": "project_1764485650524_43lkn/dokumen_kelengkapan_administrasi.png",
+        "uploadedBy": "Admin Proyek",
+        "timestamp": "2025-11-30T16:18:26.729Z"
+      }
+    ],
+    "createdAt": "2025-11-30T06:54:10.524Z",
+    "createdBy": "sudina"
+  },
+  {
+    "id": "project_1764519630882_4rvqw",
+    "title": "proyek villa",
+    "status": "Pending Offer",
+    "progress": 10,
+    "assignedDivision": "Admin Proyek",
+    "nextAction": "Unggah Dokumen Penawaran",
+    "workflowId": "msa_workflow",
+    "workflowHistory": [
+      {
+        "division": "sudina",
+        "action": "Created Project with workflow: msa_workflow",
+        "timestamp": "2025-11-30T16:20:30.882Z",
+        "note": "Project entry created."
+      },
+      {
+        "division": "System",
+        "action": "Assigned to Admin Proyek for Unggah Dokumen Penawaran",
+        "timestamp": "2025-11-30T16:20:30.882Z"
+      }
+    ],
+    "files": [],
+    "createdAt": "2025-11-30T16:20:30.882Z",
+    "createdBy": "sudina"
+  }
+]
