@@ -1,4 +1,3 @@
-
 # Msarch App
 
 Aplikasi starter Next.js untuk manajemen proyek dan tugas karyawan.
@@ -30,7 +29,7 @@ Sebelum Anda dapat menjalankan aplikasi ini, pastikan Node.js dan npm (yang teri
 
 ## Konfigurasi Variabel Lingkungan
 
-Untuk mengintegrasikan dengan layanan Google (seperti Google Calendar), Anda perlu membuat file `.env` di direktori root proyek.
+Untuk mengintegrasikan dengan layanan Google dan mengaktifkan Notifikasi Push, Anda perlu membuat file `.env` di direktori root proyek.
 
 1.  Buat file baru bernama `.env`.
 2.  Salin dan tempel konten di bawah ini ke dalam file `.env`, lalu ganti placeholder dengan kredensial Anda yang sebenarnya.
@@ -44,6 +43,13 @@ GOOGLE_CLIENT_SECRET="GANTI_DENGAN_CLIENT_SECRET_ANDA"
 # URI Pengalihan harus sama persis dengan yang dikonfigurasi di Google Cloud Console.
 # Untuk pengembangan lokal, biasanya seperti ini.
 NEXT_PUBLIC_GOOGLE_REDIRECT_URI="http://localhost:4000/api/auth/google/callback"
+
+# Kunci VAPID untuk Notifikasi Push Web
+# Anda dapat membuatnya dengan menjalankan `npx web-push generate-vapid-keys` di terminal Anda.
+# Subject biasanya berupa link mailto: ke email admin Anda.
+VAPID_SUBJECT="mailto:youremail@example.com"
+NEXT_PUBLIC_VAPID_PUBLIC_KEY="GANTI_DENGAN_PUBLIC_KEY_ANDA"
+VAPID_PRIVATE_KEY="GANTI_DENGAN_PRIVATE_KEY_ANDA"
 ```
 
 **PENTING**: File `.env` berisi informasi sensitif. File ini sudah tercantum di dalam `.gitignore` untuk mencegahnya diunggah ke GitHub secara tidak sengaja. Jangan pernah membagikan file `.env` Anda atau memasukkannya ke dalam riwayat Git.
