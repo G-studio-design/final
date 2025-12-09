@@ -1,6 +1,6 @@
 // src/app/api/auth/login/route.ts
 import { NextResponse } from 'next/server';
-import { verifyUserCredentials } from '@/services/user-service';
+import { verifyUserCredentials } from '../../../services/user-service';
 
 export const dynamic = 'force-dynamic';
 

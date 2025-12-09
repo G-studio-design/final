@@ -1,6 +1,6 @@
 // src/app/api/auth/google/disconnect/route.ts
 import { NextResponse } from 'next/server';
-import { clearUserGoogleTokens } from '../../../../../services/user-service';
+import { clearUserGoogleTokens } from '../../../../services/user-service';
 
 export async function POST(request: Request) {
   try {
