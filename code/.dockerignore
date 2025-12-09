@@ -1,0 +1,20 @@
+# .dockerignore
+
+# Abaikan dependensi lokal, karena akan diinstal di dalam container
+node_modules
+
+# Abaikan log npm
+npm-debug.log
+
+# Abaikan cache build Next.js
+.next
+
+# Abaikan folder Git
+.git
+
+# Abaikan file lingkungan lokal
+.env
+.env.local
+
+# Abaikan file konfigurasi VSCode
+.vscode
