@@ -4,8 +4,8 @@ import { NextResponse, NextRequest } from 'next/server';
 import { readdir, stat, mkdir } from 'fs/promises';
 import { writeFile } from 'fs/promises';
 import path from 'path';
-import { sanitizeForPath } from '@/lib/path-utils';
-import { addFilesToProject } from '@/services/project-service';
+import { sanitizeForPath } from '../../../lib/path-utils';
+import { addFilesToProject } from '../../../services/project-service';
 
 const MAX_FILE_SIZE = 20 * 1024 * 1024; // 20MB
 const PROJECT_FILES_BASE_DIR = path.resolve(process.cwd(), 'database', 'project_files');
