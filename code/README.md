@@ -42,11 +42,10 @@ Metode ini mengisolasi aplikasi Anda dalam sebuah "container" sehingga tidak men
 1.  **Unggah Kode Proyek ke NAS Anda:**
     -   Buka **File Station**.
     -   Buat folder baru di NAS Anda jika belum ada, misalnya `docker`.
-    -   Di dalam folder `docker`, buat lagi folder khusus untuk proyek ini bernama `msarch-app`.
-    -   Unggah **semua file dan folder proyek Anda** (termasuk `Dockerfile`, `package.json`, `package-lock.json`, dan folder `src`) ke dalam direktori `docker/msarch-app`.
+    -   Unggah **semua file dan folder proyek Anda** (termasuk `Dockerfile`, `package.json`, dan folder `src`) ke dalam direktori `docker` tersebut. **PENTING**: Jangan unggah folder `node_modules` atau `.next`.
 
 2.  **Buat File `.env` di NAS:**
-    -   Di dalam folder `docker/msarch-app` di File Station, buat file baru bernama `.env`.
+    -   Di dalam folder `docker` di File Station, buat file baru bernama `.env`.
     -   Klik kanan file `.env` tersebut dan pilih "Open with Text Editor".
     -   Salin konten dari bagian **Konfigurasi Variabel Lingkungan** di bawah ini, tempelkan ke editor teks, lalu isi dengan kredensial Anda yang sebenarnya.
 
@@ -56,7 +55,7 @@ Metode ini mengisolasi aplikasi Anda dalam sebuah "container" sehingga tidak men
 4.  **Buat Proyek Baru:**
     -   Di Container Manager, navigasi ke bagian **Project** dan klik **Create**.
     -   **Project Name**: Beri nama `msarch-app`.
-    -   **Path**: Arahkan ke folder `docker/msarch-app` (Pilih folder proyek Anda secara langsung).
+    -   **Path**: Arahkan ke folder `docker` tempat Anda mengunggah semua file proyek.
     -   **Source**: Pilih **Create docker-compose.yml**.
     -   Salin dan tempel konfigurasi berikut ini ke dalam editor:
         ```yaml
@@ -93,9 +92,9 @@ Aplikasi Anda sekarang berjalan 24/7 di Synology NAS Anda!
 
 ## Konfigurasi Variabel Lingkungan
 
-Untuk mengintegrasikan dengan layanan Google dan mengaktifkan Notifikasi Push, Anda perlu membuat file `.env` di dalam folder `msarch-app` Anda.
+Untuk mengintegrasikan dengan layanan Google dan mengaktifkan Notifikasi Push, Anda perlu membuat file `.env` di dalam folder `docker` Anda.
 
-1.  Buat file baru bernama `.env` di dalam `docker/msarch-app`.
+1.  Buat file baru bernama `.env` di dalam folder `docker`.
 2.  Salin dan tempel konten di bawah ini ke dalam file `.env`, lalu ganti placeholder dengan kredensial Anda yang sebenarnya.
 
 **PENTING:** Selalu apit nilai variabel dengan tanda kutip (`"`) untuk memastikan tidak ada kesalahan pembacaan, terutama untuk `PUBLIC_KEY` dan `PRIVATE_KEY`.
