@@ -19,8 +19,6 @@ import { Loader2, Upload, Trash2 } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { DEFAULT_WORKFLOW_ID } from '@/config/workflow-constants';
 
-const MAX_FILES_UPLOAD = 10;
-
 const getAddProjectSchema = (dictValidation: ReturnType<typeof getDictionary>['addProjectPage']['validation']) => z.object({
   title: z.string().min(5, dictValidation.titleMin),
 });
@@ -69,14 +67,6 @@ export default function AddProjectPageClient() {
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.files) {
       const filesArray = Array.from(event.target.files);
-      if (filesArray.length + selectedFiles.length > MAX_FILES_UPLOAD) {
-        toast({
-          variant: 'destructive',
-          title: addProjectDict.toast.error,
-          description: (addProjectDict.filesHint || defaultDict.addProjectPage.filesHint).replace('{max}', MAX_FILES_UPLOAD.toString()),
-        });
-        return;
-      }
       setSelectedFiles(prevFiles => [...prevFiles, ...filesArray]);
     }
   };
@@ -208,19 +198,16 @@ export default function AddProjectPageClient() {
                          type="file"
                          multiple
                          onChange={handleFileChange}
-                         disabled={isLoading || selectedFiles.length >= MAX_FILES_UPLOAD}
+                         disabled={isLoading}
                          className="flex-grow"
                        />
                        <Upload className="h-5 w-5 text-muted-foreground flex-shrink-0" />
                  </div>
-                  <p className="text-xs text-muted-foreground">
-                      {(addProjectDict.filesHint || defaultDict.addProjectPage.filesHint).replace('{max}', MAX_FILES_UPLOAD.toString())}
-                  </p>
                </div>
 
                  {selectedFiles.length > 0 && (
                    <div className="space-y-2 rounded-md border p-3">
-                     <Label>{(addProjectDict.selectedFilesLabel || defaultDict.addProjectPage.selectedFilesLabel)} ({selectedFiles.length}/{MAX_FILES_UPLOAD})</Label>
+                     <Label>{(addProjectDict.selectedFilesLabel || defaultDict.addProjectPage.selectedFilesLabel)} ({selectedFiles.length})</Label>
                      <ul className="list-disc list-inside text-sm space-y-1 max-h-32 overflow-y-auto">
                        {selectedFiles.map((file, index) => (
                          <li key={index} className="flex items-center justify-between group">

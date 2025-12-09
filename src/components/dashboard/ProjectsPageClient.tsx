@@ -1,4 +1,3 @@
-
 // src/components/dashboard/ProjectsPageClient.tsx
 'use client';
 
@@ -108,8 +107,6 @@ const projectStatuses = [
     'Pending Scheduling', 'Scheduled', 'Pending Post-Sidang Revision', 'Pending Parallel Design Uploads',
     'In Progress', 'Completed', 'Canceled', 'Pending Consultation Docs', 'Pending Review', 'Pending Final Documents', 'Pending Pelunasan Invoice', 'Pending Sidang Registration Proof'
 ];
-
-const MAX_FILES_UPLOAD = 10;
 
 interface ChecklistItem {
     name: string;
@@ -372,14 +369,6 @@ export default function ProjectsPageClient({ initialProjects }: ProjectsPageClie
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.files) {
       const filesArray = Array.from(event.target.files);
-      if (filesArray.length + uploadedFiles.length > MAX_FILES_UPLOAD) {
-        toast({
-          variant: 'destructive',
-          title: projectsDict.toast.error,
-          description: projectsDict.toast.maxFilesExceeded.replace('{max}', MAX_FILES_UPLOAD.toString()),
-        });
-        return;
-      }
       setUploadedFiles(prevFiles => [...prevFiles, ...filesArray]);
     }
   };
@@ -403,14 +392,6 @@ export default function ProjectsPageClient({ initialProjects }: ProjectsPageClie
   const handleInitialImageFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.files) {
         const filesArray = Array.from(event.target.files);
-        if (filesArray.length + initialImageFiles.length > MAX_FILES_UPLOAD) {
-            toast({
-                variant: 'destructive',
-                title: projectsDict.toast.error,
-                description: projectsDict.toast.maxFilesExceeded.replace('{max}', MAX_FILES_UPLOAD.toString()),
-            });
-            return;
-        }
         setInitialImageFiles(prevFiles => [...prevFiles, ...filesArray]);
     }
   };
@@ -1779,12 +1760,12 @@ export default function ProjectsPageClient({ initialProjects }: ProjectsPageClie
                                         </div>
                                         <div className="grid w-full items-center gap-1.5">
                                             <Label htmlFor="initial-image-files">{projectsDict.attachFilesLabel}</Label>
-                                            <Input id="initial-image-files" type="file" multiple onChange={handleInitialImageFileChange} disabled={isSubmittingInitialImages || initialImageFiles.length >= MAX_FILES_UPLOAD} className="flex-grow"/>
-                                            <p className="text-xs text-muted-foreground">{projectsDict.filesHint.replace('{max}', MAX_FILES_UPLOAD.toString())}</p>
+                                            <Input id="initial-image-files" type="file" multiple onChange={handleInitialImageFileChange} disabled={isSubmittingInitialImages}/>
+                                            <p className="text-xs text-muted-foreground">{projectsDict.filesHint.replace('{max}', "unlimited")}</p>
                                         </div>
                                         {initialImageFiles.length > 0 && (
                                             <div className="space-y-2 rounded-md border p-3">
-                                                <Label>{projectsDict.selectedFilesLabel} ({initialImageFiles.length}/{MAX_FILES_UPLOAD})</Label>
+                                                <Label>{projectsDict.selectedFilesLabel} ({initialImageFiles.length})</Label>
                                                 <ul className="list-disc list-inside text-sm space-y-1 max-h-32 overflow-y-auto">
                                                 {initialImageFiles.map((file, index) => ( <li key={`initial-img-${index}`} className="flex items-center justify-between group"><span className="truncate max-w-[calc(100%-4rem)] sm:max-w-xs text-muted-foreground group-hover:text-foreground">{file.name} <span className="text-xs">({(file.size / 1024).toFixed(1)} KB)</span></span><Button variant="ghost" size="sm" type="button" onClick={() => removeInitialImageFile(index)} disabled={isSubmittingInitialImages} className="opacity-50 group-hover:opacity-100 flex-shrink-0"><Trash2 className="h-4 w-4 text-destructive" /></Button></li>))}
                                                 </ul>
@@ -1827,14 +1808,13 @@ export default function ProjectsPageClient({ initialProjects }: ProjectsPageClie
                            <div className="grid w-full items-center gap-1.5">
                              <Label htmlFor="project-files">{projectsDict.attachFilesLabel}</Label>
                              <div className="flex flex-col sm:flex-row items-center gap-2">
-                               <Input id="project-files" type="file" multiple onChange={handleFileChange} disabled={isSubmitting || uploadedFiles.length >= MAX_FILES_UPLOAD} className="flex-grow"/>
+                               <Input id="project-files" type="file" multiple onChange={handleFileChange} disabled={isSubmitting} className="flex-grow"/>
                                <Upload className="h-5 w-5 text-muted-foreground flex-shrink-0" />
                              </div>
-                             <p className="text-xs text-muted-foreground">{projectsDict.filesHint.replace('{max}', MAX_FILES_UPLOAD.toString())}</p>
                            </div>
                            {uploadedFiles.length > 0 && (
                              <div className="space-y-2 rounded-md border p-3">
-                               <Label>{projectsDict.selectedFilesLabel} ({uploadedFiles.length}/{MAX_FILES_UPLOAD})</Label>
+                               <Label>{projectsDict.selectedFilesLabel} ({uploadedFiles.length})</Label>
                                <ul className="list-disc list-inside text-sm space-y-1 max-h-32 overflow-y-auto">
                                  {uploadedFiles.map((file, index) => ( <li key={index} className="flex items-center justify-between group"><span className="truncate max-w-[calc(100%-4rem)] sm:max-w-xs text-muted-foreground group-hover:text-foreground">{file.name} <span className="text-xs">({(file.size / 1024).toFixed(1)} KB)</span></span><Button variant="ghost" size="sm" type="button" onClick={() => removeFile(index)} disabled={isSubmitting} className="opacity-50 group-hover:opacity-100 flex-shrink-0"><Trash2 className="h-4 w-4 text-destructive" /></Button></li>))}
                                </ul>
@@ -1909,10 +1889,10 @@ export default function ProjectsPageClient({ initialProjects }: ProjectsPageClie
                                 <h3 className="text-lg font-semibold">{projectsDict.surveyCompletion.title}</h3>
                                 {project.surveyDetails?.date && <p className="text-sm text-muted-foreground">{projectsDict.surveyCompletion.scheduledFor}: {formatDateOnly(project.surveyDetails.date)} @ {project.surveyDetails.time}</p>}
                                 <div className="space-y-1.5"><Label htmlFor="surveyReportDescription">{projectsDict.surveyCompletion.reportNotesLabel}</Label><Textarea id="surveyReportDescription" placeholder={projectsDict.surveyCompletion.reportNotesPlaceholder} value={description} onChange={(e) => setDescription(e.target.value)} disabled={isSubmitting}/></div>
-                                <div className="grid w-full items-center gap-1.5"><Label htmlFor="survey-report-files">{projectsDict.attachFilesLabel} ({projectsDict.optionalReportLabel})</Label><div className="flex flex-col sm:flex-row items-center gap-2"><Input id="survey-report-files" type="file" multiple onChange={handleFileChange} disabled={isSubmitting || uploadedFiles.length >= MAX_FILES_UPLOAD} className="flex-grow"/><Upload className="h-5 w-5 text-muted-foreground flex-shrink-0" /></div></div>
+                                <div className="grid w-full items-center gap-1.5"><Label htmlFor="survey-report-files">{projectsDict.attachFilesLabel} ({projectsDict.optionalReportLabel})</Label><div className="flex flex-col sm:flex-row items-center gap-2"><Input id="survey-report-files" type="file" multiple onChange={handleFileChange} disabled={isSubmitting} className="flex-grow"/><Upload className="h-5 w-5 text-muted-foreground flex-shrink-0" /></div></div>
                                   {uploadedFiles.length > 0 && (
                                      <div className="space-y-2 rounded-md border p-3">
-                                         <Label>{projectsDict.selectedFilesLabel} ({uploadedFiles.length}/{MAX_FILES_UPLOAD})</Label>
+                                         <Label>{projectsDict.selectedFilesLabel} ({uploadedFiles.length})</Label>
                                          <ul className="list-disc list-inside text-sm space-y-1 max-h-32 overflow-y-auto">
                                              {uploadedFiles.map((file, index) => ( <li key={index} className="flex items-center justify-between group"><span className="truncate max-w-[calc(100%-4rem)] sm:max-w-xs text-muted-foreground group-hover:text-foreground">{file.name} <span className="text-xs">({(file.size / 1024).toFixed(1)} KB)</span></span><Button variant="ghost" size="sm" type="button" onClick={() => removeFile(index)} disabled={isSubmitting} className="opacity-50 group-hover:opacity-100 flex-shrink-0"><Trash2 className="h-4 w-4 text-destructive" /></Button></li>))}
                                          </ul>
@@ -2182,11 +2162,11 @@ export default function ProjectsPageClient({ initialProjects }: ProjectsPageClie
                           <div className="grid w-full items-center gap-1.5"><Label htmlFor="checklist-file-description">Deskripsi (Opsional)</Label><Textarea id="checklist-file-description" placeholder={"Masukkan deskripsi singkat..."} value={description} onChange={(e) => setDescription(e.target.value)} disabled={isSubmitting}/></div>
                           <div className="grid w-full items-center gap-1.5">
                             <Label htmlFor="checklist-files">File</Label>
-                            <Input id="checklist-files" type="file" multiple onChange={handleFileChange} disabled={isSubmitting || uploadedFiles.length >= MAX_FILES_UPLOAD} />
+                            <Input id="checklist-files" type="file" multiple onChange={handleFileChange} disabled={isSubmitting} />
                           </div>
                            {uploadedFiles.length > 0 && (
                              <div className="space-y-2 rounded-md border p-3">
-                               <Label>{projectsDict.selectedFilesLabel} ({uploadedFiles.length}/{MAX_FILES_UPLOAD})</Label>
+                               <Label>{projectsDict.selectedFilesLabel} ({uploadedFiles.length})</Label>
                                <ul className="list-disc list-inside text-sm space-y-1 max-h-32 overflow-y-auto">
                                  {uploadedFiles.map((file, index) => ( <li key={index} className="flex items-center justify-between group"><span className="truncate max-w-[calc(100%-4rem)] sm:max-w-xs text-muted-foreground group-hover:text-foreground">{file.name} <span className="text-xs">({(file.size / 1024).toFixed(1)} KB)</span></span><Button variant="ghost" size="sm" type="button" onClick={() => removeFile(index)} disabled={isSubmitting} className="opacity-50 group-hover:opacity-100 flex-shrink-0"><Trash2 className="h-4 w-4 text-destructive" /></Button></li>))}
                                </ul>
