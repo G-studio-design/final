@@ -1,4 +1,3 @@
-
 'use client';
 
 import * as React from 'react';
@@ -35,6 +34,7 @@ export default function LoginPage() {
       
       // On successful login, redirect to the dashboard
       router.push('/dashboard');
+
     } catch (err: any) {
       setError(err.message);
     } finally {
