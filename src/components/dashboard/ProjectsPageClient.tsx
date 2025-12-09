@@ -1,3 +1,4 @@
+
 // src/components/dashboard/ProjectsPageClient.tsx
 'use client';
 
@@ -1554,6 +1555,68 @@ export default function ProjectsPageClient({ initialProjects }: ProjectsPageClie
             </li>
           );
       };
+      
+       const renderFinalDocsChecklistItem = (item: ChecklistItem, index: number, allItems: ChecklistItem[]) => {
+          const canAdminDelete = currentUser?.roles.includes('Admin Proyek') || currentUser?.roles.includes('Owner') || currentUser?.roles.includes('Admin Developer');
+          const canUploaderDelete = currentUser?.roles.includes(item.uploadedBy || '');
+          const canCurrentUserDelete = canAdminDelete || canUploaderDelete;
+          const displayName = item.originalFileName || item.name;
+          
+          // Check if previous item is uploaded
+          const isPreviousUploaded = index === 0 || allItems[index - 1].uploaded;
+
+          return (
+            <li key={`final-doc-${item.name}`} className="flex items-center text-sm p-2 border rounded-md hover:bg-secondary/50 gap-2">
+                {item.uploaded ? <CheckCircle className="h-4 w-4 text-green-500 flex-shrink-0" /> : <CircleIcon className="h-4 w-4 text-muted-foreground flex-shrink-0" />}
+                <div className="flex items-center gap-2 flex-1 min-w-0">
+                    <span className={cn("truncate", item.uploaded ? "text-foreground" : "text-muted-foreground")}>{displayName}</span>
+                </div>
+                
+                {item.uploaded && item.filePath && (
+                    <div className="flex items-center gap-1 flex-shrink-0">
+                        <Button variant="ghost" size="icon" onClick={() => handleDownloadFile({ name: item.originalFileName!, path: item.filePath!, uploadedBy: '', timestamp: '' })} disabled={isDownloading || !!isDeletingFile} title={projectsDict.downloadFileTooltip} className="h-7 w-7">
+                            {isDownloading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4 text-primary" />}
+                        </Button>
+                        {canCurrentUserDelete && (
+                            <AlertDialog>
+                                <AlertDialogTrigger asChild>
+                                    <Button variant="ghost" size="icon" disabled={isDownloading || !!isDeletingFile} title={projectsDict.toast.deleteFileTooltip} className="h-7 w-7">
+                                        {isDeletingFile === item.filePath ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4 text-destructive" />}
+                                    </Button>
+                                </AlertDialogTrigger>
+                                <AlertDialogContent>
+                                    <AlertDialogHeader>
+                                        <AlertDialogTitle>{projectsDict.toast.confirmFileDeleteTitle}</AlertDialogTitle>
+                                        <AlertDialogDescription>{projectsDict.toast.confirmFileDeleteDesc.replace('{filename}', displayName)}</AlertDialogDescription>
+                                    </AlertDialogHeader>
+                                    <AlertDialogFooter>
+                                        <AlertDialogCancel disabled={!!isDeletingFile}>{projectsDict.cancelButton}</AlertDialogCancel>
+                                        <AlertDialogAction onClick={() => handleDeleteFile(item.filePath!, displayName)} className="bg-destructive hover:bg-destructive/90" disabled={!!isDeletingFile}>
+                                            {isDeletingFile === item.filePath && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                                            {projectsDict.toast.deleteFileConfirmButton}
+                                        </AlertDialogAction>
+                                    </AlertDialogFooter>
+                                </AlertDialogContent>
+                            </AlertDialog>
+                        )}
+                    </div>
+                )}
+
+                {!item.uploaded && (
+                    <Button
+                        variant="outline"
+                        size="sm"
+                        className="h-7 px-2"
+                        onClick={() => setUploadDialogState({ isOpen: true, item: item, division: 'Admin Proyek' })}
+                        disabled={isSubmitting || !isPreviousUploaded}
+                        title={!isPreviousUploaded ? `Harus mengunggah "${allItems[index - 1].name}" terlebih dahulu` : `Unggah ${item.name}`}
+                    >
+                        <Upload className="h-3 w-3" />
+                    </Button>
+                )}
+            </li>
+          );
+      };
 
        return (
            <>
@@ -1761,7 +1824,6 @@ export default function ProjectsPageClient({ initialProjects }: ProjectsPageClie
                                         <div className="grid w-full items-center gap-1.5">
                                             <Label htmlFor="initial-image-files">{projectsDict.attachFilesLabel}</Label>
                                             <Input id="initial-image-files" type="file" multiple onChange={handleInitialImageFileChange} disabled={isSubmittingInitialImages}/>
-                                            <p className="text-xs text-muted-foreground">{projectsDict.filesHint.replace('{max}', "unlimited")}</p>
                                         </div>
                                         {initialImageFiles.length > 0 && (
                                             <div className="space-y-2 rounded-md border p-3">
@@ -1777,7 +1839,7 @@ export default function ProjectsPageClient({ initialProjects }: ProjectsPageClie
                                         <Button
                                             type="button"
                                             onClick={() => handleProgressSubmit('architect_uploaded_initial_images_for_struktur', initialImageFiles, initialImageDescription)}
-                                            disabled={isSubmittingInitialImages || initialImageFiles.length === 0}
+                                            disabled={isSubmittingInitialImages}
                                             className="accent-teal"
                                         >
                                             {isSubmittingInitialImages ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Send className="mr-2 h-4 w-4" />}
@@ -1838,7 +1900,7 @@ export default function ProjectsPageClient({ initialProjects }: ProjectsPageClie
                                     <div>
                                         <h4 className="font-semibold mb-2">{projectsDict.finalDocsChecklistTitle}</h4>
                                         <ul className="space-y-2">
-                                            {finalDocsChecklistStatus?.map(item => renderChecklistItem(item, 'Admin Proyek'))}
+                                            {finalDocsChecklistStatus?.map((item, index, allItems) => renderFinalDocsChecklistItem(item, index, allItems))}
                                         </ul>
                                     </div>
                                 </CardContent>
@@ -2191,3 +2253,4 @@ export default function ProjectsPageClient({ initialProjects }: ProjectsPageClie
     </div>
   );
 }
+
