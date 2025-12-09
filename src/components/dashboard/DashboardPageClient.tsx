@@ -2,7 +2,7 @@
 // src/components/dashboard/DashboardPageClient.tsx
 'use client';
 
-import React, { useState, useMemo, useCallback } from 'react';
+import React, { useState, useMemo, useCallback, Suspense } from 'react';
 import {
   Card,
   CardContent,
@@ -42,7 +42,8 @@ import {
     PartyPopper,
     Building,
     UserCheck,
-    UserX
+    UserX,
+    Loader2
 } from 'lucide-react';
 import {
   ChartContainer,
@@ -51,6 +52,12 @@ import {
   ChartConfig,
 } from "@/components/ui/chart";
 import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, LabelList, Cell } from "recharts";
+import { getAllProjects } from '@/services/project-service';
+import { getApprovedLeaveRequests } from '@/services/leave-request-service';
+import { getAllHolidays } from '@/services/holiday-service';
+import { getAllUsersForDisplay } from '@/services/user-service';
+import { getTodaysAttendanceForAllUsers } from '@/services/attendance-service';
+import { getAppSettings } from '@/services/settings-service';
 
 // Unified event type for the calendar
 type CalendarEventType = 'sidang' | 'survey' | 'leave' | 'holiday' | 'company_event';
@@ -82,29 +89,74 @@ const getProgressColor = (progress: number, status: string): string => {
     return 'hsl(0 84.2% 60.2%)'; // Destructive (Red)
 };
 
-interface DashboardPageClientProps {
-    initialData: {
-        projects: Project[];
-        leaveRequests: LeaveRequest[];
-        holidays: HolidayEntry[];
-        allUsers: Omit<User, 'password'>[];
-        todaysAttendance: AttendanceRecord[];
-        attendanceEnabled: boolean;
-    }
+async function getDashboardData() {
+  const [
+    projects,
+    leaveRequests,
+    holidays,
+    allUsers,
+    todaysAttendance,
+    settings,
+  ] = await Promise.all([
+    getAllProjects(),
+    getApprovedLeaveRequests(),
+    getAllHolidays(),
+    getAllUsersForDisplay(),
+    getTodaysAttendanceForAllUsers(),
+    getAppSettings()
+  ]);
+
+  return {
+    projects,
+    leaveRequests,
+    holidays,
+    allUsers,
+    todaysAttendance,
+    attendanceEnabled: settings.feature_attendance_enabled,
+  };
 }
 
-export default function DashboardPageClient({ initialData }: DashboardPageClientProps) {
+function DashboardSkeleton() {
+    return (
+      <div className="container mx-auto py-4 px-4 md:px-6 space-y-6">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+          <Skeleton className="h-10 w-2/5" />
+          <Skeleton className="h-10 w-44" />
+        </div>
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+          <div className="lg:col-span-2 space-y-6">
+            <Card><CardHeader><Skeleton className="h-6 w-1/3 mb-2" /><Skeleton className="h-4 w-2/3" /></CardHeader><CardContent><Skeleton className="h-40 w-full" /></CardContent></Card>
+            <Card><CardHeader><Skeleton className="h-6 w-1/3 mb-2" /><Skeleton className="h-4 w-1/2" /></CardHeader><CardContent><Skeleton className="h-32 w-full" /></CardContent></Card>
+          </div>
+          <div className="lg:col-span-1 space-y-6">
+            <Card><CardHeader><Skeleton className="h-6 w-1/2 mb-2" /><Skeleton className="h-4 w-full" /></CardHeader><CardContent><Skeleton className="h-80 w-full" /></CardContent></Card>
+          </div>
+        </div>
+      </div>
+    );
+}
+
+export function DashboardPageClient({ initialData: unusedInitialData }: { initialData: any }) {
   const { currentUser } = useAuth();
   const { language } = useLanguage();
+  const [data, setData] = useState<Awaited<ReturnType<typeof getDashboardData>> | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const { projects, leaveRequests, holidays, allUsers, todaysAttendance, attendanceEnabled } = initialData;
-
-  // UI states
-  const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
-  
   const dashboardDict = useMemo(() => getDictionary(language).dashboardPage, [language]);
   const projectsDict = useMemo(() => getDictionary(language).projectsPage, [language]);
   const currentLocale = useMemo(() => language === 'id' ? idLocale : enLocale, [language]);
+  
+  useEffect(() => {
+    async function loadData() {
+      setIsLoading(true);
+      const fetchedData = await getDashboardData();
+      setData(fetchedData);
+      setIsLoading(false);
+    }
+    loadData();
+  }, []);
+
+  const { projects = [], leaveRequests = [], holidays = [], allUsers = [], todaysAttendance = [], attendanceEnabled = false } = data || {};
 
   const { eventsByDate, upcomingEvents } = useMemo(() => {
     const eventMap: Record<string, UnifiedEvent[]> = {};
@@ -112,7 +164,6 @@ export default function DashboardPageClient({ initialData }: DashboardPageClient
     const today = startOfToday();
     const threeDaysFromNow = addDays(today, 3);
 
-    // Process Projects for Sidang and Survey events
     projects.forEach(p => {
       if (p.scheduleDetails?.date && p.scheduleDetails?.time) {
         const eventDate = parseISO(`${p.scheduleDetails.date}T${p.scheduleDetails.time}`);
@@ -128,7 +179,6 @@ export default function DashboardPageClient({ initialData }: DashboardPageClient
       }
     });
 
-    // Process Leave Requests
     leaveRequests.forEach(l => {
       const start = parseISO(l.startDate);
       const end = parseISO(l.endDate);
@@ -139,7 +189,6 @@ export default function DashboardPageClient({ initialData }: DashboardPageClient
       }
     });
 
-    // Process Holidays
     holidays.forEach(h => {
         const eventDate = parseISO(h.date);
         const key = format(eventDate, 'yyyy-MM-dd');
@@ -147,7 +196,6 @@ export default function DashboardPageClient({ initialData }: DashboardPageClient
         eventMap[key].push({ id: `holiday-${h.id}`, type: 'holiday', date: eventDate, title: h.name, description: h.description, originalData: h });
     });
 
-    // Sort events within each day by time
     Object.keys(eventMap).forEach(key => {
       eventMap[key].sort((a, b) => {
         if (a.time && b.time) return a.time.localeCompare(b.time);
@@ -155,7 +203,6 @@ export default function DashboardPageClient({ initialData }: DashboardPageClient
         if (b.time) return 1;
         return a.type.localeCompare(b.type);
       });
-      // Populate upcoming events
       const date = parseISO(key);
       if (isWithinInterval(date, { start: today, end: threeDaysFromNow })) {
           upcoming.push(...eventMap[key].filter(e => e.type === 'sidang' || e.type === 'survey'));
@@ -166,7 +213,7 @@ export default function DashboardPageClient({ initialData }: DashboardPageClient
 
     return { eventsByDate: eventMap, upcomingEvents: upcoming };
   }, [projects, leaveRequests, holidays]);
-  
+
   const attendanceSummary = useMemo(() => {
     const today = new Date();
     const todayHoliday = holidays.find(h => isSameDay(parseISO(h.date), today));
@@ -183,9 +230,7 @@ export default function DashboardPageClient({ initialData }: DashboardPageClient
     });
 
     const checkedInCount = todaysAttendance.length;
-    // Count users who are not on leave today
     const activeUsersToday = allUsers.filter(u => !onLeaveToday.has(u.id));
-    // Count users who are active but haven't checked in
     const notCheckedInCount = activeUsersToday.filter(u => !todaysAttendance.some(a => a.userId === u.id)).length;
 
     return {
@@ -205,18 +250,6 @@ export default function DashboardPageClient({ initialData }: DashboardPageClient
     const key = statusKey?.toLowerCase().replace(/ /g,'') as keyof typeof dashboardDict.status;
     return dashboardDict.status[key] || statusKey;
   }, [dashboardDict]);
-  
-  const getRoleIcon = (role: string) => {
-      const roleLower = role.toLowerCase().trim();
-      if (roleLower.includes('owner')) return UserIcon;
-      if (roleLower.includes('akuntan')) return UserCog;
-      if (roleLower.includes('admin proyek')) return UserCog;
-      if (roleLower.includes('arsitek')) return UserIcon;
-      if (roleLower.includes('struktur')) return UserIcon;
-      if (roleLower.includes('mep')) return Wrench;
-      if (roleLower.includes('admin developer')) return Code;
-      return UserIcon;
-  }
   
   const getEventTypeIcon = (type: CalendarEventType) => {
       switch(type) {
@@ -242,27 +275,32 @@ export default function DashboardPageClient({ initialData }: DashboardPageClient
     const allowedRoles = ['Owner', 'Admin Proyek', 'Admin Developer'];
     return currentUser.roles.some(userRole => allowedRoles.includes(userRole));
   }, [currentUser]);
+  
+  const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
 
+  if (isLoading || !data) {
+    return <DashboardSkeleton />;
+  }
 
   return (
-    <div className="container mx-auto py-4 px-4 md:px-6 space-y-6">
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <h1 className="text-2xl md:text-3xl font-bold text-primary">
-          {dashboardDict.title}
-        </h1>
-        {canAddProject && (
-            <Link href="/dashboard/add-project" passHref>
-                <Button className="w-full sm:w-auto accent-teal">
-                    <PlusCircle className="mr-2 h-5 w-5" />
-                    {dashboardDict.addNewProject}
-                </Button>
-            </Link>
-        )}
-      </div>
+    <Suspense fallback={<DashboardSkeleton />}>
+      <div className="container mx-auto py-4 px-4 md:px-6 space-y-6">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+          <h1 className="text-2xl md:text-3xl font-bold text-primary">
+            {dashboardDict.title}
+          </h1>
+          {canAddProject && (
+              <Link href="/dashboard/add-project" passHref>
+                  <Button className="w-full sm:w-auto accent-teal">
+                      <PlusCircle className="mr-2 h-5 w-5" />
+                      {dashboardDict.addNewProject}
+                  </Button>
+              </Link>
+          )}
+        </div>
 
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-        <div className="lg:col-span-2 space-y-6">
-             {/* Attendance Summary Widget */}
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+          <div className="lg:col-span-2 space-y-6">
             {(attendanceEnabled || (currentUser && currentUser.roles.includes('Admin Developer'))) && (
                 <Card>
                     <CardHeader>
@@ -307,8 +345,6 @@ export default function DashboardPageClient({ initialData }: DashboardPageClient
                 </Card>
             )}
 
-
-            {/* Active Projects Card */}
             <Card>
                 <CardHeader>
                     <CardTitle>{dashboardDict.activeProjects}</CardTitle>
@@ -345,7 +381,6 @@ export default function DashboardPageClient({ initialData }: DashboardPageClient
                 </CardFooter>
             </Card>
 
-            {/* Project Progress Chart */}
             <Card>
               <CardHeader>
                 <CardTitle>{dashboardDict.projectProgressChartTitle}</CardTitle>
@@ -377,7 +412,6 @@ export default function DashboardPageClient({ initialData }: DashboardPageClient
               </CardContent>
             </Card>
 
-            {/* Upcoming Agenda Card */}
             <Card>
                 <CardHeader>
                     <CardTitle>{dashboardDict.upcomingAgendaTitle}</CardTitle>
@@ -411,10 +445,9 @@ export default function DashboardPageClient({ initialData }: DashboardPageClient
                     )}
                 </CardContent>
             </Card>
-        </div>
+          </div>
 
-        <div className="lg:col-span-1">
-            {/* Calendar Card */}
+          <div className="lg:col-span-1">
             <Card>
                 <CardHeader>
                     <CardTitle>{dashboardDict.scheduleAgendaTitle}</CardTitle>
@@ -464,8 +497,9 @@ export default function DashboardPageClient({ initialData }: DashboardPageClient
                     </div>
                 </CardContent>
             </Card>
+          </div>
         </div>
       </div>
-    </div>
+    </Suspense>
   );
 }
