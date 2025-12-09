@@ -61,6 +61,12 @@ export default function SettingsPageClient() {
    const [confirmPassword, setConfirmPassword] = React.useState('');
    const [isUpdatingPassword, setIsUpdatingPassword] = React.useState(false);
    const [isDisconnectingGoogle, setIsDisconnectingGoogle] = React.useState(false);
+   
+   const [avatarFile, setAvatarFile] = React.useState<File | null>(null);
+   const [avatarPreview, setAvatarPreview] = React.useState<string | null>(null);
+   const [isUploadingAvatar, setIsUploadingAvatar] = React.useState(false);
+   const fileInputRef = React.useRef<HTMLInputElement>(null);
+
 
    const [notificationPermission, setNotificationPermission] = React.useState('default');
    const [isSubscribing, setIsSubscribing] = React.useState(false);
@@ -263,6 +269,46 @@ export default function SettingsPageClient() {
         if (!name) return '?';
         return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
   };
+  
+  const handleAvatarFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (file.size > 2 * 1024 * 1024) { // 2MB limit
+        toast({ variant: 'destructive', title: 'File too large', description: 'Please select an image under 2MB.' });
+        return;
+      }
+      setAvatarFile(file);
+      setAvatarPreview(URL.createObjectURL(file));
+    }
+  };
+
+  const handleAvatarUpload = async () => {
+    if (!avatarFile || !currentUser) return;
+
+    setIsUploadingAvatar(true);
+    try {
+      const formData = new FormData();
+      formData.append('avatar', avatarFile);
+
+      const response = await fetch(`/api/users/${currentUser.id}/avatar`, {
+        method: 'POST',
+        body: formData,
+      });
+
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.message);
+
+      updateAuthContextUser(result.user);
+      toast({ title: 'Success', description: 'Profile picture updated successfully.' });
+      setAvatarFile(null);
+      setAvatarPreview(null);
+    } catch (error: any) {
+      toast({ variant: 'destructive', title: 'Upload Failed', description: error.message });
+    } finally {
+      setIsUploadingAvatar(false);
+    }
+  };
+
 
   if (!isClient || !currentUser) {
       return (
@@ -286,9 +332,36 @@ export default function SettingsPageClient() {
         <CardContent className="space-y-6">
             <Card><CardHeader><CardTitle className="text-lg">{settingsDict.profileCardTitle}</CardTitle></CardHeader>
                  <CardContent className="space-y-4">
-                     <div className="flex items-center space-y-4 sm:space-y-0 sm:space-x-4">
-                          <Avatar className="h-20 w-20 border-2 border-primary/30"><AvatarImage src={currentUser.profilePictureUrl || undefined} alt={currentUser.displayName || currentUser.username} data-ai-hint="user avatar placeholder" /><AvatarFallback className="text-xl bg-muted">{getUserInitials(currentUser.displayName || currentUser.username)}</AvatarFallback></Avatar>
-                          <div className="text-xs text-muted-foreground mt-1 text-center sm:text-left">{settingsDict.pictureHint.replace("Upload a new profile picture", "Profile picture upload is not available yet")}</div>
+                     <div className="flex flex-col sm:flex-row items-center sm:items-start space-y-4 sm:space-y-0 sm:space-x-4">
+                          <Avatar className="h-20 w-20 border-2 border-primary/30">
+                            <AvatarImage src={avatarPreview || currentUser.profilePictureUrl || undefined} alt={currentUser.displayName || currentUser.username} />
+                            <AvatarFallback className="text-xl bg-muted">{getUserInitials(currentUser.displayName || currentUser.username)}</AvatarFallback>
+                          </Avatar>
+                          <div className="flex-grow space-y-2 text-center sm:text-left">
+                            <input
+                              type="file"
+                              ref={fileInputRef}
+                              onChange={handleAvatarFileChange}
+                              accept="image/png, image/jpeg"
+                              className="hidden"
+                            />
+                            {avatarFile ? (
+                                <div className="flex flex-col sm:flex-row items-center gap-2">
+                                  <Button onClick={handleAvatarUpload} disabled={isUploadingAvatar}>
+                                    {isUploadingAvatar ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Upload className="mr-2 h-4 w-4" />}
+                                    {isUploadingAvatar ? settingsDict.uploadingPictureButton : settingsDict.changePictureButton}
+                                  </Button>
+                                  <Button variant="ghost" onClick={() => { setAvatarFile(null); setAvatarPreview(null); }}>
+                                    <XCircle className="mr-2 h-4 w-4" /> Cancel
+                                  </Button>
+                                </div>
+                            ) : (
+                                <Button variant="outline" onClick={() => fileInputRef.current?.click()}>
+                                    {settingsDict.changePictureButton}
+                                </Button>
+                            )}
+                            <p className="text-xs text-muted-foreground mt-1">{settingsDict.pictureHint}</p>
+                          </div>
                      </div>
                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4 border-t">
                          <div className="space-y-1"><Label htmlFor="username">{settingsDict.usernameLabel}</Label><Input id="username" value={username} onChange={(e) => setUsername(e.target.value)} placeholder={settingsDict.usernamePlaceholder} disabled={isUpdatingProfile}/></div>

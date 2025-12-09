@@ -193,3 +193,23 @@ export async function clearUserGoogleTokens(userId: string): Promise<Omit<User, 
     const { password: _p, ...userWithoutPassword } = users[userIndex];
     return userWithoutPassword;
 }
+
+export async function updateUserProfilePicture(userId: string, pictureUrl: string): Promise<Omit<User, 'password'>> {
+  let users = await getAllUsers();
+  const userIndex = users.findIndex(u => u.id === userId);
+
+  if (userIndex === -1) {
+    throw new Error('USER_NOT_FOUND');
+  }
+
+  const updatedUser = {
+    ...users[userIndex],
+    profilePictureUrl: pictureUrl,
+  };
+
+  users[userIndex] = updatedUser;
+  await writeDb(DB_PATH, users);
+
+  const { password, ...userWithoutPassword } = updatedUser;
+  return userWithoutPassword;
+}
