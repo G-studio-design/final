@@ -44,12 +44,18 @@ GOOGLE_CLIENT_SECRET="GANTI_DENGAN_CLIENT_SECRET_ANDA"
 # Untuk pengembangan lokal, biasanya seperti ini.
 NEXT_PUBLIC_GOOGLE_REDIRECT_URI="http://localhost:4000/api/auth/google/callback"
 
-# Kunci VAPID untuk Notifikasi Push Web
-# Anda dapat membuatnya dengan menjalankan `npx web-push generate-vapid-keys` di terminal Anda.
+# ==============================================================================
+# Kunci VAPID untuk Notifikasi Push Web (WAJIB UNTUK NOTIFIKASI REAL-TIME)
+# ==============================================================================
+# Untuk membuatnya, jalankan perintah berikut di terminal Anda:
+# npx web-push generate-vapid-keys
+#
+# Perintah ini akan menghasilkan sepasang kunci (Public dan Private). Salin dan tempel kunci tersebut di bawah.
 # Subject biasanya berupa link mailto: ke email admin Anda.
+
 VAPID_SUBJECT="mailto:youremail@example.com"
-NEXT_PUBLIC_VAPID_PUBLIC_KEY="GANTI_DENGAN_PUBLIC_KEY_ANDA"
-VAPID_PRIVATE_KEY="GANTI_DENGAN_PRIVATE_KEY_ANDA"
+NEXT_PUBLIC_VAPID_PUBLIC_KEY="GANTI_DENGAN_PUBLIC_KEY_HASIL_GENERASI"
+VAPID_PRIVATE_KEY="GANTI_DENGAN_PRIVATE_KEY_HASIL_GENERASI"
 ```
 
 **PENTING**: File `.env` berisi informasi sensitif. File ini sudah tercantum di dalam `.gitignore` untuk mencegahnya diunggah ke GitHub secara tidak sengaja. Jangan pernah membagikan file `.env` Anda atau memasukkannya ke dalam riwayat Git.
