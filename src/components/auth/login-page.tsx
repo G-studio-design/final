@@ -1,4 +1,3 @@
-
 // src/components/auth/login-page.tsx
 'use client';
 
@@ -96,7 +95,7 @@ export default function LoginPage() {
             throw new Error(result.message || 'An unexpected error occurred.');
         }
 
-        console.log('Login successful for user:', result.username, 'Role:', result.role);
+        console.log('Login successful for user:', result.username, 'Roles:', result.roles);
         setCurrentUser(result as User);
         toast({
             title: dict.success,
