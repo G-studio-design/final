@@ -34,6 +34,8 @@ Untuk mengintegrasikan dengan layanan Google dan mengaktifkan Notifikasi Push, A
 1.  Buat file baru bernama `.env`.
 2.  Salin dan tempel konten di bawah ini ke dalam file `.env`, lalu ganti placeholder dengan kredensial Anda yang sebenarnya.
 
+**PENTING:** Selalu apit nilai variabel dengan tanda kutip (`"`) untuk memastikan tidak ada kesalahan pembacaan.
+
 ```env
 # Kredensial Google OAuth 2.0
 # Dapatkan ini dari Google Cloud Console: https://console.cloud.google.com/apis/credentials
