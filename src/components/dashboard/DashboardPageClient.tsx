@@ -1,4 +1,3 @@
-
 // src/components/dashboard/DashboardPageClient.tsx
 'use client';
 
@@ -43,7 +42,8 @@ import {
     Building,
     UserCheck,
     UserX,
-    Loader2
+    Loader2,
+    ArrowRight
 } from 'lucide-react';
 import {
   ChartContainer,
@@ -58,6 +58,8 @@ import { getAllHolidays } from '@/services/holiday-service';
 import { getAllUsersForDisplay } from '@/services/user-service';
 import { getTodaysAttendanceForAllUsers } from '@/services/attendance-service';
 import { getAppSettings } from '@/services/settings-service';
+import { Skeleton } from '@/components/ui/skeleton';
+
 
 // Unified event type for the calendar
 type CalendarEventType = 'sidang' | 'survey' | 'leave' | 'holiday' | 'company_event';
