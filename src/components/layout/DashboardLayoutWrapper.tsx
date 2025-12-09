@@ -1,4 +1,3 @@
-
 // src/components/layout/DashboardLayoutWrapper.tsx
 'use client';
 
@@ -322,7 +321,7 @@ export default function DashboardLayoutWrapper({ children, attendanceEnabled }: 
       <div className="flex-1 flex flex-col">
            <header className="sticky top-0 z-30 flex h-14 items-center justify-between gap-2 border-b bg-background px-4 sm:px-6">
              <Link href="/dashboard" className="flex items-center gap-2 font-semibold text-base sm:text-lg text-primary">
-                <Image src="/msarch-logo.png" alt="Msarch App Logo" width={24} height={24} className="h-5 w-5 sm:h-6 sm:w-6" />
+                <Image src="/msarch-logo.png" alt="Msarch App Logo" width={24} height={24} className="h-5 w-5 sm:h-6 sm:w-6" priority />
                  <span className="hidden sm:inline">{layoutDict.appTitle}</span>
                  <span className="sm:hidden">{layoutDict.appTitleShort || layoutDict.appTitle}</span>
               </Link>
