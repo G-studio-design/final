@@ -10,12 +10,13 @@ Aplikasi starter Next.js untuk manajemen proyek dan tugas karyawan.
 
 ## Deployment & Konfigurasi HTTPS di Synology NAS
 
-Metode ini menggunakan Docker untuk isolasi dan Reverse Proxy untuk mengaktifkan HTTPS gratis, yang **wajib** untuk fitur seperti Notifikasi Push dan Absensi berbasis lokasi.
+Metode ini menggunakan Docker untuk isolasi, dan **Tailscale** untuk mendapatkan akses HTTPS yang aman dan gratis tanpa perlu konfigurasi router (port forwarding). HTTPS **wajib** untuk fitur seperti Notifikasi Push dan Absensi berbasis lokasi.
 
 ### 1. Prasyarat di Synology
 
 1.  Buka **Package Center** di DSM.
 2.  Cari dan instal **Container Manager** (mungkin bernama Docker pada versi DSM yang lebih lama).
+3.  Cari dan instal **Tailscale**.
 
 ### 2. Siapkan Struktur Folder di NAS
 
@@ -23,26 +24,22 @@ Metode ini menggunakan Docker untuk isolasi dan Reverse Proxy untuk mengaktifkan
 2.  Di bawah folder `docker`, buat folder baru bernama `msarch-app`.
 3.  Unggah **semua file dan folder proyek Anda** (termasuk `Dockerfile`, `package.json`, `src`, dll.) ke dalam folder `/docker/msarch-app` tersebut.
 
-### 3. Konfigurasi Jaringan & Domain (Bagian Penting)
+### 3. Konfigurasi Jaringan & Domain dengan Tailscale
 
-**A. Port Forwarding di Router Anda:**
-- Masuk ke pengaturan router internet Anda.
-- Arahkan (forward) port eksternal `80` dan `443` ke alamat IP **internal** Synology NAS Anda. Ini penting agar sertifikat SSL bisa dibuat.
+**A. Instal dan Login ke Tailscale:**
+1.  Buka paket **Tailscale** yang sudah Anda instal di Synology.
+2.  Klik **Login**. Anda akan diarahkan ke browser untuk login menggunakan akun Google, Microsoft, atau GitHub. Gunakan akun yang mudah Anda ingat.
+3.  Setelah login, NAS Anda akan muncul di daftar mesin di [Admin Console Tailscale](https://login.tailscale.com/admin/machines).
 
-**B. Dapatkan Domain Gratis dari Synology (DDNS):**
-1.  Di DSM, buka **Control Panel** > **External Access** > tab **DDNS**.
-2.  Klik **Add**.
-3.  **Service provider:** Pilih **Synology**.
-4.  **Hostname:** Ketik nama unik yang Anda inginkan (misal: `msa-kantor`). Domain lengkap Anda akan menjadi `msa-kantor.synology.me`. **Catat domain ini.**
-5.  Centang **"Get a certificate from Let's Encrypt and set it as default"**.
-6.  Klik **OK**. Tunggu hingga statusnya menjadi **Normal**.
+**B. Dapatkan Nama Domain HTTPS Anda:**
+1.  Di [Admin Console Tailscale](https://login.tailscale.com/admin/machines), cari mesin (NAS) Anda. Anda akan melihat nama domain yang diberikan, contohnya: `nama-nas.nama-akun.ts.net`. **Catat domain ini.** Inilah alamat HTTPS permanen Anda.
 
 **C. Atur Reverse Proxy:**
-1.  Buka **Control Panel** > **Login Portal** > tab **Advanced** > **Reverse Proxy**.
+1.  Di DSM, buka **Control Panel** > **Login Portal** > tab **Advanced** > **Reverse Proxy**.
 2.  Klik **Create**.
-3.  **Source (Dari Internet):**
+3.  **Source (Dari Internet via Tailscale):**
     -   Protocol: `HTTPS`
-    -   Hostname: Masukkan domain DDNS Anda dari langkah B (misal: `msa-kantor.synology.me`).
+    -   Hostname: Masukkan domain Tailscale Anda dari langkah B (misal: `nama-nas.nama-akun.ts.net`).
     -   Port: `443`
 4.  **Destination (Ke Aplikasi Docker):**
     -   Protocol: `HTTP`
@@ -53,7 +50,7 @@ Metode ini menggunakan Docker untuk isolasi dan Reverse Proxy untuk mengaktifkan
 ### 4. Buat dan Konfigurasi File `.env`
 
 1.  Di dalam folder `/docker/msarch-app` di File Station, buat file baru bernama `.env`.
-2.  Salin konten di bawah, tempel ke file `.env`, dan **isi dengan kredensial Anda**. Ganti `msa-kantor.synology.me` dengan domain DDNS Anda.
+2.  Salin konten di bawah, tempel ke file `.env`, dan **isi dengan kredensial Anda**. Ganti `nama-nas.nama-akun.ts.net` dengan domain Tailscale Anda.
 
 ```env
 # =======================================================
@@ -63,7 +60,7 @@ Metode ini menggunakan Docker untuk isolasi dan Reverse Proxy untuk mengaktifkan
 # PENTING: Saat membuat kredensial, tambahkan URI pengalihan di bawah ini ke daftar "Authorized redirect URIs".
 GOOGLE_CLIENT_ID="GANTI_DENGAN_CLIENT_ID_ANDA"
 GOOGLE_CLIENT_SECRET="GANTI_DENGAN_CLIENT_SECRET_ANDA"
-NEXT_PUBLIC_GOOGLE_REDIRECT_URI="https://msa-kantor.synology.me/api/auth/google/callback"
+NEXT_PUBLIC_GOOGLE_REDIRECT_URI="https://nama-nas.nama-akun.ts.net/api/auth/google/callback"
 
 # =======================================================
 # Kunci VAPID untuk Notifikasi Push Web (WAJIB)
@@ -106,8 +103,9 @@ VAPID_PRIVATE_KEY="GANTI_DENGAN_PRIVATE_KEY_ANDA"
 
 ### 6. Akses Aplikasi Anda
 
-Setelah container berjalan, buka browser dan akses aplikasi Anda melalui alamat **HTTPS** yang telah Anda buat:
+1.  **Instal Tailscale** di komputer atau ponsel yang ingin Anda gunakan untuk mengakses aplikasi. Login dengan akun yang sama seperti saat Anda login di NAS.
+2.  Setelah terinstal, buka browser dan akses aplikasi Anda melalui alamat **HTTPS** dari Tailscale:
 
-**`https://msa-kantor.synology.me`** (Ganti dengan domain DDNS Anda)
+**`https://nama-nas.nama-akun.ts.net`** (Ganti dengan domain Tailscale Anda)
 
-Aplikasi Anda kini berjalan dengan aman dan semua fitur akan berfungsi.
+Aplikasi Anda kini berjalan dengan aman di jaringan pribadi Anda, dan semua fitur (lokasi, notifikasi) akan berfungsi.
