@@ -47,3 +47,4 @@ export async function writeDb<T>(dbPath: string, data: T): Promise<void> {
     throw new Error('Could not write to the database.');
   }
 }
+

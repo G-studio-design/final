@@ -57,3 +57,4 @@ export async function verifyUserCredentials(usernameInput: string, passwordInput
     const { password, ...userWithoutPassword } = user;
     return userWithoutPassword;
 }
+

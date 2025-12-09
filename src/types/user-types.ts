@@ -8,3 +8,4 @@ export interface User {
     displayName?: string | null;
     createdAt?: string;
 }
+

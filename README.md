@@ -89,3 +89,4 @@ Contoh:
 - `https://aplikasi-saya.com/api/auth/google/callback`
 
 **PENTING**: File `.env` berisi informasi sensitif. Jangan pernah memasukkannya ke dalam riwayat Git.
+
