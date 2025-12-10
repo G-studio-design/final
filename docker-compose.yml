@@ -13,6 +13,8 @@ services:
       dockerfile: Dockerfile
     container_name: msarch-app-prod
     restart: unless-stopped
+    ports:
+      - "4000:4000"
     env_file:
       - .env
     # Menghubungkan container aplikasi ke jaringan kustom
