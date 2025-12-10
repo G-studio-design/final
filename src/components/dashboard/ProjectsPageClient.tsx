@@ -1382,7 +1382,7 @@ export default function ProjectsPageClient({ initialProjects }: ProjectsPageClie
                 const fileNameLower = file.name.toLowerCase();
                 const allKeywordsMatch = reqKeywords.every(keyword => fileNameLower.includes(keyword));
                 
-                if (reqName === 'Bukti Pembayaran') {
+                if (reqName === 'Bukti Pembayaran' || reqName === 'Pelunasan') {
                     return allKeywordsMatch && (file.uploadedBy === 'Owner' || file.uploadedBy === 'Akuntan');
                 }
                 
@@ -1400,9 +1400,9 @@ export default function ProjectsPageClient({ initialProjects }: ProjectsPageClie
 
     const showFinalDocumentUploadSection = React.useMemo(() => {
       if (!selectedProject || !currentUser || !Array.isArray(currentUser.roles)) return false;
-      const canTakeAction = currentUser.roles.includes('Admin Proyek') || currentUser.roles.includes('Owner');
+      const canTakeAction = currentUser.roles.includes('Admin Proyek') || currentUser.roles.includes('Owner') || currentUser.roles.includes('Akuntan');
       return selectedProject.status === 'Pending Final Documents' && canTakeAction;
-  }, [selectedProject, currentUser]);
+    }, [selectedProject, currentUser]);
 
   const renderProjectList = () => {
        if (!projectsDict?.projectListTitle) {
@@ -1562,6 +1562,10 @@ export default function ProjectsPageClient({ initialProjects }: ProjectsPageClie
           const canCurrentUserDelete = canAdminDelete || canUploaderDelete;
           const displayName = item.originalFileName || item.name;
           
+          const isPaymentDoc = item.name === 'Bukti Pembayaran' || item.name === 'Pelunasan';
+          const canAccountantUpload = isPaymentDoc && currentUser?.roles.includes('Akuntan');
+          const canAdminUpload = !isPaymentDoc && currentUser?.roles.includes('Admin Proyek');
+
           // Check if previous item is uploaded
           const isPreviousUploaded = index === 0 || allItems[index - 1].uploaded;
 
@@ -1602,12 +1606,12 @@ export default function ProjectsPageClient({ initialProjects }: ProjectsPageClie
                     </div>
                 )}
 
-                {!item.uploaded && (
+                {!item.uploaded && (canAdminUpload || canAccountantUpload) && (
                     <Button
                         variant="outline"
                         size="sm"
                         className="h-7 px-2"
-                        onClick={() => setUploadDialogState({ isOpen: true, item: item, division: 'Admin Proyek' })}
+                        onClick={() => setUploadDialogState({ isOpen: true, item: item, division: canAccountantUpload ? 'Akuntan' : 'Admin Proyek' })}
                         disabled={isSubmitting || !isPreviousUploaded}
                         title={!isPreviousUploaded ? `Harus mengunggah "${allItems[index - 1].name}" terlebih dahulu` : `Unggah ${item.name}`}
                     >
@@ -1904,12 +1908,14 @@ export default function ProjectsPageClient({ initialProjects }: ProjectsPageClie
                                         </ul>
                                     </div>
                                 </CardContent>
+                                {currentUser?.roles.includes('Admin Proyek') && (
                                 <CardFooter className="p-4 sm:p-6 border-t">
                                     <Button onClick={() => handleDecision('completed')} disabled={isSubmitting || !allFinalDocsUploaded} className="w-full sm:w-auto accent-teal">
                                         {isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <CheckCircle className="mr-2 h-4 w-4" />}
                                         {projectsDict.completeProjectButton}
                                     </Button>
                                 </CardFooter>
+                                )}
                             </Card>
                         )}
                         {showSurveyDetailsInputSection && (
@@ -2253,4 +2259,5 @@ export default function ProjectsPageClient({ initialProjects }: ProjectsPageClie
     </div>
   );
 }
+
 
