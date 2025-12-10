@@ -42,24 +42,25 @@ Metode ini menggunakan Docker untuk isolasi, dan **Tailscale** untuk mendapatkan
     -   Port: `4000`
 5.  Klik **Save**.
 
-#### D. (PENTING) Konfigurasi Firewall Synology
-Firewall Synology mungkin memblokir koneksi dari Tailscale. Buat aturan untuk mengizinkannya.
+#### D. (PENTING SEKALI!) Konfigurasi Firewall Synology
+Firewall Synology kemungkinan besar memblokir koneksi dari Tailscale. Kita harus membuat aturan untuk mengizinkannya secara eksplisit. **Jangan lewatkan langkah ini.**
+
 1.  Buka **Control Panel** > **Security** > tab **Firewall**.
 2.  Pastikan firewall diaktifkan. Jika tidak, aktifkan dan centang "Enable Firewall notifications".
 3.  Di bawah bagian "Firewall Profile", klik tombol **Edit Rules**.
 4.  Klik **Create**.
-5.  Di bagian **Ports**:
+5.  Di jendela baru, pada bagian **Ports**:
     - Pilih **"Select from a list of built-in applications"**, lalu klik **Select**.
-    - Cari dan centang **Reverse Proxy (HTTPS)** (port 443). Klik **OK**.
+    - Cari dan centang **Reverse Proxy (HTTPS)** (ini akan otomatis memilih port 443). Klik **OK**.
 6.  Di bagian **Source IP**:
     - Pilih **Specific IP**, lalu klik **Select**.
-    - Pilih tab **Subnet**.
+    - Di jendela baru, pilih tab **Subnet**.
     - Masukkan Alamat IP: `100.64.0.0`
     - Masukkan Subnet mask: `255.192.0.0`
-    - (Ini adalah rentang alamat IP standar yang digunakan oleh Tailscale).
+    - *(Ini adalah rentang alamat IP standar yang digunakan oleh semua koneksi Tailscale).*
 7.  Di bagian **Action**:
     - Pilih **Allow**.
-8.  Klik **OK**, lalu **Save** profil firewall Anda.
+8.  Klik **OK**, lalu **Save** untuk menyimpan profil firewall Anda.
 
 ### 3. Siapkan Struktur Folder di NAS
 
