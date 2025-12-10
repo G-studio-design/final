@@ -1,4 +1,10 @@
 version: '3.8'
+
+# Mendefinisikan jaringan kustom agar container dapat saling berkomunikasi
+networks:
+  msarch-net:
+    driver: bridge
+
 services:
   # Layanan untuk aplikasi Next.js Anda
   app:
@@ -7,10 +13,11 @@ services:
       dockerfile: Dockerfile
     container_name: msarch-app-prod
     restart: unless-stopped
-    ports:
-      - "4000:4000"
     env_file:
       - .env
+    # Menghubungkan container aplikasi ke jaringan kustom
+    networks:
+      - msarch-net
 
   # Layanan untuk Cloudflare Tunnel
   tunnel:
@@ -20,3 +27,6 @@ services:
     command: tunnel --no-autoupdate run
     environment:
       - TUNNEL_TOKEN=${CLOUDFLARED_TOKEN}
+    # Menghubungkan container tunnel ke jaringan kustom
+    networks:
+      - msarch-net
