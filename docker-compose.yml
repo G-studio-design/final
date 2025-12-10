@@ -2,11 +2,11 @@ version: '3.8'
 services:
   # Layanan untuk aplikasi Next.js Anda
   app:
-    build:
-      context: .
-      dockerfile: Dockerfile
+    build: .
     container_name: msarch-app-prod
     restart: unless-stopped
+    ports:
+      - "4000:4000"
     env_file:
       - .env
 
