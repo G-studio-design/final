@@ -42,11 +42,9 @@ export async function POST(request: Request) {
     headers.append('Content-Disposition', `attachment; filename="attendance_report_${year}_${monthName.replace(/ /g, '_')}.docx"`);
     headers.append('Content-Type', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document');
     
-    const response = new Response(buffer, { headers });
-    return new NextResponse(response.body, {
-      status: response.status,
-      statusText: response.statusText,
-      headers: response.headers,
+    return new Response(buffer, {
+      status: 200,
+      headers: headers,
     });
 
   } catch (error: any) {
