@@ -1,35 +1,42 @@
 # Dockerfile
-# Tahap 1: Instalasi dependensi
-FROM node:18-alpine AS deps
-WORKDIR /app
-COPY package.json package-lock.json* ./
-RUN npm install
 
-# Tahap 2: Membangun aplikasi
-FROM node:18-alpine AS builder
+# Stage 1: Base image with Node.js
+# Using a specific version is better for reproducibility
+FROM node:18-alpine AS base
+
+# Set working directory
+WORKDIR /app
+
+# Stage 2: Install dependencies
+# Copy package.json and package-lock.json
+FROM base AS deps
+COPY package.json ./
+# Use npm ci for faster, more reliable builds in CI/CD environments
+RUN npm ci
+
+# Stage 3: Build the application
+# Copy source code and build
+FROM base AS builder
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
+# Make sure the build command is run
 RUN npm run build
 
-# Tahap 3: Menjalankan aplikasi di lingkungan produksi
-FROM node:18-alpine AS runner
+# Stage 4: Production image
+# Use a lean base image for production
+FROM base AS runner
 WORKDIR /app
 
-ENV NODE_ENV=production
-
-# Menyalin file build dari tahap sebelumnya
+# Copy necessary files from the builder stage
 COPY --from=builder /app/public ./public
+# Standalone output is more optimized for production
 COPY --from=builder /app/.next/standalone ./
 COPY --from=builder /app/.next/static ./.next/static
-COPY --from=builder /app/package.json ./package.json
 
-# Menyalin file database dan konfigurasi
-COPY database ./database
-COPY ecosystem.config.js .
-COPY next.config.js .
-COPY .env .
-
+# Expose the port the app runs on
 EXPOSE 4000
 
-CMD ["npm", "start"]
+# Command to run the application
+# Use the node server from the standalone output
+CMD ["node", "server.js"]
