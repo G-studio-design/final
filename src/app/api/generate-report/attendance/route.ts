@@ -42,7 +42,6 @@ export async function POST(request: Request) {
     headers.append('Content-Disposition', `attachment; filename="attendance_report_${year}_${monthName.replace(/ /g, '_')}.docx"`);
     headers.append('Content-Type', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document');
     
-    // Correction: Use NextResponse to handle the buffer correctly.
     return new NextResponse(buffer, {
       status: 200,
       headers: headers,
