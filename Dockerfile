@@ -1,30 +1,35 @@
 # Dockerfile
-# Stage 1: Install dependencies
+# Tahap 1: Instalasi dependensi
 FROM node:18-alpine AS deps
 WORKDIR /app
-COPY package.json package-lock.json ./
-RUN npm install --legacy-peer-deps
+COPY package.json package-lock.json* ./
+RUN npm install
 
-# Stage 2: Build the application
+# Tahap 2: Membangun aplikasi
 FROM node:18-alpine AS builder
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 RUN npm run build
 
-# Stage 3: Production image
+# Tahap 3: Menjalankan aplikasi di lingkungan produksi
 FROM node:18-alpine AS runner
 WORKDIR /app
 
 ENV NODE_ENV=production
 
-# Copy built assets
+# Menyalin file build dari tahap sebelumnya
 COPY --from=builder /app/public ./public
-COPY --from=builder /app/.next ./.next
-COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/.next/standalone ./
+COPY --from=builder /app/.next/static ./.next/static
 COPY --from=builder /app/package.json ./package.json
-# Copy database and other persistent files
+
+# Menyalin file database dan konfigurasi
 COPY database ./database
+COPY ecosystem.config.js .
+COPY next.config.js .
+COPY .env .
 
 EXPOSE 4000
+
 CMD ["npm", "start"]
