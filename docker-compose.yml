@@ -6,6 +6,9 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+      args:
+        - PUID=1026
+        - PGID=100
     container_name: msarch-app-prod
     restart: unless-stopped
     env_file:

@@ -1,5 +1,5 @@
 {
-  "feature_attendance_enabled": false,
+  "feature_attendance_enabled": true,
   "office_latitude": -8.6527224,
   "office_longitude": 115.2281786,
   "attendance_radius_meters": 100,
