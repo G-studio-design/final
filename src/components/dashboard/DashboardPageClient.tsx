@@ -45,13 +45,13 @@ import {
     Loader2,
     ArrowRight
 } from 'lucide-react';
-// import {
-//   ChartContainer,
-//   ChartTooltip,
-//   ChartTooltipContent,
-//   ChartConfig,
-// } from "@/components/ui/chart";
-// import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, LabelList, Cell } from "recharts";
+import {
+  ChartContainer,
+  ChartTooltip,
+  ChartTooltipContent,
+  type ChartConfig,
+} from "@/components/ui/chart";
+import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, LabelList, Cell } from "recharts";
 import { getAllProjects } from '../../services/project-service';
 import { getApprovedLeaveRequests } from '../../services/leave-request-service';
 import { getAllHolidays } from '../../services/holiday-service';
@@ -264,11 +264,11 @@ export function DashboardPageClient({ initialData: unusedInitialData }: { initia
       }
   }
 
-  // const chartConfig = {
-  //   progress: {
-  //     label: dashboardDict.progressChart.label,
-  //   },
-  // } as ChartConfig;
+  const chartConfig = {
+    progress: {
+      label: dashboardDict.progressChart.label,
+    },
+  } satisfies ChartConfig;
 
   const canAddProject = useMemo(() => {
     if (!currentUser || !Array.isArray(currentUser.roles)) {
@@ -390,28 +390,24 @@ export function DashboardPageClient({ initialData: unusedInitialData }: { initia
               </CardHeader>
               <CardContent className="pl-0 pr-4 sm:pl-2">
                 {activeProjects.length > 0 ? (
-                  <div className="h-[300px] w-full text-muted-foreground flex items-center justify-center">
-                    {/* Chart has been temporarily disabled to fix build issues. */}
-                    Chart temporarily disabled.
-                  </div>
-                  // <ChartContainer config={chartConfig} className="h-[300px] w-full">
-                  //   <ResponsiveContainer>
-                  //     <BarChart data={activeProjects} layout="vertical" margin={{ right: 40, left: 10 }}>
-                  //       <XAxis type="number" dataKey="progress" domain={[0, 100]} tickFormatter={(value) => `${value}%`} tick={{ fontSize: 10 }} />
-                  //       <YAxis type="category" dataKey="title" tick={{ fontSize: 10, width: 80, textAnchor: 'end' }} interval={0} tickFormatter={(value) => value.length > 15 ? `${value.substring(0, 15)}...` : value} />
-                  //       <ChartTooltip
-                  //           cursor={{ fill: 'hsl(var(--muted))' }}
-                  //           content={<ChartTooltipContent />}
-                  //       />
-                  //       <Bar dataKey="progress" radius={[0, 4, 4, 0]}>
-                  //          <LabelList dataKey="progress" position="right" offset={8} className="fill-foreground" fontSize={12} formatter={(value: number) => `${value}%`} />
-                  //          {activeProjects.map((project, index) => (
-                  //               <Cell key={`cell-${index}`} fill={getProgressColor(project.progress, project.status)} />
-                  //          ))}
-                  //       </Bar>
-                  //     </BarChart>
-                  //   </ResponsiveContainer>
-                  // </ChartContainer>
+                  <ChartContainer config={chartConfig} className="h-[300px] w-full">
+                    <ResponsiveContainer>
+                      <BarChart data={activeProjects} layout="vertical" margin={{ right: 40, left: 10 }}>
+                        <XAxis type="number" dataKey="progress" domain={[0, 100]} tickFormatter={(value) => `${value}%`} tick={{ fontSize: 10 }} />
+                        <YAxis type="category" dataKey="title" tick={{ fontSize: 10, width: 80, textAnchor: 'end' }} interval={0} tickFormatter={(value) => value.length > 15 ? `${value.substring(0, 15)}...` : value} />
+                        <ChartTooltip
+                            cursor={{ fill: 'hsl(var(--muted))' }}
+                            content={<ChartTooltipContent />}
+                        />
+                        <Bar dataKey="progress" radius={[0, 4, 4, 0]}>
+                           <LabelList dataKey="progress" position="right" offset={8} className="fill-foreground" fontSize={12} formatter={(value: number) => `${value}%`} />
+                           {activeProjects.map((project, index) => (
+                                <Cell key={`cell-${index}`} fill={getProgressColor(project.progress, project.status)} />
+                           ))}
+                        </Bar>
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </ChartContainer>
                 ) : (
                   <p className="text-sm text-muted-foreground">{dashboardDict.noProjectsForChart}</p>
                 )}

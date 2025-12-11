@@ -38,15 +38,15 @@ import { type Project } from '../../services/project-service';
 import { Badge } from '@/components/ui/badge';
 import { format, parseISO, getMonth, getYear } from 'date-fns';
 import { id as idLocale, enUS as enLocale } from 'date-fns/locale';
-// import {
-//   ChartContainer,
-//   ChartTooltip,
-//   ChartTooltipContent,
-//   ChartConfig
-// } from "@/components/ui/chart";
-// import { BarChart, Bar, XAxis, YAxis, CartesianGrid, ResponsiveContainer, LabelList, Cell } from "recharts";
+import {
+  ChartContainer,
+  ChartTooltip,
+  ChartTooltipContent,
+  type ChartConfig
+} from "@/components/ui/chart";
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, ResponsiveContainer, LabelList, Cell } from "recharts";
 import type { Language } from '@/context/LanguageContext';
-// import { toPng } from 'html-to-image';
+import { toPng } from 'html-to-image';
 import { cn } from '@/lib/utils';
 import { Card as ResponsiveCard } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -214,17 +214,17 @@ export default function MonthlyReportClient({ initialProjects }: MonthlyReportCl
   React.useEffect(() => {
     const generateChartImage = async () => {
         if (reportData && chartContainerRef.current && (reportData.inProgress.length > 0 || reportData.completed.length > 0 || reportData.canceled.length > 0)) {
-            // try {
-            //     const dataUrl = await toPng(chartContainerRef.current, {
-            //         skipFonts: true, 
-            //         backgroundColor: '#FFFFFF' 
-            //     });
-            //     setChartImageDataUrl(dataUrl);
-            // } catch (error) {
-            //     console.error('Failed to generate chart image:', error);
-            //     toast({ variant: 'destructive', title: reportDict.toast.chartImageErrorTitle, description: reportDict.toast.chartImageErrorDesc });
-            //     setChartImageDataUrl(null);
-            // }
+            try {
+                const dataUrl = await toPng(chartContainerRef.current, {
+                    skipFonts: true, 
+                    backgroundColor: '#FFFFFF' 
+                });
+                setChartImageDataUrl(dataUrl);
+            } catch (error) {
+                console.error('Failed to generate chart image:', error);
+                toast({ variant: 'destructive', title: reportDict.toast.chartImageErrorTitle, description: reportDict.toast.chartImageErrorDesc });
+                setChartImageDataUrl(null);
+            }
         } else if (reportData) { 
             setChartImageDataUrl(null);
         }
@@ -311,22 +311,22 @@ export default function MonthlyReportClient({ initialProjects }: MonthlyReportCl
   const years = Array.from({ length: 10 }, (_, i) => (parseInt(currentYear) - 5 + i).toString());
   const months = Array.from({ length: 12 }, (_, i) => ({ value: (i + 1).toString(), label: getMonthName(i + 1, language) }));
 
-  // const chartConfig = React.useMemo(() => ({
-  //   count: { label: reportDict.totalProjectsShort, color: "hsl(var(--foreground))" },
-  //   [reportDict.status.inprogress]: { label: reportDict.status.inprogress, color: CHART_EXPORT_COLORS.inProgress },
-  //   [reportDict.status.completed]: { label: reportDict.status.completed, color: CHART_EXPORT_COLORS.completed },
-  //   [reportDict.status.canceled]: { label: reportDict.status.canceled, color: CHART_EXPORT_COLORS.canceled },
-  // } as ChartConfig), [reportDict]);
+  const chartConfig = React.useMemo(() => ({
+    count: { label: reportDict.totalProjectsShort, color: "hsl(var(--foreground))" },
+    [reportDict.status.inprogress]: { label: reportDict.status.inprogress, color: CHART_EXPORT_COLORS.inProgress },
+    [reportDict.status.completed]: { label: reportDict.status.completed, color: CHART_EXPORT_COLORS.completed },
+    [reportDict.status.canceled]: { label: reportDict.status.canceled, color: CHART_EXPORT_COLORS.canceled },
+  } satisfies ChartConfig), [reportDict]);
 
 
-  // const chartDisplayData = React.useMemo(() => {
-  //   if (!reportData) return [];
-  //   return [
-  //     { name: reportDict.status.inprogress, count: reportData.inProgress.length, fill: chartConfig[reportDict.status.inprogress].color },
-  //     { name: reportDict.status.completed, count: reportData.completed.length, fill: chartConfig[reportDict.status.completed].color },
-  //     { name: reportDict.status.canceled, count: reportData.canceled.length, fill: chartConfig[reportDict.status.canceled].color },
-  //   ].filter(item => item.count > 0); 
-  // }, [reportData, reportDict.status, chartConfig]);
+  const chartDisplayData = React.useMemo(() => {
+    if (!reportData) return [];
+    return [
+      { name: reportDict.status.inprogress, count: reportData.inProgress.length, fill: chartConfig[reportDict.status.inprogress].color },
+      { name: reportDict.status.completed, count: reportData.completed.length, fill: chartConfig[reportDict.status.completed].color },
+      { name: reportDict.status.canceled, count: reportData.canceled.length, fill: chartConfig[reportDict.status.canceled].color },
+    ].filter(item => item.count > 0); 
+  }, [reportData, reportDict.status, chartConfig]);
 
   const allProjectsForReport = React.useMemo(() => {
     if (!reportData) return [];
@@ -361,7 +361,7 @@ export default function MonthlyReportClient({ initialProjects }: MonthlyReportCl
   }
   
   const noDataForReport = reportData && reportData.completed.length === 0 && reportData.inProgress.length === 0 && reportData.canceled.length === 0;
-  // const noDataForChart = !chartDisplayData || chartDisplayData.length === 0;
+  const noDataForChart = !chartDisplayData || chartDisplayData.length === 0;
 
 
   return (
@@ -423,7 +423,7 @@ export default function MonthlyReportClient({ initialProjects }: MonthlyReportCl
             <CardContent>
                 <div className="w-full overflow-x-auto rounded-md border mb-6">
                     <div ref={chartContainerRef} className="bg-background p-2 sm:p-4 min-w-[500px]">
-                        {/* {noDataForChart ? (
+                        {noDataForChart ? (
                             <div className="flex flex-col items-center justify-center h-[250px] sm:h-[300px] text-center text-muted-foreground p-4">
                                 <PieChartIcon className="h-12 w-12 mb-2 opacity-50" />
                                 <p>{reportDict.noDataForMonth}</p>
@@ -449,7 +449,7 @@ export default function MonthlyReportClient({ initialProjects }: MonthlyReportCl
                                     </BarChart>
                                 </ResponsiveContainer>
                             </ChartContainer>
-                        )} */}
+                        )}
                     </div>
                 </div>
 
