@@ -13,6 +13,15 @@ services:
     restart: unless-stopped
     env_file:
       - .env
+    environment:
+      # PENTING: Arahkan DATABASE_PATH ke folder data di dalam kontainer.
+      # Path ini harus cocok dengan path target dari volume di bawah.
+      - DATABASE_PATH=/app/database
+    volumes:
+      # PENTING: Map folder data eksternal Anda di NAS ke folder database di dalam kontainer.
+      # Ganti './msarch-data/database' dengan path absolut di NAS Anda, misal: '/volume1/docker/msarch-data/database'
+      # Path '/app/database' di dalam kontainer adalah tempat aplikasi akan mencari data.
+      - ./msarch-data/database:/app/database
 
   # Layanan untuk Cloudflare Tunnel
   tunnel:
