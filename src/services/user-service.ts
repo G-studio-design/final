@@ -2,7 +2,6 @@
 'use server';
 
 import * as path from 'path';
-import bcrypt from 'bcryptjs';
 import type { User, AddUserData, UpdateProfileData, UpdatePasswordData, UpdateUserGoogleTokensData } from '../types/user-types';
 import { getAllUsers } from './data-access/user-data';
 import { writeDb } from '../lib/database-utils';
@@ -39,7 +38,7 @@ export async function verifyUserCredentials(usernameInput: string, passwordInput
         return null;
     }
 
-    const isMatch = await bcrypt.compare(passwordInput, user.password);
+    const isMatch = passwordInput === user.password;
 
     if (!isMatch) {
         console.log(`[Auth] Password mismatch for user '${usernameInput}'.`);
@@ -65,13 +64,10 @@ export async function addUser(userData: AddUserData): Promise<Omit<User, 'passwo
         throw new Error('EMAIL_EXISTS');
     }
 
-    const salt = await bcrypt.genSalt(10);
-    const hashedPassword = await bcrypt.hash(userData.password, salt);
-
     const newUser: User = {
         id: `usr_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`,
         username: userData.username,
-        password: hashedPassword,
+        password: userData.password, // Store plain text password
         roles: userData.roles,
         email: userData.email || `${userData.username.toLowerCase().replace(/\s+/g, '_')}@example.com`,
         displayName: userData.displayName || userData.username,
@@ -152,15 +148,13 @@ export async function updatePassword(updateData: UpdatePasswordData): Promise<vo
         if (!user.password) {
             throw new Error('PASSWORD_MISMATCH');
         }
-        const isMatch = await bcrypt.compare(updateData.currentPassword, user.password);
+        const isMatch = updateData.currentPassword === user.password;
         if (!isMatch) {
             throw new Error('PASSWORD_MISMATCH');
         }
     }
-
-    const salt = await bcrypt.genSalt(10);
-    const hashedPassword = await bcrypt.hash(updateData.newPassword, salt);
-    users[userIndex].password = hashedPassword;
+    
+    users[userIndex].password = updateData.newPassword;
     await writeDb(DB_PATH_USERS, users);
 }
 

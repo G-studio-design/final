@@ -1,9 +1,8 @@
-
-[
+{[
   {
     "id": "usr_dev_iwg",
     "username": "I.wayan_govina",
-    "password": "$2a$10$f/f.b.m8J1p.v.5.D.C3b.x5f4g3h2i1j0k9l8m7n6o5p4q3r2s1",
+    "password": "devpassword",
     "roles": [
       "Admin Developer"
     ],
@@ -15,7 +14,7 @@
   {
     "id": "usr_owner_default",
     "username": "sudina",
-    "password": "$2a$10$l/Zf3Bv.w5g.v.x5f4g3h2i1j0k9l8m7n6o5p4q3r2s1",
+    "password": "admin123",
     "roles": [
       "Owner"
     ],
@@ -26,7 +25,7 @@
   {
     "id": "usr_1747633709593_uxubw",
     "username": "arsitek",
-    "password": "$2a$10$l/Zf3Bv.w5g.v.x5f4g3h2i1j0k9l8m7n6o5p4q3r2s1",
+    "password": "admin123",
     "roles": [
       "Arsitek"
     ],
@@ -37,7 +36,7 @@
   {
     "id": "usr_1747633745993_u8h9d",
     "username": "struktur",
-    "password": "$2a$10$l/Zf3Bv.w5g.v.x5f4g3h2i1j0k9l8m7n6o5p4q3r2s1",
+    "password": "admin123",
     "roles": [
       "Struktur"
     ],
@@ -48,7 +47,7 @@
   {
     "id": "usr_1747799008584_4r22a",
     "username": "komangmerta",
-    "password": "$2a$10$l/Zf3Bv.w5g.v.x5f4g3h2i1j0k9l8m7n6o5p4q3r2s1",
+    "password": "admin123",
     "roles": [
       "Admin Proyek",
       "MEP"
@@ -61,7 +60,7 @@
   {
     "id": "usr_1747925369552_66ue2",
     "username": "oksi",
-    "password": "$2a$10$l/Zf3Bv.w5g.v.x5f4g3h2i1j0k9l8m7n6o5p4q3r2s1",
+    "password": "admin123",
     "roles": [
       "Akuntan"
     ],
@@ -72,7 +71,7 @@
   {
     "id": "usr_1748081668166_rkls1",
     "username": "agung",
-    "password": "$2a$10$l/Zf3Bv.w5g.v.x5f4g3h2i1j0k9l8m7n6o5p4q3r2s1",
+    "password": "admin123",
     "roles": [
       "MEP"
     ],
