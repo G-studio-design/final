@@ -1,51 +1,53 @@
 # Dockerfile
 
-# Base Image
-FROM node:18-alpine AS base
-
-# 1. Tahap Dependencies
-# --------------------
-FROM base AS deps
+# Stage 1: Install dependencies
+FROM node:18-alpine AS deps
 WORKDIR /app
-COPY package.json package-lock.json ./
-RUN npm install
+COPY package.json package-lock.json* ./
+RUN npm ci
 
-# 2. Tahap Builder
-# ---------------
-FROM base AS builder
+# Stage 2: Build the application
+FROM node:18-alpine AS builder
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
+RUN npm run build
 
-# Argumen untuk User/Group ID
+# Stage 3: Production image
+FROM node:18-alpine AS runner
+WORKDIR /app
+
+ENV NODE_ENV=production
+
+# Arguments for user and group IDs
 ARG PUID=1000
 ARG PGID=1000
 
-# Buat pengguna dan grup
-RUN addgroup -g ${PGID} nodejs && \
-    adduser -u ${PUID} -G nodejs -s /bin/sh -D nextjs
+# Create group and user
+# This command first checks if the group exists. If not, it creates it.
+# Then it adds the user. This avoids "gid in use" errors on systems like Synology.
+RUN if ! getent group ${PGID} > /dev/null 2>&1; then \
+        addgroup -g ${PGID} nodejs; \
+    fi && \
+    adduser -u ${PUID} -G $(getent group ${PGID} | cut -d: -f1) -s /bin/sh -D nextjs
 
-# Build aplikasi Next.js
-ENV NEXT_PUBLIC_GOOGLE_REDIRECT_URI=$NEXT_PUBLIC_GOOGLE_REDIRECT_URI
-RUN npm run build
+# Set ownership of the app directory
+# This step is deferred until after files are copied.
 
-# 3. Tahap Runner (Produksi)
-# -------------------------
-FROM base AS runner
-WORKDIR /app
-
-# Set variabel lingkungan
-ENV NODE_ENV=production
-
-# Ganti pengguna ke non-root
-USER nextjs
-
-# Salin artefak yang sudah dibangun
-COPY --from=builder --chown=nextjs:nodejs /app/.next ./.next
+# Copy necessary files from the builder stage
+COPY --from=builder /app/public ./public
+COPY --from=builder --chown=nextjs:$(getent group ${PGID} | cut -d: -f1) /app/.next ./.next
 COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/package.json ./package.json
-COPY --from=builder /app/public ./public
-COPY --from=builder /app/next.config.js ./
+
+# Copy database and other persistent files
+# Ensure these files/folders exist or handle their absence gracefully
+COPY --chown=nextjs:$(getent group ${PGID} | cut -d: -f1) database ./database
+
+# The main app directory should also be owned by the node user.
+RUN chown -R nextjs:$(getent group ${PGID} | cut -d: -f1) /app
+
+USER nextjs
 
 EXPOSE 4000
 
