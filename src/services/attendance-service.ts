@@ -1,3 +1,4 @@
+
 // src/services/attendance-service.ts
 'use server';
 
@@ -77,6 +78,10 @@ export async function getTodaysAttendanceForAllUsers(): Promise<AttendanceRecord
 export async function checkIn(data: CheckInData): Promise<CheckInResult> {
   try {
     const settings = await getAppSettings();
+
+    if (!settings.feature_attendance_enabled) {
+      return { error: "Fitur absensi sedang tidak diaktifkan oleh administrator." };
+    }
 
     if (!data.location) {
       return { error: "Lokasi tidak ditemukan. Pastikan GPS aktif dan berikan izin lokasi." };

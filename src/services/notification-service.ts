@@ -28,8 +28,10 @@ interface StoredSubscriptions {
   subscriptions: PushSubscription[];
 }
 
-const NOTIFICATION_DB_PATH = path.resolve(process.cwd(), 'database', 'notifications.json');
-const SUBSCRIPTION_DB_PATH = path.resolve(process.cwd(), 'database', 'subscriptions.json');
+const DB_BASE_PATH = path.resolve(process.cwd(), 'database');
+const NOTIFICATION_DB_PATH = path.join(DB_BASE_PATH, 'notifications.json');
+const SUBSCRIPTION_DB_PATH = path.join(DB_BASE_PATH, 'subscriptions.json');
+
 const NOTIFICATION_LIMIT = 300;
 
 // Initialize VAPID details once
