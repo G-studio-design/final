@@ -99,7 +99,7 @@ export async function deleteUser(userId: string): Promise<void> {
     
     // Clean up avatar file if it exists
     if (userToDelete.profilePictureUrl) {
-        const oldAvatarPath = path.join(PUBLIC_UPLOADS_BASE_DIR, userToDelete.profilePictureUrl);
+        const oldAvatarPath = path.join(PUBLIC_UPLOADS_BASE_DIR, userToDelete.profilePictureUrl.split('?')[0]);
         try {
             await fs.unlink(oldAvatarPath);
             console.log(`[UserService/deleteUser] Cleaned up avatar for deleted user ${userId}: ${oldAvatarPath}`);
@@ -239,28 +239,29 @@ export async function updateUserProfilePicture(userId: string, newPictureUrl: st
     throw new Error('USER_NOT_FOUND');
   }
 
+  // Get the old picture URL *before* updating the user record
   const oldPictureUrl = users[userIndex].profilePictureUrl;
+
+  // Add a cache-busting query parameter to the new URL
+  const finalPictureUrl = `${newPictureUrl}?v=${Date.now()}`;
 
   const updatedUser = {
     ...users[userIndex],
-    profilePictureUrl: newPictureUrl,
+    profilePictureUrl: finalPictureUrl,
   };
 
   users[userIndex] = updatedUser;
   await writeDb(DB_PATH_USERS, users);
 
-  // After successfully updating the DB, delete the old avatar file
-  if (oldPictureUrl && oldPictureUrl !== newPictureUrl) {
-    // Construct the absolute path to the old file inside the 'public' directory
-    const oldAvatarPath = path.join(PUBLIC_UPLOADS_BASE_DIR, oldPictureUrl);
+  // After successfully updating the DB, try to delete the old avatar file
+  if (oldPictureUrl && oldPictureUrl.split('?')[0] !== newPictureUrl) {
+    const oldAvatarPath = path.join(PUBLIC_UPLOADS_BASE_DIR, oldPictureUrl.split('?')[0]);
     try {
       await fs.unlink(oldAvatarPath);
       console.log(`[UserService/updateUserProfilePicture] Successfully deleted old avatar: ${oldAvatarPath}`);
     } catch (error: any) {
-      // Don't throw an error if deletion fails, just log it.
-      // Most common "error" is that the file doesn't exist, which is fine.
       if (error.code !== 'ENOENT') {
-        console.warn(`[UserService/updateUserProfilePicture] Failed to delete old avatar file ${oldAvatarPath}:`, error.message);
+        console.warn(`[UserService/updateUserProfilePicture] Could not delete old avatar file ${oldAvatarPath}:`, error.message);
       }
     }
   }

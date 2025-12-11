@@ -59,6 +59,7 @@ export async function POST(
     const fileUrl = `/uploads/avatars/${filename}`;
 
     // Update user record in the database with the new URL
+    // This service function now handles logic for deleting the old file and cache-busting.
     const updatedUser = await updateUserProfilePicture(userId, fileUrl);
 
     return NextResponse.json({
