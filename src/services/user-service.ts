@@ -2,6 +2,7 @@
 'use server';
 
 import * as path from 'path';
+import bcrypt from 'bcryptjs';
 import type { User, AddUserData, UpdateProfileData, UpdatePasswordData, UpdateUserGoogleTokensData } from '../types/user-types';
 import { getAllUsers } from './data-access/user-data';
 import { writeDb } from '../lib/database-utils';
@@ -32,7 +33,13 @@ export async function findUserById(userId: string): Promise<User | null> {
 export async function verifyUserCredentials(usernameInput: string, passwordInput: string): Promise<Omit<User, 'password'> | null> {
     const user = await findUserByUsername(usernameInput);
 
-    if (!user || !user.password || passwordInput !== user.password) {
+    if (!user || !user.password) {
+        return null;
+    }
+
+    const isMatch = await bcrypt.compare(passwordInput, user.password);
+
+    if (!isMatch) {
         return null;
     }
 
@@ -54,10 +61,13 @@ export async function addUser(userData: AddUserData): Promise<Omit<User, 'passwo
         throw new Error('EMAIL_EXISTS');
     }
 
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(userData.password, salt);
+
     const newUser: User = {
         id: `usr_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`,
         username: userData.username,
-        password: userData.password,
+        password: hashedPassword,
         roles: userData.roles,
         email: userData.email || `${userData.username.toLowerCase().replace(/\s+/g, '_')}@example.com`,
         displayName: userData.displayName || userData.username,
@@ -135,12 +145,18 @@ export async function updatePassword(updateData: UpdatePasswordData): Promise<vo
     const user = users[userIndex];
 
     if (updateData.currentPassword) {
-        if (!user.password || updateData.currentPassword !== user.password) {
+        if (!user.password) {
+            throw new Error('PASSWORD_MISMATCH');
+        }
+        const isMatch = await bcrypt.compare(updateData.currentPassword, user.password);
+        if (!isMatch) {
             throw new Error('PASSWORD_MISMATCH');
         }
     }
 
-    users[userIndex].password = updateData.newPassword;
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(updateData.newPassword, salt);
+    users[userIndex].password = hashedPassword;
     await writeDb(DB_PATH, users);
 }
 

@@ -1,116 +1,94 @@
 // public/sw.js
 
-// This is a basic service worker for a Progressive Web App (PWA).
-
-const CACHE_NAME = 'msarch-app-cache-v1';
-const urlsToCache = [
-  '/',
-  '/manifest.json',
-  '/msarch-logo.png',
-  '/dashboard',
-  // Add other important assets and pages you want to cache
-];
-
-// Install a service worker
-self.addEventListener('install', event => {
-  // Perform install steps
-  event.waitUntil(
-    caches.open(CACHE_NAME)
-      .then(function(cache) {
-        console.log('Opened cache');
-        return cache.addAll(urlsToCache);
-      })
-  );
+self.addEventListener('install', (event) => {
+  console.log('Service Worker installing.');
+  // Optional: Caching assets for offline use
+  // event.waitUntil(
+  //   caches.open('msarch-app-cache').then((cache) => {
+  //     return cache.addAll([
+  //       '/',
+  //       // Add other important assets here
+  //     ]);
+  //   })
+  // );
+  self.skipWaiting();
 });
 
-// Cache and return requests
-self.addEventListener('fetch', event => {
-  // Let the browser handle requests for scripts, etc.
-  if (event.request.url.includes('/_next/')) {
-    return;
-  }
-  
-  event.respondWith(
-    caches.match(event.request)
-      .then(function(response) {
-        // Cache hit - return response
-        if (response) {
-          return response;
-        }
-        return fetch(event.request);
-      }
-    )
-  );
+self.addEventListener('activate', (event) => {
+  console.log('Service Worker activating.');
+  // Optional: Clean up old caches
+  // event.waitUntil(
+  //   caches.keys().then((cacheNames) => {
+  //     return Promise.all(
+  //       cacheNames.map((cacheName) => {
+  //         if (cacheName !== 'msarch-app-cache') {
+  //           return caches.delete(cacheName);
+  //         }
+  //       })
+  //     );
+  //   })
+  // );
+  return self.clients.claim();
 });
 
-// Update a service worker
-self.addEventListener('activate', event => {
-  const cacheWhitelist = [CACHE_NAME];
-  event.waitUntil(
-    caches.keys().then(cacheNames => {
-      return Promise.all(
-        cacheNames.map(cacheName => {
-          if (cacheWhitelist.indexOf(cacheName) === -1) {
-            return caches.delete(cacheName);
-          }
-        })
-      );
-    })
-  );
-});
-
-
-// Handle push notifications
 self.addEventListener('push', (event) => {
   if (!event.data) {
-    console.log('Push event but no data');
+    console.error('Push event but no data');
     return;
   }
-  
+
+  let notificationData = {
+    title: 'Msarch App Notification',
+    body: 'You have a new update.',
+    icon: '/msarch-logo.png', // Default icon
+    badge: '/msarch-logo.png', // Default badge
+    url: '/dashboard' // Default fallback URL
+  };
+
   try {
     const data = event.data.json();
-    const title = data.title || 'Msarch App';
-    const options = {
-      body: data.body,
-      icon: '/msarch-logo.png',
-      badge: '/msarch-logo.png',
-      vibrate: [200, 100, 200],
-      data: {
-        url: data.url || '/dashboard' 
-      }
-    };
-    event.waitUntil(self.registration.showNotification(title, options));
+    notificationData.title = data.title || notificationData.title;
+    notificationData.body = data.body || notificationData.body;
+    notificationData.url = data.url || notificationData.url;
   } catch (e) {
-    console.error('Error processing push data', e);
-    // Fallback for plain text
-     const title = 'Msarch App';
-     const options = {
-        body: event.data.text(),
-        icon: '/msarch-logo.png',
-        badge: '/msarch-logo.png',
-     };
-     event.waitUntil(self.registration.showNotification(title, options));
+    console.error('Failed to parse push data as JSON', e);
+    // Use the raw text as body if JSON parsing fails
+    notificationData.body = event.data.text();
   }
+
+  const options = {
+    body: notificationData.body,
+    icon: notificationData.icon,
+    badge: notificationData.badge,
+    data: {
+      url: notificationData.url
+    }
+  };
+
+  event.waitUntil(
+    self.registration.showNotification(notificationData.title, options)
+  );
 });
 
-// Handle notification click
 self.addEventListener('notificationclick', (event) => {
   event.notification.close();
-  const urlToOpen = event.notification.data.url || '/dashboard';
+  
+  const urlToOpen = event.notification.data.url || '/';
 
   event.waitUntil(
     clients.matchAll({
-      type: 'window',
-      includeUncontrolled: true
+      type: 'window'
     }).then((clientList) => {
-      // If a window for the app is already open, focus it.
+      // Check if a window for this app is already open
       for (let i = 0; i < clientList.length; i++) {
-        let client = clientList[i];
-        if (client.url === '/' && 'focus' in client) {
+        const client = clientList[i];
+        // If the client's URL is the one we want to navigate to and it's focused, do nothing.
+        // If it's open but not focused, focus it.
+        if (client.url === urlToOpen && 'focus' in client) {
           return client.focus();
         }
       }
-      // Otherwise, open a new window.
+      // If no window is open, open a new one.
       if (clients.openWindow) {
         return clients.openWindow(urlToOpen);
       }
