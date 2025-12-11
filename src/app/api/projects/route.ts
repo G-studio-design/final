@@ -56,7 +56,7 @@ export async function POST(request: Request) {
             const originalFilename = file.name;
             const safeFilenameForPath = sanitizeForPath(originalFilename) || `file_${Date.now()}`;
             const relativeFilePath = path.join(newProjectId, safeFilenameForPath);
-            const absoluteFilePath = path.join(PROJECT_FILES_BASE_DIR, relativeFilePath);
+            const absoluteFilePath = path.join(projectSpecificDirAbsolute, safeFilenameForPath);
             
             const bytes = await file.arrayBuffer();
             const buffer = Buffer.from(bytes);
