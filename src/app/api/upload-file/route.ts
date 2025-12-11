@@ -1,3 +1,4 @@
+
 // src/app/api/upload-file/route.ts
 'use server';
 import { NextResponse, NextRequest } from 'next/server';
@@ -41,6 +42,8 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ message: 'File size exceeds the limit of 20MB' }, { status: 413 });
         }
 
+        // Ensure the base project_files directory exists first, then the specific one
+        await ensureDirectoryExists(PROJECT_FILES_BASE_DIR);
         const projectSpecificDir = path.join(PROJECT_FILES_BASE_DIR, projectId);
         await ensureDirectoryExists(projectSpecificDir);
 

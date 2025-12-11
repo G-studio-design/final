@@ -1,4 +1,3 @@
-
 [
   {
     "id": "project_01_pending_offer",
@@ -269,7 +268,7 @@
     "createdAt": "2025-10-10T10:00:00.000Z",
     "createdBy": "sudina"
   },
-    {
+  {
     "id": "project_11_pending_final_docs",
     "title": "Proyek Rumah Sakit (Tahap Dokumen Akhir)",
     "status": "Pending Final Documents",
@@ -341,5 +340,55 @@
     "files": [],
     "createdAt": "2025-09-13T13:00:00.000Z",
     "createdBy": "sudina"
+  },
+  {
+    "id": "project_1765456418404_otu0z",
+    "title": "proyek villa  sanur",
+    "status": "Pending Offer",
+    "progress": 10,
+    "assignedDivision": "Admin Proyek",
+    "nextAction": "Unggah Dokumen Penawaran",
+    "workflowId": "msa_workflow",
+    "workflowHistory": [
+      {
+        "division": "komangmerta",
+        "action": "Created Project with workflow: msa_workflow",
+        "timestamp": "2025-12-11T12:33:38.404Z",
+        "note": "Project entry created."
+      },
+      {
+        "division": "System",
+        "action": "Assigned to Admin Proyek for Unggah Dokumen Penawaran",
+        "timestamp": "2025-12-11T12:33:38.404Z"
+      }
+    ],
+    "files": [],
+    "createdAt": "2025-12-11T12:33:38.404Z",
+    "createdBy": "komangmerta"
+  },
+  {
+    "id": "project_1765456422054_70gry",
+    "title": "proyek villa  sanur",
+    "status": "Pending Offer",
+    "progress": 10,
+    "assignedDivision": "Admin Proyek",
+    "nextAction": "Unggah Dokumen Penawaran",
+    "workflowId": "msa_workflow",
+    "workflowHistory": [
+      {
+        "division": "komangmerta",
+        "action": "Created Project with workflow: msa_workflow",
+        "timestamp": "2025-12-11T12:33:42.054Z",
+        "note": "Project entry created."
+      },
+      {
+        "division": "System",
+        "action": "Assigned to Admin Proyek for Unggah Dokumen Penawaran",
+        "timestamp": "2025-12-11T12:33:42.054Z"
+      }
+    ],
+    "files": [],
+    "createdAt": "2025-12-11T12:33:42.054Z",
+    "createdBy": "komangmerta"
   }
 ]

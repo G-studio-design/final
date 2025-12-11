@@ -1,3 +1,4 @@
+
 // src/app/api/projects/route.ts
 'use server';
 
@@ -6,6 +7,10 @@ import { addProject, getAllProjects, addFilesToProject, getProjectById, deletePr
 import * as fs from 'fs/promises';
 import * as path from 'path';
 import { sanitizeForPath } from '@/lib/path-utils';
+
+const DB_BASE_PATH = process.env.DATABASE_PATH || path.resolve(process.cwd(), 'database');
+const PROJECT_FILES_BASE_DIR = path.join(DB_BASE_PATH, 'project_files');
+
 
 export async function GET(request: Request) {
   try {
@@ -18,9 +23,6 @@ export async function GET(request: Request) {
 }
 
 export async function POST(request: Request) {
-  const DB_BASE_PATH = process.env.DATABASE_PATH || path.resolve(process.cwd(), 'database');
-  const PROJECT_FILES_BASE_DIR = path.join(DB_BASE_PATH, 'project_files');
-  
   let newProjectId: string | null = null;
 
   try {
@@ -34,6 +36,9 @@ export async function POST(request: Request) {
     if (!title || !workflowId || !createdBy || !userId) {
       return NextResponse.json({ message: 'Missing required project data.' }, { status: 400 });
     }
+    
+    // Ensure the base project_files directory exists before any operation
+    await fs.mkdir(PROJECT_FILES_BASE_DIR, { recursive: true });
 
     // 1. Create the project entry to get an ID
     const newProject = await addProject({ title, workflowId, createdBy });

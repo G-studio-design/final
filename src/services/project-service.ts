@@ -1,7 +1,9 @@
+
 // src/services/project-service.ts
 'use server';
 
 import * as path from 'path';
+import * as fs from 'fs/promises';
 import { format, parseISO } from 'date-fns';
 import { id as IndonesianLocale } from 'date-fns/locale';
 import { notifyUsersByRole, deleteNotificationsByProjectId, type NotificationPayload } from './notification-service';
@@ -14,6 +16,7 @@ export type { Project, AddProjectData, UpdateProjectParams, FileEntry, ScheduleD
 
 const DB_BASE_PATH = process.env.DATABASE_PATH || path.resolve(process.cwd(), 'database');
 const DB_PATH = path.join(DB_BASE_PATH, 'projects.json');
+const PROJECT_FILES_BASE_DIR = path.join(DB_BASE_PATH, 'project_files');
 
 
 export async function addProject(projectData: Omit<AddProjectData, 'initialFiles'>): Promise<Project> {
@@ -25,6 +28,9 @@ export async function addProject(projectData: Omit<AddProjectData, 'initialFiles
     if (!firstStep) {
         throw new Error('WORKFLOW_INVALID');
     }
+    
+    // Ensure the base project_files directory exists before creating subdirectories
+    await fs.mkdir(PROJECT_FILES_BASE_DIR, { recursive: true });
 
     const newProject: Project = {
         id: projectId,
