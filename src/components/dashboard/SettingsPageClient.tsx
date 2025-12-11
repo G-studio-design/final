@@ -298,7 +298,9 @@ export default function SettingsPageClient() {
       const result = await response.json();
       if (!response.ok) throw new Error(result.message);
 
+      // This is the key change: update the user in the context with the full user object from the API response
       updateAuthContextUser(result.user);
+      
       toast({ title: 'Success', description: 'Profile picture updated successfully.' });
       setAvatarFile(null);
       setAvatarPreview(null);
