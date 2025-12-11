@@ -239,19 +239,41 @@ export async function deleteProjectFile(projectId: string, filePath: string, del
 
     if (projectIndex === -1) throw new Error('PROJECT_NOT_FOUND');
 
-    const fileToDelete = projects[projectIndex].files.find(f => f.path === filePath);
-    projects[projectIndex].files = projects[projectIndex].files.filter(file => file.path !== filePath);
-
-    if (fileToDelete) {
-        projects[projectIndex].workflowHistory.push({
-            division: deleterUsername,
-            action: `Deleted file: "${fileToDelete.name}"`,
-            timestamp: new Date().toISOString(),
-        });
+    const project = projects[projectIndex];
+    const fileToDelete = project.files.find(f => f.path === filePath);
+    
+    if (!fileToDelete) {
+        console.warn(`[ProjectService/deleteProjectFile] File record not found for path: ${filePath}. Skipping database update.`);
+    } else {
+        project.files = project.files.filter(file => file.path !== filePath);
+        if (deleterUsername !== 'system-revision') {
+            project.workflowHistory.push({
+                division: deleterUsername,
+                action: `Deleted file: "${fileToDelete.name}"`,
+                timestamp: new Date().toISOString(),
+            });
+        }
+        projects[projectIndex] = project;
+        await writeDb(DB_PATH, projects);
     }
     
-    await writeDb(DB_PATH, projects);
+    // --- Physical file deletion ---
+    const absoluteFilePath = path.join(PROJECT_FILES_BASE_DIR, filePath);
+    try {
+        await fs.access(absoluteFilePath); // Check if file exists
+        await fs.unlink(absoluteFilePath);
+        console.log(`[ProjectService/deleteProjectFile] Physically deleted file: ${absoluteFilePath}`);
+    } catch (error: any) {
+        if (error.code === 'ENOENT') {
+            console.warn(`[ProjectService/deleteProjectFile] Physical file not found, skipping unlink: ${absoluteFilePath}`);
+        } else {
+            // Re-throw other errors to be caught by the API route
+            console.error(`[ProjectService/deleteProjectFile] Error deleting physical file ${absoluteFilePath}:`, error);
+            throw new Error(`Failed to delete physical file: ${error.message}`);
+        }
+    }
 }
+
 
 export async function deleteProject(projectId: string, deleterUsername: string): Promise<string> {
     const projects = await readDb<Project[]>(DB_PATH, []);

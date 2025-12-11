@@ -1,17 +1,15 @@
 // src/app/api/upload-file/route.ts
 'use server';
 import { NextResponse, NextRequest } from 'next/server';
-import { stat, mkdir } from 'fs/promises';
-import { writeFile } from 'fs/promises';
+import { stat, mkdir, writeFile, unlink } from 'fs/promises';
 import path from 'path';
 import { sanitizeForPath } from '@/lib/path-utils';
+import { getProjectById, deleteProjectFile } from '@/services/project-service';
 
 const MAX_FILE_SIZE = 20 * 1024 * 1024; // 20MB
 
-// We now define the base path for all project files relative to the app's root.
-// This path inside the container will be mapped to the NAS.
-const PROJECT_FILES_BASE_DIR = path.join(process.cwd(), 'data', 'project_files');
-
+const DB_BASE_PATH = process.env.DATABASE_PATH || path.resolve(process.cwd(), 'data');
+const PROJECT_FILES_BASE_DIR = path.join(DB_BASE_PATH, 'project_files');
 
 async function ensureDirectoryExists(directoryPath: string) {
   try {
@@ -41,21 +39,31 @@ export async function POST(req: NextRequest) {
         if (buffer.length > MAX_FILE_SIZE) {
             return NextResponse.json({ message: 'File size exceeds the limit of 20MB' }, { status: 413 });
         }
-
-        // Ensure the project-specific directory exists within the main project files directory.
+        
         const projectSpecificDir = path.join(PROJECT_FILES_BASE_DIR, projectId);
         await ensureDirectoryExists(projectSpecificDir);
 
         const originalFilename = file.name;
-        // Sanitize filename to prevent path traversal issues and ensure it's valid for filesystems
         const safeFilenameForPath = sanitizeForPath(originalFilename) || `file_${Date.now()}`;
-        
+        const relativePath = path.join(projectId, safeFilenameForPath).replace(/\\/g, '/');
         const absoluteFilePath = path.join(projectSpecificDir, safeFilenameForPath);
+
+        // --- REVISION LOGIC ---
+        // Check if a file with the same sanitized name already exists for this project
+        const project = await getProjectById(projectId);
+        if (project) {
+            const existingFile = project.files.find(f => path.basename(f.path) === safeFilenameForPath);
+            if (existingFile) {
+                console.log(`[API/UploadFile] Revision detected. Deleting old file: ${existingFile.path}`);
+                // The deleteProjectFile service function handles both DB and physical file deletion.
+                // We pass a dummy username as this is a system action.
+                await deleteProjectFile(projectId, existingFile.path, 'system-revision');
+            }
+        }
+        // --- END REVISION LOGIC ---
+
         await writeFile(absoluteFilePath, buffer);
         
-        // The relative path for the database should be relative to the base directory for consistency.
-        const relativePath = path.join(projectId, safeFilenameForPath).replace(/\\/g, '/');
-
         const fileEntry = {
             name: originalFilename,
             path: relativePath,
