@@ -52,6 +52,10 @@ export async function addProject(projectData: Omit<AddProjectData, 'initialFiles
     projects.push(newProject);
     await writeDb(DB_PATH, projects);
     
+    // Create the project-specific directory after the project is successfully in the DB
+    const projectSpecificDir = path.join(PROJECT_FILES_BASE_DIR, projectId);
+    await fs.mkdir(projectSpecificDir, { recursive: true });
+    
     if (firstStep.assignedDivision) {
         const payload: NotificationPayload = {
             title: `Proyek Baru Ditugaskan: ${newProject.title}`,
@@ -256,6 +260,15 @@ export async function deleteProject(projectId: string, deleterUsername: string):
     if (projectIndex === -1) throw new Error('PROJECT_NOT_FOUND_FOR_DELETION');
 
     const projectTitle = projects[projectIndex].title;
+    
+    // Delete physical project files directory
+    const projectFilesDir = path.join(PROJECT_FILES_BASE_DIR, projectId);
+    try {
+        await fs.rm(projectFilesDir, { recursive: true, force: true });
+        console.log(`[ProjectService] Deleted project files directory: ${projectFilesDir}`);
+    } catch (error) {
+        console.error(`[ProjectService] Failed to delete project files directory ${projectFilesDir}. Manual cleanup may be required.`, error);
+    }
     
     const remainingProjects = projects.filter(p => p.id !== projectId);
     await writeDb(DB_PATH, remainingProjects);

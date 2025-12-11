@@ -1,1 +1,11 @@
-[]
+[
+  {
+    "id": "notif_1765457362696_mjiz5",
+    "userId": "usr_1747799008584_4r22a",
+    "projectId": "project_1765457362682_df0dd",
+    "message": "Anda ditugaskan untuk langkah awal pada proyek baru \"proyek pelabuhan sanur\". Tugas: Unggah Dokumen Penawaran.",
+    "url": "/dashboard/projects?projectId=project_1765457362682_df0dd",
+    "timestamp": "2025-12-11T12:49:22.696Z",
+    "isRead": false
+  }
+]

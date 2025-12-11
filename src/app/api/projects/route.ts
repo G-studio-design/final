@@ -43,9 +43,12 @@ export async function POST(request: Request) {
     const newProject = await addProject({ title, workflowId, createdBy });
     newProjectId = newProject.id; 
 
+    // The project-specific directory is already created by addProject service
+
     // 2. Handle file uploads if any
     if (files.length > 0) {
         const projectSpecificDirAbsolute = path.join(PROJECT_FILES_BASE_DIR, newProjectId);
+        // This directory should already exist from the service, but we ensure it just in case
         await fs.mkdir(projectSpecificDirAbsolute, { recursive: true });
 
         const fileEntries = [];
