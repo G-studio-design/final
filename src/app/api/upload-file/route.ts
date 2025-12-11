@@ -7,8 +7,10 @@ import path from 'path';
 import { sanitizeForPath } from '@/lib/path-utils';
 
 const MAX_FILE_SIZE = 20 * 1024 * 1024; // 20MB
-const DB_BASE_PATH = process.env.DATABASE_PATH || path.resolve(process.cwd(), 'database');
-const PROJECT_FILES_BASE_DIR = path.join(DB_BASE_PATH, 'project_files');
+
+// We now define the base path for all project files relative to the app's root.
+// This path inside the container will be mapped to the NAS.
+const PROJECT_FILES_BASE_DIR = path.join(process.cwd(), 'data', 'project_files');
 
 
 async function ensureDirectoryExists(directoryPath: string) {
@@ -40,8 +42,7 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ message: 'File size exceeds the limit of 20MB' }, { status: 413 });
         }
 
-        // Ensure the base project_files directory exists first, then the specific one
-        await ensureDirectoryExists(PROJECT_FILES_BASE_DIR);
+        // Ensure the project-specific directory exists within the main project files directory.
         const projectSpecificDir = path.join(PROJECT_FILES_BASE_DIR, projectId);
         await ensureDirectoryExists(projectSpecificDir);
 
@@ -52,8 +53,7 @@ export async function POST(req: NextRequest) {
         const absoluteFilePath = path.join(projectSpecificDir, safeFilenameForPath);
         await writeFile(absoluteFilePath, buffer);
         
-        // Use a relative path (from the base dir) for storage in the JSON database
-        // This makes the path relative to the `project_files` directory
+        // The relative path for the database should be relative to the base directory for consistency.
         const relativePath = path.join(projectId, safeFilenameForPath).replace(/\\/g, '/');
 
         const fileEntry = {
