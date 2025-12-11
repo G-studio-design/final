@@ -11,8 +11,10 @@ import { writeDb } from '../lib/database-utils';
 const DB_PATH = path.resolve(process.cwd(), 'database', 'users.json');
 
 export async function findUserByUsername(username: string): Promise<User | null> {
+    // FIX: Add a null/undefined check for the username parameter to prevent crashes.
     if (!username) return null;
     const users = await getAllUsers();
+    // The toLowerCase() call is now safe.
     const user = users.find(u => u.username.toLowerCase() === username.toLowerCase());
     return user || null;
 }
