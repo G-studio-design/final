@@ -13,7 +13,6 @@ const DB_PATH = path.resolve(process.cwd(), 'database');
  * @returns A promise that resolves to an array of all User objects.
  */
 export async function getAllUsers(): Promise<User[]> {
-    // FIX: Corrected the path to point directly to the users.json file in the `database` directory.
     const filePath = path.join(DB_PATH, 'users.json');
     return await readDb<User[]>(filePath, []);
 }
