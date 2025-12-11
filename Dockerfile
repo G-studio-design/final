@@ -1,57 +1,54 @@
 # Dockerfile
 
-# Argumen untuk User dan Group ID
-ARG PUID=1000
-ARG PGID=1000
-
-# Tahap 1: Build aplikasi
+# ==================================
+# Builder Stage
+# ==================================
 FROM node:20-alpine AS builder
 
 WORKDIR /app
 
-# Salin package.json dan package-lock.json
+# Copy package.json and package-lock.json
 COPY package*.json ./
 
-# Instal dependensi
+# Install dependencies
 RUN npm install
 
-# Salin sisa kode aplikasi
+# Copy the rest of the application source code
 COPY . .
 
-# Build aplikasi Next.js
+# Build the Next.js application
 RUN npm run build
 
-# Tahap 2: Setup environment produksi
-FROM node:20-alpine AS runner
+# ==================================
+# Production Stage
+# ==================================
+FROM node:20-alpine AS production
 
 WORKDIR /app
 
-# Atur environment ke production
+# Set environment to production
 ENV NODE_ENV=production
 
-# Buat group dan user non-root dengan GID dan UID yang ditentukan
-RUN addgroup -g ${PGID} --system nodejs
-RUN adduser -u ${PUID} --system nodejs -G nodejs
-
-# Salin folder .next dari tahap builder
-COPY --from=builder /app/.next ./.next
-
-# Salin folder public
+# Copy built assets from the builder stage
 COPY --from=builder /app/public ./public
+COPY --from=builder /app/.next/standalone ./
+COPY --from=builder /app/.next/static ./.next/static
+COPY --from=builder /app/package.json .
 
-# Salin file konfigurasi Next.js dan package.json
-COPY --from=builder /app/next.config.js ./
-COPY --from=builder /app/package.json ./
+# Create a non-root user and group to run the app
+ARG PUID=1026
+ARG PGID=100
+RUN addgroup -g ${PGID} -S nodejs
+RUN adduser -u ${PUID} -S nodejs -G nodejs
 
-# Berikan kepemilikan folder /app ke user non-root yang baru dibuat
-# Ini penting agar aplikasi bisa menulis file (misalnya, file cache) jika diperlukan
+# Change ownership of the app directory
 RUN chown -R nodejs:nodejs /app
 
-# Ganti ke user non-root
+# Switch to the non-root user
 USER nodejs
 
-# Buka port 4000
+# Expose the port the app runs on
 EXPOSE 4000
 
-# Jalankan aplikasi
-CMD ["npm", "start"]
+# The command to run the application
+CMD ["node", "server.js"]
