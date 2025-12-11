@@ -1,97 +1,69 @@
 // public/sw.js
 
-self.addEventListener('install', (event) => {
-  console.log('Service Worker installing.');
-  // Optional: Caching assets for offline use
-  // event.waitUntil(
-  //   caches.open('msarch-app-cache').then((cache) => {
-  //     return cache.addAll([
-  //       '/',
-  //       // Add other important assets here
-  //     ]);
-  //   })
-  // );
-  self.skipWaiting();
-});
+// Listener untuk push event
+self.addEventListener('push', function (event) {
+  console.log('[Service Worker] Push Received.');
 
-self.addEventListener('activate', (event) => {
-  console.log('Service Worker activating.');
-  // Optional: Clean up old caches
-  // event.waitUntil(
-  //   caches.keys().then((cacheNames) => {
-  //     return Promise.all(
-  //       cacheNames.map((cacheName) => {
-  //         if (cacheName !== 'msarch-app-cache') {
-  //           return caches.delete(cacheName);
-  //         }
-  //       })
-  //     );
-  //   })
-  // );
-  return self.clients.claim();
-});
-
-self.addEventListener('push', (event) => {
-  if (!event.data) {
-    console.error('Push event but no data');
-    return;
-  }
-
-  let notificationData = {
-    title: 'Msarch App Notification',
-    body: 'You have a new update.',
-    icon: '/msarch-logo.png', // Default icon
-    badge: '/msarch-logo.png', // Default badge
-    url: '/dashboard' // Default fallback URL
-  };
-
+  let notificationData = {};
   try {
-    const data = event.data.json();
-    notificationData.title = data.title || notificationData.title;
-    notificationData.body = data.body || notificationData.body;
-    notificationData.url = data.url || notificationData.url;
+    notificationData = event.data.json();
   } catch (e) {
-    console.error('Failed to parse push data as JSON', e);
-    // Use the raw text as body if JSON parsing fails
-    notificationData.body = event.data.text();
+    console.warn('[Service Worker] Push event data is not JSON, treating as text.');
+    notificationData = {
+      title: 'Msarch App Notification',
+      body: event.data.text(),
+      url: '/dashboard'
+    };
   }
+
+  const { title, body, url } = notificationData;
 
   const options = {
-    body: notificationData.body,
-    icon: notificationData.icon,
-    badge: notificationData.badge,
+    body: body,
+    icon: '/msarch-logo.png', // Path ke ikon notifikasi
+    badge: '/msarch-logo.png', // Path ke badge notifikasi (untuk beberapa perangkat)
     data: {
-      url: notificationData.url
+      url: url || '/dashboard' // Menyimpan URL untuk digunakan saat notifikasi di-klik
     }
   };
 
-  event.waitUntil(
-    self.registration.showNotification(notificationData.title, options)
-  );
+  event.waitUntil(self.registration.showNotification(title, options));
 });
 
-self.addEventListener('notificationclick', (event) => {
-  event.notification.close();
-  
-  const urlToOpen = event.notification.data.url || '/';
+// Listener untuk klik notifikasi
+self.addEventListener('notificationclick', function (event) {
+  console.log('[Service Worker] Notification click Received.');
+
+  event.notification.close(); // Tutup notifikasi
+
+  const targetUrl = event.notification.data.url;
 
   event.waitUntil(
     clients.matchAll({
       type: 'window'
-    }).then((clientList) => {
-      // Check if a window for this app is already open
+    }).then(function (clientList) {
+      // Cek apakah ada tab aplikasi yang sudah terbuka
       for (let i = 0; i < clientList.length; i++) {
         const client = clientList[i];
-        // If the client's URL is the one we want to navigate to and it's focused, do nothing.
-        // If it's open but not focused, focus it.
-        if (client.url === urlToOpen && 'focus' in client) {
-          return client.focus();
+        if (client.url === '/' && 'focus' in client) {
+          // Jika ada, fokus ke tab tersebut dan navigasi ke URL target
+          client.focus();
+          return client.navigate(targetUrl);
         }
       }
-      // If no window is open, open a new one.
+      // Jika tidak ada tab yang terbuka, buka tab baru
       if (clients.openWindow) {
-        return clients.openWindow(urlToOpen);
+        return clients.openWindow(targetUrl);
       }
     })
   );
+});
+
+// Skip waiting phase on activate to ensure the new service worker takes control immediately
+self.addEventListener('install', (event) => {
+    event.waitUntil(self.skipWaiting());
+});
+
+self.addEventListener('activate', (event) => {
+    event.waitUntil(self.clients.claim());
 });
