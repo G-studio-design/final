@@ -4,7 +4,7 @@
 
 import * as path from 'path';
 import webPush, { type PushSubscription } from 'web-push';
-import { getAllUsers } from './data-access/user-data';
+import { getAllUsers, getSubscriptionsForUserIds } from './data-access/user-data';
 import { readDb, writeDb } from '../lib/database-utils';
 
 export interface Notification {
@@ -23,9 +23,9 @@ export interface NotificationPayload {
   url?: string;
 }
 
-interface StoredSubscriptions {
+interface StoredSubscription {
   userId: string;
-  subscriptions: PushSubscription[];
+  subscription: PushSubscription;
 }
 
 const DB_BASE_PATH = path.resolve(process.cwd(), 'database');
@@ -121,16 +121,11 @@ export async function notifyUsersByRole(roles: string | string[], payload: Notif
         return;
     }
 
-    const allSubscriptions = await readDb<StoredSubscriptions[]>(SUBSCRIPTION_DB_PATH, []);
-    const targetSubscriptions = allSubscriptions.filter(s => userIdsToNotify.includes(s.userId));
+    const targetSubscriptions = await getSubscriptionsForUserIds(userIdsToNotify);
 
-    for (const userSub of targetSubscriptions) {
-        console.log(`[NotificationService] Found ${userSub.subscriptions.length} subscription(s) for user ${userSub.userId}.`);
-        await Promise.all(
-            userSub.subscriptions.map(subscription => 
-                sendPushNotification(subscription, payload)
-            )
-        );
+    for (const sub of targetSubscriptions) {
+        console.log(`[NotificationService] Sending to subscription for user ${sub.userId}.`);
+        await sendPushNotification(sub.subscription, payload);
     }
 }
 
@@ -150,20 +145,15 @@ export async function notifyUserById(userId: string, payload: NotificationPayloa
         return;
     }
 
-    const allSubscriptions = await readDb<StoredSubscriptions[]>(SUBSCRIPTION_DB_PATH, []);
+    const userSubscriptions = await getSubscriptionsForUserIds(userIdsToNotify);
 
-    for (const id of userIdsToNotify) {
-        const userSubscriptionRecord = allSubscriptions.find(sub => sub.userId === id);
-        if (userSubscriptionRecord && userSubscriptionRecord.subscriptions.length > 0) {
-            console.log(`[NotificationService] Found ${userSubscriptionRecord.subscriptions.length} subscription(s) for user ${id}.`);
-            await Promise.all(
-                userSubscriptionRecord.subscriptions.map(subscription => 
-                    sendPushNotification(subscription, payload)
-                )
-            );
-        } else {
-             console.log(`[NotificationService] No push subscriptions found for user ${id}.`);
-        }
+    if (userSubscriptions.length > 0) {
+        console.log(`[NotificationService] Found ${userSubscriptions.length} subscription(s) for user ${userId}.`);
+        await Promise.all(
+            userSubscriptions.map(sub => sendPushNotification(sub.subscription, payload))
+        );
+    } else {
+         console.log(`[NotificationService] No push subscriptions found for user ${userId}.`);
     }
 }
 
@@ -196,40 +186,31 @@ export async function clearAllNotifications(): Promise<void> {
 }
 
 export async function saveSubscription(userId: string, newSubscription: PushSubscription): Promise<void> {
-    const allStoredSubscriptions = await readDb<StoredSubscriptions[]>(SUBSCRIPTION_DB_PATH, []);
-    let userSubscriptionRecord = allStoredSubscriptions.find(s => s.userId === userId);
+    const allStoredSubscriptions = await readDb<StoredSubscription[]>(SUBSCRIPTION_DB_PATH, []);
+    
+    const subscriptionExists = allStoredSubscriptions.some(
+        s => s.userId === userId && s.subscription.endpoint === newSubscription.endpoint
+    );
 
-    if (userSubscriptionRecord) {
-        const subscriptionExists = userSubscriptionRecord.subscriptions.some(
-            s => s.endpoint === newSubscription.endpoint
-        );
-        if (!subscriptionExists) {
-            userSubscriptionRecord.subscriptions.push(newSubscription);
-        } else {
-             console.log(`[NotificationService] Subscription with endpoint ${newSubscription.endpoint.slice(0,50)}... already exists for user ${userId}.`);
-        }
+    if (!subscriptionExists) {
+        const newStoredSub: StoredSubscription = { userId, subscription: newSubscription };
+        allStoredSubscriptions.push(newStoredSub);
+        await writeDb(SUBSCRIPTION_DB_PATH, allStoredSubscriptions);
+        console.log(`[NotificationService] Subscription saved for user ${userId}. Total subscriptions for user: ${allStoredSubscriptions.filter(s => s.userId === userId).length}.`);
     } else {
-        userSubscriptionRecord = { userId, subscriptions: [newSubscription] };
-        allStoredSubscriptions.push(userSubscriptionRecord);
+        console.log(`[NotificationService] Subscription with endpoint ${newSubscription.endpoint.slice(0,50)}... already exists for user ${userId}.`);
     }
-
-    await writeDb(SUBSCRIPTION_DB_PATH, allStoredSubscriptions);
-    console.log(`[NotificationService] Subscription saved for user ${userId}. User now has ${userSubscriptionRecord.subscriptions.length} subscription(s).`);
 }
 
 export async function deleteSubscription(subscriptionToDelete: PushSubscription): Promise<void> {
-    const allStoredSubscriptions = await readDb<StoredSubscriptions[]>(SUBSCRIPTION_DB_PATH, []);
+    const allStoredSubscriptions = await readDb<StoredSubscription[]>(SUBSCRIPTION_DB_PATH, []);
     
-    const updatedSubscriptions = allStoredSubscriptions.map(userSub => {
-        const filteredSubs = userSub.subscriptions.filter(
-            s => s.endpoint !== subscriptionToDelete.endpoint
-        );
-        if (filteredSubs.length > 0) {
-            return { ...userSub, subscriptions: filteredSubs };
-        }
-        return null;
-    }).filter((s): s is StoredSubscriptions => s !== null);
+    const updatedSubscriptions = allStoredSubscriptions.filter(
+        s => s.subscription.endpoint !== subscriptionToDelete.endpoint
+    );
 
-    await writeDb(SUBSCRIPTION_DB_PATH, updatedSubscriptions);
-    console.log(`[NotificationService] Subscription with endpoint ${subscriptionToDelete.endpoint.slice(0, 50)}... has been deleted.`);
+    if (allStoredSubscriptions.length !== updatedSubscriptions.length) {
+      await writeDb(SUBSCRIPTION_DB_PATH, updatedSubscriptions);
+      console.log(`[NotificationService] Subscription with endpoint ${subscriptionToDelete.endpoint.slice(0, 50)}... has been deleted.`);
+    }
 }
