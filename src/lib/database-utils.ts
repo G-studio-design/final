@@ -5,42 +5,37 @@ import * as fs from 'fs/promises';
 import * as path from 'path';
 
 /**
- * Safely reads a JSON database file. This function is read-only and will not create files,
- * making it safe for the Next.js build process.
+ * Safely reads a JSON database file, ensuring it always gets the latest version from disk.
+ * This function is designed for a server environment where data files can be updated.
  * @param dbPath The absolute path to the database file.
  * @param defaultData The default data to return if the file doesn't exist or is empty.
  * @returns A promise that resolves to the parsed data or the default data.
  */
 export async function readDb<T>(dbPath: string, defaultData: T): Promise<T> {
     try {
+        // ALWAYS read the file from disk, do not use any in-memory cache.
         const data = await fs.readFile(dbPath, 'utf8');
-        // Handle case where file is empty string
+        
+        // If file is empty, it's invalid JSON. Write default and return it.
         if (data.trim() === "") {
-            // If the file is empty, write the default data to it for future consistency.
-            // This part is problematic for Vercel's read-only filesystem.
-            // We should handle this gracefully.
-            try {
-              await writeDb(dbPath, defaultData);
-              return defaultData;
-            } catch (writeError) {
-              console.warn(`[DB Read/Write] Could not write default data to empty DB file at ${path.basename(dbPath)}. This is expected in read-only environments. Returning default data in memory. Error: ${(writeError as Error).message}`);
-              return defaultData;
-            }
-        }
-        return JSON.parse(data) as T;
-    } catch (error: any) {
-        // If the file doesn't exist, try to create it with default data.
-        if (error.code === 'ENOENT') {
-          try {
+            console.warn(`[DB Read] DB file at ${path.basename(dbPath)} was empty. Attempting to write default data.`);
             await writeDb(dbPath, defaultData);
             return defaultData;
-          } catch (writeError) {
-            console.error(`[DB Read/Write] CRITICAL: Could not create new DB file at ${path.basename(dbPath)}. Error: ${(writeError as Error).message}. Returning default data in memory.`);
-            return defaultData;
-          }
         }
-        // For other errors (e.g., parsing error), log it and return default.
-        console.error(`[DB Read Error] at ${path.basename(dbPath)}: ${error.message}. Returning default data.`);
+
+        return JSON.parse(data) as T;
+
+    } catch (error: any) {
+        // If file does not exist, create it with default data.
+        if (error.code === 'ENOENT') {
+            console.log(`[DB Read] DB file at ${path.basename(dbPath)} not found. Creating it with default data.`);
+            await writeDb(dbPath, defaultData);
+            return defaultData;
+        }
+        
+        // For any other error (e.g., malformed JSON), log it and return default.
+        // This prevents a crash if the file becomes corrupted.
+        console.error(`[DB Read] Error reading or parsing ${path.basename(dbPath)}: ${error.message}. Returning default data as a fallback.`);
         return defaultData;
     }
 }
@@ -51,7 +46,21 @@ export async function readDb<T>(dbPath: string, defaultData: T): Promise<T> {
  * @param data The data to write to the file.
  */
 export async function writeDb<T>(dbPath: string, data: T): Promise<void> {
-    const dbDir = path.dirname(dbPath);
-    await fs.mkdir(dbDir, { recursive: true });
-    await fs.writeFile(dbPath, JSON.stringify(data, null, 2), 'utf8');
+    try {
+        const dbDir = path.dirname(dbPath);
+        await fs.mkdir(dbDir, { recursive: true });
+        // Use a temporary file and rename for atomic write
+        const tempFilePath = dbPath + '.tmp';
+        await fs.writeFile(tempFilePath, JSON.stringify(data, null, 2), 'utf8');
+        await fs.rename(tempFilePath, dbPath);
+    } catch (error: any) {
+        console.error(`[DB Write] CRITICAL: Failed to write to DB file at ${path.basename(dbPath)}. Error: ${error.message}`);
+        // If there was a temp file, try to clean it up
+        try {
+            await fs.unlink(dbPath + '.tmp');
+        } catch (cleanupError) {
+            // Ignore cleanup error
+        }
+        throw error; // Re-throw the original error
+    }
 }
