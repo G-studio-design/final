@@ -21,3 +21,4 @@ export async function getSubscriptionsForUserIds(userIds: string[]): Promise<{us
     const allSubscriptions = await readDb<{userId: string, subscription: any}[]>(path.resolve(process.cwd(), 'database', 'subscriptions.json'), []);
     return allSubscriptions.filter(sub => userIds.includes(sub.userId));
 }
+
