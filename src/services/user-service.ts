@@ -4,12 +4,14 @@
 import * as path from 'path';
 import type { User, AddUserData, UpdateProfileData, UpdatePasswordData, UpdateUserGoogleTokensData } from '../types/user-types';
 import { readDb, writeDb } from '../lib/database-utils';
+import { getAllUsers as getAllUsersFromDb } from './data-access/user-data';
 
 const DB_BASE_PATH = process.env.DATABASE_PATH || path.resolve(process.cwd(), 'database');
 const DB_PATH_USERS = path.join(DB_BASE_PATH, 'users.json');
 
 async function getAllUsers(): Promise<User[]> {
-    return await readDb<User[]>(DB_PATH_USERS, []);
+    // This now uses the separated data-access function
+    return await getAllUsersFromDb();
 }
 
 export async function findUserByUsername(username: string): Promise<User | null> {

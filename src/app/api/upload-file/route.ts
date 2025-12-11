@@ -1,12 +1,10 @@
-
 // src/app/api/upload-file/route.ts
 'use server';
 import { NextResponse, NextRequest } from 'next/server';
-import { readdir, stat, mkdir } from 'fs/promises';
+import { stat, mkdir } from 'fs/promises';
 import { writeFile } from 'fs/promises';
 import path from 'path';
 import { sanitizeForPath } from '@/lib/path-utils';
-import { addFilesToProject } from '@/services/project-service';
 
 const MAX_FILE_SIZE = 20 * 1024 * 1024; // 20MB
 const DB_BASE_PATH = process.env.DATABASE_PATH || path.resolve(process.cwd(), 'database');

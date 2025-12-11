@@ -4,7 +4,7 @@
 import * as path from 'path';
 import webPush, { type PushSubscription } from 'web-push';
 import { readDb, writeDb } from '../lib/database-utils';
-import { getAllUsers } from './user-service';
+import { getAllUsers, getSubscriptionsForUserIds } from './data-access/user-data';
 
 const DB_BASE_PATH = process.env.DATABASE_PATH || path.resolve(process.cwd(), 'database');
 const DB_PATH_NOTIFICATIONS = path.join(DB_BASE_PATH, 'notifications.json');
@@ -48,12 +48,6 @@ if (process.env.VAPID_PRIVATE_KEY && process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY) {
 } else {
     console.warn("[NotificationService] VAPID keys are not configured. Push notifications will be disabled.");
 }
-
-async function getSubscriptionsForUserIds(userIds: string[]): Promise<{userId: string, subscription: any}[]> {
-    const allSubscriptions = await readDb<{userId: string, subscription: any}[]>(DB_PATH_SUBSCRIPTIONS, []);
-    return allSubscriptions.filter(sub => userIds.includes(sub.userId));
-}
-
 
 async function sendPushNotification(subscription: PushSubscription, payload: NotificationPayload) {
     try {

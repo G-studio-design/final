@@ -6,13 +6,10 @@ import * as path from 'path';
 import { deleteProjectFile as deleteFileRecord, getProjectById } from '@/services/project-service';
 import { findUserById } from '@/services/user-service';
 
-const ALLOWED_ROLES_TO_DELETE = ['Owner', 'Admin Proyek', 'Admin Developer'];
+const DB_BASE_PATH = process.env.DATABASE_PATH || path.resolve(process.cwd(), 'database');
+const PROJECT_FILES_BASE_DIR = path.join(DB_BASE_PATH, 'project_files');
 
 export async function POST(request: Request) {
-  // Define base directory safely within the handler
-  const DB_BASE_PATH = process.env.DATABASE_PATH || path.resolve(process.cwd(), 'database');
-  const PROJECT_FILES_BASE_DIR = path.join(DB_BASE_PATH, 'project_files');
-  
   try {
     const body = await request.json();
     const { projectId, filePath, userId } = body as { projectId: string; filePath: string; userId: string; };
@@ -37,6 +34,7 @@ export async function POST(request: Request) {
     }
     
     // Authorization Check: Allow if user's role is in admin list OR if one of the user's roles matches the uploader's role.
+    const ALLOWED_ROLES_TO_DELETE = ['Owner', 'Admin Proyek', 'Admin Developer'];
     const canDelete = user.roles.some(role => ALLOWED_ROLES_TO_DELETE.includes(role)) || user.roles.includes(fileToDelete.uploadedBy);
 
     if (!canDelete) {
