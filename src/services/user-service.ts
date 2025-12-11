@@ -35,15 +35,18 @@ export async function verifyUserCredentials(usernameInput: string, passwordInput
     const user = await findUserByUsername(usernameInput);
 
     if (!user || !user.password) {
+        console.log(`[Auth] User '${usernameInput}' not found or has no password.`);
         return null;
     }
 
     const isMatch = await bcrypt.compare(passwordInput, user.password);
 
     if (!isMatch) {
+        console.log(`[Auth] Password mismatch for user '${usernameInput}'.`);
         return null;
     }
-
+    
+    console.log(`[Auth] User '${usernameInput}' authenticated successfully.`);
     const { password: _p, ...userWithoutPassword } = user;
     return userWithoutPassword;
 }
