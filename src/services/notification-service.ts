@@ -3,8 +3,9 @@
 
 import * as path from 'path';
 import webPush, { type PushSubscription } from 'web-push';
-import { getAllUsers, getSubscriptionsForUserIds } from './data-access/user-data';
+import { getSubscriptionsForUserIds } from './data-access/user-data';
 import { readDb, writeDb } from '../lib/database-utils';
+import { getAllUsers } from './user-service';
 
 export interface Notification {
     id: string;

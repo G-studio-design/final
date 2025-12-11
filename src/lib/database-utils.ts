@@ -16,20 +16,18 @@ export async function readDb<T>(dbPath: string, defaultData: T): Promise<T> {
         // ALWAYS read the file from disk, do not use any in-memory cache.
         const data = await fs.readFile(dbPath, 'utf8');
         
-        // If file is empty, it's invalid JSON. Write default and return it.
+        // If file is empty, it's invalid JSON. Return default data.
         if (data.trim() === "") {
-            console.warn(`[DB Read] DB file at ${path.basename(dbPath)} was empty. Attempting to write default data.`);
-            await writeDb(dbPath, defaultData);
+            console.warn(`[DB Read] DB file at ${path.basename(dbPath)} was empty. Returning default data.`);
             return defaultData;
         }
 
         return JSON.parse(data) as T;
 
     } catch (error: any) {
-        // If file does not exist, create it with default data.
+        // If file does not exist, return default data but DO NOT create it.
         if (error.code === 'ENOENT') {
-            console.log(`[DB Read] DB file at ${path.basename(dbPath)} not found. Creating it with default data.`);
-            await writeDb(dbPath, defaultData);
+            console.error(`[DB Read] CRITICAL: DB file at ${dbPath} not found. Returning default data. Make sure the file exists.`);
             return defaultData;
         }
         
