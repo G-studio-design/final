@@ -10,7 +10,7 @@ import {
 import type { Workflow, WorkflowStep, WorkflowStepTransition } from '../types/workflow-types';
 import { readDb, writeDb } from '../lib/database-utils';
 
-const DB_PATH = path.join(process.cwd(), 'database', 'workflows.json');
+const DB_PATH = path.resolve(process.cwd(), 'database', 'workflows.json');
 
 export async function getAllWorkflows(): Promise<Workflow[]> {
   const workflows = await readDb<Workflow[]>(DB_PATH, []);
