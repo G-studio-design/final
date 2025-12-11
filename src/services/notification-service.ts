@@ -3,7 +3,6 @@
 
 import * as path from 'path';
 import webPush, { type PushSubscription } from 'web-push';
-import { getSubscriptionsForUserIds } from './data-access/user-data';
 import { readDb, writeDb } from '../lib/database-utils';
 import { getAllUsers } from './user-service';
 
@@ -28,8 +27,8 @@ interface StoredSubscription {
   subscription: PushSubscription;
 }
 
-const DB_PATH_NOTIFICATIONS = path.resolve(process.cwd(), 'database', 'notifications.json');
-const DB_PATH_SUBSCRIPTIONS = path.resolve(process.cwd(), 'database', 'subscriptions.json');
+const DB_PATH_NOTIFICATIONS = path.join(process.cwd(), 'database', 'notifications.json');
+const DB_PATH_SUBSCRIPTIONS = path.join(process.cwd(), 'database', 'subscriptions.json');
 
 const NOTIFICATION_LIMIT = 300;
 
@@ -48,6 +47,12 @@ if (process.env.VAPID_PRIVATE_KEY && process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY) {
 } else {
     console.warn("[NotificationService] VAPID keys are not configured. Push notifications will be disabled.");
 }
+
+async function getSubscriptionsForUserIds(userIds: string[]): Promise<{userId: string, subscription: any}[]> {
+    const allSubscriptions = await readDb<{userId: string, subscription: any}[]>(DB_PATH_SUBSCRIPTIONS, []);
+    return allSubscriptions.filter(sub => userIds.includes(sub.userId));
+}
+
 
 async function sendPushNotification(subscription: PushSubscription, payload: NotificationPayload) {
     try {
