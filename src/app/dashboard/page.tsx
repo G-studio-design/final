@@ -1,4 +1,3 @@
-
 // src/app/dashboard/page.tsx
 import React, { Suspense } from 'react';
 import { Skeleton } from '@/components/ui/skeleton';

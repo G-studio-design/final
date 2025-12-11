@@ -129,15 +129,21 @@ export default function AttendancePageClient({ initialData }: AttendancePageClie
   const handleCheckOutClick = () => {
     const now = new Date();
     const currentDayKey = daysOfWeek[now.getDay()];
-    const standardCheckOutTime = appSettings?.workingHours[currentDayKey]?.checkOut || "17:00";
-    
-    const [hour, minute] = standardCheckOutTime.split(':').map(Number);
-    const standardCheckOutTimeToday = new Date();
-    standardCheckOutTimeToday.setHours(hour, minute, 0, 0);
+    const workDayInfo = appSettings?.workingHours[currentDayKey];
 
-    if (now < standardCheckOutTimeToday) {
-        setIsCheckOutDialogOpen(true);
+    if (workDayInfo && workDayInfo.isWorkDay) {
+        const standardCheckOutTime = workDayInfo.checkOut || "17:00";
+        const [hour, minute] = standardCheckOutTime.split(':').map(Number);
+        const standardCheckOutTimeToday = new Date();
+        standardCheckOutTimeToday.setHours(hour, minute, 0, 0);
+
+        if (now < standardCheckOutTimeToday) {
+            setIsCheckOutDialogOpen(true);
+        } else {
+            performCheckOut('Normal');
+        }
     } else {
+        // Not a workday, allow normal checkout without a reason dialog
         performCheckOut('Normal');
     }
   };
