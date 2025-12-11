@@ -1,63 +1,55 @@
 # Dockerfile
 
-# =================================================================================================
-# Tahap 1: Build - Membangun aplikasi Next.js
-# =================================================================================================
-FROM node:20-alpine AS builder
+# ==================================
+# Base Stage
+# ==================================
+FROM node:20-alpine AS base
 WORKDIR /app
+COPY package*.json ./
 
-# Salin file package.json dan yarn.lock/package-lock.json
-COPY package.json ./
-COPY package-lock.json ./
+# ==================================
+# Dependencies Stage
+# ==================================
+FROM base AS deps
+RUN --mount=type=cache,id=npm,target=/root/.npm \
+    npm install --frozen-lockfile
 
-# Instal dependensi
-RUN npm install
-
-# Salin sisa kode aplikasi
+# ==================================
+# Builder Stage
+# ==================================
+FROM base AS builder
+COPY --from=deps /app/node_modules ./node_modules
 COPY . .
-
-# Bangun aplikasi
+# Disable Next.js telemetry
+# See https://nextjs.org/telemetry
+ENV NEXT_TELEMETRY_DISABLED 1
 RUN npm run build
 
-# =================================================================================================
-# Tahap 2: Runner - Menjalankan aplikasi
-# =================================================================================================
-FROM node:20-alpine AS runner
-WORKDIR /app
-
-# ARG untuk user dan group ID
+# ==================================
+# Runner Stage
+# ==================================
+FROM base AS runner
+# Set user and group arguments
 ARG PUID=1000
 ARG PGID=1000
 
-# Buat grup dan pengguna agar file tidak dimiliki oleh 'root'
-# Langkah 1: Buat grup dengan nama 'nodejs'.
-RUN addgroup -g ${PGID} -S nodejs
+# Create user and group
+# Check if group exists, if not create it. Then create user.
+RUN \
+  if ! getent group ${PGID} > /dev/null 2>&1; then \
+    addgroup -g ${PGID} -S nodejs; \
+  fi && \
+  adduser -u ${PUID} -S nodejs -G $(getent group ${PGID} | cut -d: -f1)
 
-# Langkah 2: Buat pengguna 'nodejs' dan tambahkan ke grup 'nodejs'.
-RUN adduser -D -S -h /app -u ${PUID} -G nodejs nodejs
-
-# Salin dependensi dari tahap builder
-COPY --from=builder /app/node_modules ./node_modules
-COPY --from=builder /app/package.json ./package.json
-
-# Salin folder .next (hasil build) dan folder public
-# --chown memastikan file-file ini dimiliki oleh pengguna 'nodejs' yang baru dibuat
-COPY --from=builder --chown=nodejs:nodejs /app/.next ./.next
-COPY --from=builder --chown=nodejs:nodejs /app/public ./public
-
-# Salin file-file lain yang diperlukan untuk menjalankan aplikasi
-COPY --from=builder /app/next.config.js ./
-COPY --from=builder /app/ecosystem.config.js ./
-COPY --from=builder /app/.env ./
-
-# Ganti pemilik semua file di /app ke pengguna 'nodejs'
-RUN chown -R nodejs:nodejs /app
-
-# Ganti ke pengguna non-root
+# Set user
 USER nodejs
 
-# Ekspos port 4000
-EXPOSE 4000
+# Copy built app and node_modules
+COPY --from=builder --chown=nodejs:nodejs /app/.next ./.next
+COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/package.json ./package.json
+COPY --from=builder /app/public ./public
 
-# Jalankan aplikasi menggunakan PM2
+# Expose port and start app
+EXPOSE 4000
 CMD ["npm", "start"]
