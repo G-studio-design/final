@@ -1,22 +1,34 @@
-# Tahap 1: Base Image dengan Node.js
-FROM node:18-alpine AS base
+# Stage 1: Build the Next.js application
+FROM node:20-alpine AS builder
 
-# Set direktori kerja di dalam kontainer
-# Semua file proyek akan sudah ada di sini berkat docker-compose
+# Set the working directory inside the container
 WORKDIR /
 
-# Salin package.json dan package-lock.json (jika ada)
-# Ini memanfaatkan caching Docker
+# Copy package.json and package-lock.json (if available)
+# and install dependencies
 COPY package*.json ./
+RUN npm install
 
-# Instal dependensi
-RUN npm install --no-update-notifier --no-audit
-
-# Salin sisa file aplikasi
+# Copy the rest of the application source code
 COPY . .
 
-# Build aplikasi Next.js
+# Build the Next.js application
 RUN npm run build
 
-# Default command untuk menjalankan aplikasi
+# Stage 2: Create the final, smaller production image
+FROM node:20-alpine
+
+# Set the working directory
+WORKDIR /
+
+# Copy the built application from the builder stage
+COPY --from=builder /node_modules ./node_modules
+COPY --from=builder /.next ./.next
+COPY --from=builder /public ./public
+COPY --from=builder /package.json ./package.json
+
+# Expose the port the app runs on
+EXPOSE 4000
+
+# The command to run the application
 CMD ["npm", "start"]
