@@ -26,7 +26,7 @@ services:
       - DATABASE_PATH=/app/database
     volumes:
       # PENTING: Map folder data eksternal Anda di NAS ke folder database di dalam kontainer.
-      # Ganti './msarch-data/database' dengan path absolut di NAS Anda, misal: '/volume1/docker/msarch-data/database'
+      # Ganti './msarch-data/database' dengan path absolut di NAS Anda, misal: '/volume1/docker/msarch-app/msarch-data/database'
       # Path '/app/database' di dalam kontainer adalah tempat aplikasi akan mencari data.
       - ./msarch-data/database:/app/database
     # Menambahkan layanan 'app' ke jaringan 'msarch-net'
