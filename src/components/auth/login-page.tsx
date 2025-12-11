@@ -92,6 +92,7 @@ export default function LoginPage() {
         const result = await response.json();
 
         if (!response.ok) {
+            // Throw an error with the message from the server's JSON response
             throw new Error(result.message || 'An unexpected error occurred.');
         }
 
@@ -105,12 +106,16 @@ export default function LoginPage() {
 
     } catch (error: any) {
         console.error('Login error:', error);
+        
+        // The error.message will now correctly contain the server's message
         const errorMessage = error.message || dict.invalidCredentials;
         setLoginError(errorMessage);
+        
         if (errorMessage.toLowerCase().includes('invalid')) {
             form.setError('username', { type: 'manual', message: ' ' });
             form.setError('password', { type: 'manual', message: ' '});
         }
+        
         form.resetField('password');
         setIsSubmitting(false);
     }
