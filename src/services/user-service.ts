@@ -7,7 +7,7 @@ import { readDb, writeDb } from '../lib/database-utils';
 import { getAllUsers as getAllUsersFromDb } from './data-access/user-data';
 
 const DB_BASE_PATH = process.env.DATABASE_PATH || path.resolve(process.cwd(), 'database');
-const DB_PATH_USERS = path.join(DB_BASE_PATH, 'users.json');
+const DB_PATH_USERS = path.join(DB_BASE_PATH, 'database', 'users.json');
 
 async function getAllUsers(): Promise<User[]> {
     // This now uses the separated data-access function

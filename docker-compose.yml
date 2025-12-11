@@ -23,12 +23,14 @@ services:
     environment:
       # PENTING: Arahkan DATABASE_PATH ke folder data di dalam kontainer.
       # Path ini harus cocok dengan path target dari volume di bawah.
-      - DATABASE_PATH=/app/database
+      - DATABASE_PATH=/app/data
     volumes:
-      # Map folder data eksternal Anda di NAS ke folder database di dalam kontainer.
-      - ./msarch-data/database:/app/database
+      # Map folder data eksternal Anda di NAS ke folder data di dalam kontainer.
+      - ./msarch-data/database:/app/data/database
       # Map folder unggahan eksternal Anda di NAS ke folder public/uploads di dalam kontainer.
       - ./msarch-data/uploads:/app/public/uploads
+      # Map folder file proyek eksternal Anda di NAS ke folder project_files di dalam kontainer.
+      - ./msarch-data/project_files:/app/data/project_files
     # Menambahkan layanan 'app' ke jaringan 'msarch-net'
     networks:
       - msarch-net

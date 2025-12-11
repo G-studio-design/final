@@ -6,8 +6,8 @@ import type { User } from '@/types/user-types';
 import { readDb } from '@/lib/database-utils';
 
 const DB_BASE_PATH = process.env.DATABASE_PATH || path.resolve(process.cwd(), 'database');
-const DB_PATH_USERS = path.join(DB_BASE_PATH, 'users.json');
-const DB_PATH_SUBSCRIPTIONS = path.join(DB_BASE_PATH, 'subscriptions.json');
+const DB_PATH_USERS = path.join(DB_BASE_PATH, 'database', 'users.json');
+const DB_PATH_SUBSCRIPTIONS = path.join(DB_BASE_PATH, 'database', 'subscriptions.json');
 
 /**
  * Reads the entire user database.

@@ -7,8 +7,8 @@ import { readDb, writeDb } from '../lib/database-utils';
 import { getAllUsers, getSubscriptionsForUserIds } from './data-access/user-data';
 
 const DB_BASE_PATH = process.env.DATABASE_PATH || path.resolve(process.cwd(), 'database');
-const DB_PATH_NOTIFICATIONS = path.join(DB_BASE_PATH, 'notifications.json');
-const DB_PATH_SUBSCRIPTIONS = path.join(DB_BASE_PATH, 'subscriptions.json');
+const DB_PATH_NOTIFICATIONS = path.join(DB_BASE_PATH, 'database', 'notifications.json');
+const DB_PATH_SUBSCRIPTIONS = path.join(DB_BASE_PATH, 'database', 'subscriptions.json');
 
 export interface Notification {
     id: string;
