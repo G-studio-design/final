@@ -7,6 +7,8 @@ services:
       context: .
       dockerfile: Dockerfile
       args:
+        # GANTI DENGAN PUID DAN PGID DARI PENGGUNA NAS ANDA
+        # Jalankan 'id <username>' via SSH di NAS untuk mendapatkannya.
         - PUID=1026
         - PGID=100
     container_name: msarch-app-prod

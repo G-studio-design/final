@@ -1,39 +1,57 @@
-# 1. Base Image
-# Menggunakan image Node.js versi LTS dengan basis Alpine yang ringan
-FROM node:20-alpine
+# Dockerfile
 
-# 2. Set Working Directory
-# Menetapkan direktori kerja di dalam kontainer
+# Argumen untuk User dan Group ID
+ARG PUID=1000
+ARG PGID=1000
+
+# Tahap 1: Build aplikasi
+FROM node:20-alpine AS builder
+
 WORKDIR /app
 
-# 3. Copy package.json and package-lock.json
-# Menyalin file-file ini terlebih dahulu untuk memanfaatkan cache Docker
+# Salin package.json dan package-lock.json
 COPY package*.json ./
 
-# 4. Install Dependencies
-# Menginstal dependensi proyek
+# Instal dependensi
 RUN npm install
 
-# 5. Copy Application Code
-# Menyalin sisa kode aplikasi ke dalam direktori kerja
+# Salin sisa kode aplikasi
 COPY . .
 
-# 6. Set File Permissions (Opsional, tapi praktik yang baik)
-# Mengubah kepemilikan file ke pengguna non-root
-# RUN chown -R node:node .
-
-# 7. Build the Application
-# Menjalankan script build dari Next.js
+# Build aplikasi Next.js
 RUN npm run build
 
-# 8. Expose Port
-# Memberi tahu Docker bahwa kontainer akan berjalan di port 4000
+# Tahap 2: Setup environment produksi
+FROM node:20-alpine AS runner
+
+WORKDIR /app
+
+# Atur environment ke production
+ENV NODE_ENV=production
+
+# Buat group dan user non-root dengan GID dan UID yang ditentukan
+RUN addgroup -g ${PGID} --system nodejs
+RUN adduser -u ${PUID} --system nodejs -G nodejs
+
+# Salin folder .next dari tahap builder
+COPY --from=builder /app/.next ./.next
+
+# Salin folder public
+COPY --from=builder /app/public ./public
+
+# Salin file konfigurasi Next.js dan package.json
+COPY --from=builder /app/next.config.js ./
+COPY --from=builder /app/package.json ./
+
+# Berikan kepemilikan folder /app ke user non-root yang baru dibuat
+# Ini penting agar aplikasi bisa menulis file (misalnya, file cache) jika diperlukan
+RUN chown -R nodejs:nodejs /app
+
+# Ganti ke user non-root
+USER nodejs
+
+# Buka port 4000
 EXPOSE 4000
 
-# 9. Set User (Opsional, tapi sangat disarankan untuk keamanan)
-# Beralih ke pengguna non-root yang dibuat oleh image Node.js
-# USER node
-
-# 10. Default Command
-# Perintah yang akan dijalankan saat kontainer dimulai
+# Jalankan aplikasi
 CMD ["npm", "start"]
