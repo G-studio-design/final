@@ -27,9 +27,8 @@ interface StoredSubscription {
   subscription: PushSubscription;
 }
 
-const DB_BASE_PATH = path.resolve(process.cwd(), 'database');
-const NOTIFICATION_DB_PATH = path.join(DB_BASE_PATH, 'notifications.json');
-const SUBSCRIPTION_DB_PATH = path.join(DB_BASE_PATH, 'subscriptions.json');
+const DB_PATH_NOTIFICATIONS = path.resolve(process.cwd(), 'database', 'notifications.json');
+const DB_PATH_SUBSCRIPTIONS = path.resolve(process.cwd(), 'database', 'subscriptions.json');
 
 const NOTIFICATION_LIMIT = 300;
 
@@ -64,7 +63,7 @@ async function sendPushNotification(subscription: PushSubscription, payload: Not
 }
 
 async function addInAppNotifications(userIds: string[], payload: NotificationPayload, projectId?: string): Promise<void> {
-    const notifications = await readDb<Notification[]>(NOTIFICATION_DB_PATH, []);
+    const notifications = await readDb<Notification[]>(DB_PATH_NOTIFICATIONS, []);
     const now = new Date().toISOString();
 
     for (const userId of userIds) {
@@ -84,7 +83,7 @@ async function addInAppNotifications(userIds: string[], payload: NotificationPay
         notifications.splice(NOTIFICATION_LIMIT);
     }
     
-    await writeDb(NOTIFICATION_DB_PATH, notifications);
+    await writeDb(DB_PATH_NOTIFICATIONS, notifications);
 }
 
 async function findUsersByRole(rolesToFind: string[]): Promise<string[]> {
@@ -157,35 +156,35 @@ export async function notifyUserById(userId: string, payload: NotificationPayloa
 }
 
 export async function getNotificationsForUser(userId: string): Promise<Notification[]> {
-    const allNotifications = await readDb<Notification[]>(NOTIFICATION_DB_PATH, []);
+    const allNotifications = await readDb<Notification[]>(DB_PATH_NOTIFICATIONS, []);
     return allNotifications.filter(n => n.userId === userId).sort((a,b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
 }
 
 export async function markNotificationAsRead(notificationId: string): Promise<void> {
-    const notifications = await readDb<Notification[]>(NOTIFICATION_DB_PATH, []);
+    const notifications = await readDb<Notification[]>(DB_PATH_NOTIFICATIONS, []);
     const notificationIndex = notifications.findIndex(n => n.id === notificationId);
 
     if (notificationIndex !== -1 && !notifications[notificationIndex].isRead) {
         notifications[notificationIndex].isRead = true;
-        await writeDb(NOTIFICATION_DB_PATH, notifications);
+        await writeDb(DB_PATH_NOTIFICATIONS, notifications);
     }
 }
 
 export async function deleteNotificationsByProjectId(projectId: string): Promise<void> {
     if (!projectId) return;
-    const notifications = await readDb<Notification[]>(NOTIFICATION_DB_PATH, []);
+    const notifications = await readDb<Notification[]>(DB_PATH_NOTIFICATIONS, []);
     const filtered = notifications.filter(n => n.projectId !== projectId);
     if (notifications.length !== filtered.length) {
-        await writeDb(NOTIFICATION_DB_PATH, filtered);
+        await writeDb(DB_PATH_NOTIFICATIONS, filtered);
     }
 }
 
 export async function clearAllNotifications(): Promise<void> {
-    await writeDb(NOTIFICATION_DB_PATH, []);
+    await writeDb(DB_PATH_NOTIFICATIONS, []);
 }
 
 export async function saveSubscription(userId: string, newSubscription: PushSubscription): Promise<void> {
-    const allStoredSubscriptions = await readDb<StoredSubscription[]>(SUBSCRIPTION_DB_PATH, []);
+    const allStoredSubscriptions = await readDb<StoredSubscription[]>(DB_PATH_SUBSCRIPTIONS, []);
     
     const subscriptionExists = allStoredSubscriptions.some(
         s => s.userId === userId && s.subscription.endpoint === newSubscription.endpoint
@@ -194,7 +193,7 @@ export async function saveSubscription(userId: string, newSubscription: PushSubs
     if (!subscriptionExists) {
         const newStoredSub: StoredSubscription = { userId, subscription: newSubscription };
         allStoredSubscriptions.push(newStoredSub);
-        await writeDb(SUBSCRIPTION_DB_PATH, allStoredSubscriptions);
+        await writeDb(DB_PATH_SUBSCRIPTIONS, allStoredSubscriptions);
         console.log(`[NotificationService] Subscription saved for user ${userId}. Total subscriptions for user: ${allStoredSubscriptions.filter(s => s.userId === userId).length}.`);
     } else {
         console.log(`[NotificationService] Subscription with endpoint ${newSubscription.endpoint.slice(0,50)}... already exists for user ${userId}.`);
@@ -202,14 +201,14 @@ export async function saveSubscription(userId: string, newSubscription: PushSubs
 }
 
 export async function deleteSubscription(subscriptionToDelete: PushSubscription): Promise<void> {
-    const allStoredSubscriptions = await readDb<StoredSubscription[]>(SUBSCRIPTION_DB_PATH, []);
+    const allStoredSubscriptions = await readDb<StoredSubscription[]>(DB_PATH_SUBSCRIPTIONS, []);
     
     const updatedSubscriptions = allStoredSubscriptions.filter(
         s => s.subscription.endpoint !== subscriptionToDelete.endpoint
     );
 
     if (allStoredSubscriptions.length !== updatedSubscriptions.length) {
-      await writeDb(SUBSCRIPTION_DB_PATH, updatedSubscriptions);
+      await writeDb(DB_PATH_SUBSCRIPTIONS, updatedSubscriptions);
       console.log(`[NotificationService] Subscription with endpoint ${subscriptionToDelete.endpoint.slice(0, 50)}... has been deleted.`);
     }
 }

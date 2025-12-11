@@ -1,4 +1,3 @@
-
 // src/services/user-service.ts
 'use server';
 
@@ -8,13 +7,11 @@ import type { User, AddUserData, UpdateProfileData, UpdatePasswordData, UpdateUs
 import { getAllUsers } from './data-access/user-data';
 import { writeDb } from '../lib/database-utils';
 
-const DB_PATH = path.resolve(process.cwd(), 'database', 'users.json');
+const DB_PATH_USERS = path.resolve(process.cwd(), 'database', 'users.json');
 
 export async function findUserByUsername(username: string): Promise<User | null> {
-    // FIX: Add a null/undefined check for the username parameter to prevent crashes.
     if (!username) return null;
     const users = await getAllUsers();
-    // The toLowerCase() call is now safe.
     const user = users.find(u => u.username.toLowerCase() === username.toLowerCase());
     return user || null;
 }
@@ -34,6 +31,7 @@ export async function findUserById(userId: string): Promise<User | null> {
 }
 
 export async function verifyUserCredentials(usernameInput: string, passwordInput: string): Promise<Omit<User, 'password'> | null> {
+    if (!usernameInput || !passwordInput) return null;
     const user = await findUserByUsername(usernameInput);
 
     if (!user || !user.password) {
@@ -78,7 +76,7 @@ export async function addUser(userData: AddUserData): Promise<Omit<User, 'passwo
     };
 
     users.push(newUser);
-    await writeDb(DB_PATH, users);
+    await writeDb(DB_PATH_USERS, users);
     const { password: _p, ...newUserWithoutPassword } = newUser;
     return newUserWithoutPassword;
 }
@@ -96,7 +94,7 @@ export async function deleteUser(userId: string): Promise<void> {
     }
 
     const remainingUsers = users.filter(user => user.id !== userId);
-    await writeDb(DB_PATH, remainingUsers);
+    await writeDb(DB_PATH_USERS, remainingUsers);
 }
 
 export async function updateUserProfile(updateData: UpdateProfileData): Promise<Omit<User, 'password'>> {
@@ -131,7 +129,7 @@ export async function updateUserProfile(updateData: UpdateProfileData): Promise<
     
     const updatedUser = { ...currentUserState, ...updateData };
     users[userIndex] = updatedUser;
-    await writeDb(DB_PATH, users);
+    await writeDb(DB_PATH_USERS, users);
     
     const { password: _p, ...userWithoutPassword } = updatedUser;
     return userWithoutPassword;
@@ -160,7 +158,7 @@ export async function updatePassword(updateData: UpdatePasswordData): Promise<vo
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(updateData.newPassword, salt);
     users[userIndex].password = hashedPassword;
-    await writeDb(DB_PATH, users);
+    await writeDb(DB_PATH_USERS, users);
 }
 
 export async function getAllUsersForDisplay(): Promise<Omit<User, 'password'>[]> {
@@ -189,7 +187,7 @@ export async function updateUserGoogleTokens(
         accessTokenExpiresAt: tokens.accessTokenExpiresAt !== undefined ? tokens.accessTokenExpiresAt : users[userIndex].accessTokenExpiresAt,
     };
     
-    await writeDb(DB_PATH, users);
+    await writeDb(DB_PATH_USERS, users);
 }
 
 export async function clearUserGoogleTokens(userId: string): Promise<Omit<User, 'password'>> {
@@ -208,7 +206,7 @@ export async function clearUserGoogleTokens(userId: string): Promise<Omit<User, 
 
     users[userIndex] = user;
     
-    await writeDb(DB_PATH, users);
+    await writeDb(DB_PATH_USERS, users);
     const { password: _p, ...userWithoutPassword } = users[userIndex];
     return userWithoutPassword;
 }
@@ -227,7 +225,7 @@ export async function updateUserProfilePicture(userId: string, pictureUrl: strin
   };
 
   users[userIndex] = updatedUser;
-  await writeDb(DB_PATH, users);
+  await writeDb(DB_PATH_USERS, users);
 
   const { password, ...userWithoutPassword } = updatedUser;
   return userWithoutPassword;

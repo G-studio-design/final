@@ -5,7 +5,8 @@ import * as path from 'path';
 import type { User } from '@/types/user-types';
 import { readDb } from '@/lib/database-utils';
 
-const DB_PATH = path.resolve(process.cwd(), 'database');
+const DB_PATH_USERS = path.resolve(process.cwd(), 'database', 'users.json');
+const DB_PATH_SUBSCRIPTIONS = path.resolve(process.cwd(), 'database', 'subscriptions.json');
 
 /**
  * Reads the entire user database.
@@ -13,12 +14,10 @@ const DB_PATH = path.resolve(process.cwd(), 'database');
  * @returns A promise that resolves to an array of all User objects.
  */
 export async function getAllUsers(): Promise<User[]> {
-    const filePath = path.join(DB_PATH, 'users.json');
-    return await readDb<User[]>(filePath, []);
+    return await readDb<User[]>(DB_PATH_USERS, []);
 }
 
 export async function getSubscriptionsForUserIds(userIds: string[]): Promise<{userId: string, subscription: any}[]> {
-    const filePath = path.join(DB_PATH, 'subscriptions.json');
-    const allSubscriptions = await readDb<{userId: string, subscription: any}[]>(filePath, []);
+    const allSubscriptions = await readDb<{userId: string, subscription: any}[]>(DB_PATH_SUBSCRIPTIONS, []);
     return allSubscriptions.filter(sub => userIds.includes(sub.userId));
 }
