@@ -1,69 +1,78 @@
 // public/sw.js
 
-// Listener untuk push event
-self.addEventListener('push', function (event) {
-  console.log('[Service Worker] Push Received.');
+// Listen for the install event, which is fired when the service worker is installed.
+self.addEventListener('install', (event) => {
+  console.log('Service Worker: Fired event: install');
+  // The skipWaiting() method allows this service worker to activate
+  // as soon as it's finished installing.
+  event.waitUntil(self.skipWaiting());
+});
 
-  let notificationData = {};
-  try {
-    notificationData = event.data.json();
-  } catch (e) {
-    console.warn('[Service Worker] Push event data is not JSON, treating as text.');
-    notificationData = {
-      title: 'Msarch App Notification',
-      body: event.data.text(),
-      url: '/dashboard'
-    };
+// Listen for the activate event, which is fired when the service worker is activated.
+self.addEventListener('activate', (event) => {
+  console.log('Service Worker: Fired event: activate');
+  // The clients.claim() method allows an active service worker to set itself as the
+  // controller for all clients within its scope.
+  event.waitUntil(self.clients.claim());
+});
+
+// Listen for the push event, which is fired when a push message is received.
+self.addEventListener('push', (event) => {
+  console.log('Service Worker: Fired event: push');
+  if (!event.data) {
+    console.error('Service Worker: Push event but no data');
+    return;
   }
 
-  const { title, body, url } = notificationData;
+  const data = event.data.json();
+  console.log('Service Worker: Push received with data:', data);
 
+  const title = data.title || 'Msarch App Notification';
   const options = {
-    body: body,
-    icon: '/msarch-logo.png', // Path ke ikon notifikasi
-    badge: '/msarch-logo.png', // Path ke badge notifikasi (untuk beberapa perangkat)
+    body: data.body,
+    icon: '/msarch-logo.png', // Main icon
+    badge: '/msarch-logo-badge.png', // Icon for small areas (like Android status bar)
+    vibrate: [200, 100, 200], // Vibration pattern
     data: {
-      url: url || '/dashboard' // Menyimpan URL untuk digunakan saat notifikasi di-klik
-    }
+      url: data.url || '/', // URL to open on click
+    },
   };
 
   event.waitUntil(self.registration.showNotification(title, options));
 });
 
-// Listener untuk klik notifikasi
-self.addEventListener('notificationclick', function (event) {
-  console.log('[Service Worker] Notification click Received.');
+// Listen for the notificationclick event, which is fired when a user clicks on a notification.
+self.addEventListener('notificationclick', (event) => {
+  console.log('Service Worker: Fired event: notificationclick');
+  const notification = event.notification;
+  const urlToOpen = notification.data.url || '/';
 
-  event.notification.close(); // Tutup notifikasi
+  // Close the notification
+  notification.close();
 
-  const targetUrl = event.notification.data.url;
-
+  // This looks for an existing window/tab with the same URL.
+  // If one is found, it focuses it. If not, it opens a new one.
   event.waitUntil(
-    clients.matchAll({
-      type: 'window'
-    }).then(function (clientList) {
-      // Cek apakah ada tab aplikasi yang sudah terbuka
-      for (let i = 0; i < clientList.length; i++) {
-        const client = clientList[i];
-        if (client.url === '/' && 'focus' in client) {
-          // Jika ada, fokus ke tab tersebut dan navigasi ke URL target
-          client.focus();
-          return client.navigate(targetUrl);
+    self.clients
+      .matchAll({
+        type: 'window',
+        includeUncontrolled: true,
+      })
+      .then((clientList) => {
+        // Check if there's a window open with the target URL
+        for (const client of clientList) {
+          if (client.url === urlToOpen && 'focus' in client) {
+            console.log('Service Worker: Found an existing client, focusing it.');
+            client.postMessage({ type: 'navigate', url: urlToOpen });
+            return client.focus();
+          }
         }
-      }
-      // Jika tidak ada tab yang terbuka, buka tab baru
-      if (clients.openWindow) {
-        return clients.openWindow(targetUrl);
-      }
-    })
+
+        // If no client is found, open a new one
+        if (self.clients.openWindow) {
+          console.log('Service Worker: No existing client found, opening a new window.');
+          return self.clients.openWindow(urlToOpen);
+        }
+      })
   );
-});
-
-// Skip waiting phase on activate to ensure the new service worker takes control immediately
-self.addEventListener('install', (event) => {
-    event.waitUntil(self.skipWaiting());
-});
-
-self.addEventListener('activate', (event) => {
-    event.waitUntil(self.clients.claim());
 });

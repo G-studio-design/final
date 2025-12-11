@@ -1,4 +1,3 @@
-
 // src/components/dashboard/ProjectsPageClient.tsx
 'use client';
 
@@ -227,6 +226,19 @@ export default function ProjectsPageClient({ initialProjects }: ProjectsPageClie
         setIsLoadingProjects(false);
     }
   }, [toast, projectsDict.toast.error, projectsDict.toast.couldNotLoadProjects]);
+
+  React.useEffect(() => {
+    const handleDataRefresh = () => {
+      console.log('`refresh-data` event received, refetching projects...');
+      fetchAllProjects();
+    };
+
+    window.addEventListener('refresh-data', handleDataRefresh);
+
+    return () => {
+      window.removeEventListener('refresh-data', handleDataRefresh);
+    };
+  }, [fetchAllProjects]);
 
   const fetchProjectById = async (id: string): Promise<Project | null> => {
     try {
@@ -2259,5 +2271,3 @@ export default function ProjectsPageClient({ initialProjects }: ProjectsPageClie
     </div>
   );
 }
-
-

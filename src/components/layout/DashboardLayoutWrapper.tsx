@@ -111,6 +111,8 @@ export default function DashboardLayoutWrapper({ children, attendanceEnabled }: 
       const handleServiceWorkerMessage = (event: MessageEvent) => {
         if (event.data && event.data.type === 'navigate' && event.data.url) {
           router.push(event.data.url);
+          // Dispatch a custom event to tell the page to refresh its data
+          window.dispatchEvent(new CustomEvent('refresh-data'));
         }
       };
 
@@ -280,6 +282,8 @@ export default function DashboardLayoutWrapper({ children, attendanceEnabled }: 
     
     if (notification.url) {
         router.push(notification.url);
+        // Dispatch a custom event to tell the page to refresh its data
+        window.dispatchEvent(new CustomEvent('refresh-data'));
     }
 }, [router]);
 
