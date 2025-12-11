@@ -45,7 +45,7 @@ const DEFAULT_SETTINGS: AppSettings = {
   }
 };
 
-const DB_PATH = path.resolve('/database', 'app_settings.json');
+const DB_PATH = path.resolve(process.cwd(), 'database', 'app_settings.json');
 
 export async function getAppSettings(): Promise<AppSettings> {
   return await readDb<AppSettings>(DB_PATH, DEFAULT_SETTINGS);

@@ -27,8 +27,8 @@ interface StoredSubscription {
   subscription: PushSubscription;
 }
 
-const DB_PATH_NOTIFICATIONS = path.resolve('/database', 'notifications.json');
-const DB_PATH_SUBSCRIPTIONS = path.resolve('/database', 'subscriptions.json');
+const DB_PATH_NOTIFICATIONS = path.resolve(process.cwd(), 'database', 'notifications.json');
+const DB_PATH_SUBSCRIPTIONS = path.resolve(process.cwd(), 'database', 'subscriptions.json');
 
 const NOTIFICATION_LIMIT = 300;
 
