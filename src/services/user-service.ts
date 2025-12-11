@@ -2,12 +2,15 @@
 'use server';
 
 import * as path from 'path';
+import * as fs from 'fs/promises';
 import type { User, AddUserData, UpdateProfileData, UpdatePasswordData, UpdateUserGoogleTokensData } from '../types/user-types';
 import { readDb, writeDb } from '../lib/database-utils';
 import { getAllUsers as getAllUsersFromDb } from './data-access/user-data';
 
 const DB_BASE_PATH = process.env.DATABASE_PATH || path.resolve(process.cwd(), 'database');
 const DB_PATH_USERS = path.join(DB_BASE_PATH, 'database', 'users.json');
+const PUBLIC_UPLOADS_BASE_DIR = path.join(process.cwd(), 'public');
+
 
 async function getAllUsers(): Promise<User[]> {
     // This now uses the separated data-access function
@@ -93,6 +96,20 @@ export async function deleteUser(userId: string): Promise<void> {
     if (!userToDelete) {
         throw new Error('USER_NOT_FOUND');
     }
+    
+    // Clean up avatar file if it exists
+    if (userToDelete.profilePictureUrl) {
+        const oldAvatarPath = path.join(PUBLIC_UPLOADS_BASE_DIR, userToDelete.profilePictureUrl);
+        try {
+            await fs.unlink(oldAvatarPath);
+            console.log(`[UserService/deleteUser] Cleaned up avatar for deleted user ${userId}: ${oldAvatarPath}`);
+        } catch (error: any) {
+            if (error.code !== 'ENOENT') { // Don't log error if file simply doesn't exist
+                console.warn(`[UserService/deleteUser] Could not clean up avatar for user ${userId}:`, error.message);
+            }
+        }
+    }
+
 
     if (userToDelete.roles.includes('Admin Developer')) {
         throw new Error('CANNOT_DELETE_ADMIN_DEVELOPER');
@@ -214,7 +231,7 @@ export async function clearUserGoogleTokens(userId: string): Promise<Omit<User, 
     return userWithoutPassword;
 }
 
-export async function updateUserProfilePicture(userId: string, pictureUrl: string): Promise<Omit<User, 'password'>> {
+export async function updateUserProfilePicture(userId: string, newPictureUrl: string): Promise<Omit<User, 'password'>> {
   let users = await getAllUsers();
   const userIndex = users.findIndex(u => u.id === userId);
 
@@ -222,13 +239,31 @@ export async function updateUserProfilePicture(userId: string, pictureUrl: strin
     throw new Error('USER_NOT_FOUND');
   }
 
+  const oldPictureUrl = users[userIndex].profilePictureUrl;
+
   const updatedUser = {
     ...users[userIndex],
-    profilePictureUrl: pictureUrl,
+    profilePictureUrl: newPictureUrl,
   };
 
   users[userIndex] = updatedUser;
   await writeDb(DB_PATH_USERS, users);
+
+  // After successfully updating the DB, delete the old avatar file
+  if (oldPictureUrl && oldPictureUrl !== newPictureUrl) {
+    // Construct the absolute path to the old file inside the 'public' directory
+    const oldAvatarPath = path.join(PUBLIC_UPLOADS_BASE_DIR, oldPictureUrl);
+    try {
+      await fs.unlink(oldAvatarPath);
+      console.log(`[UserService/updateUserProfilePicture] Successfully deleted old avatar: ${oldAvatarPath}`);
+    } catch (error: any) {
+      // Don't throw an error if deletion fails, just log it.
+      // Most common "error" is that the file doesn't exist, which is fine.
+      if (error.code !== 'ENOENT') {
+        console.warn(`[UserService/updateUserProfilePicture] Failed to delete old avatar file ${oldAvatarPath}:`, error.message);
+      }
+    }
+  }
 
   const { password, ...userWithoutPassword } = updatedUser;
   return userWithoutPassword;
