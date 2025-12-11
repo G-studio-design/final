@@ -1,48 +1,44 @@
 # Dockerfile
+FROM node:20-alpine AS base
 
-# ==================================
-# Builder Stage
-# ==================================
-FROM node:20-alpine AS builder
-
+# --- Builder Stage ---
+# Builds the Next.js application
+FROM base AS builder
 WORKDIR /app
-
-# Copy package.json and package-lock.json
 COPY package*.json ./
-
-# Install dependencies
 RUN npm install
-
-# Copy the rest of the application source code
 COPY . .
-
-# Build the Next.js application
 RUN npm run build
 
-# ==================================
-# Production Stage
-# ==================================
-FROM node:20-alpine AS production
-
+# --- Runner Stage ---
+# Creates the final, optimized image for running the app
+FROM base AS runner
 WORKDIR /app
 
-# Set environment to production
-ENV NODE_ENV=production
+# Arguments for user and group IDs, with default values
+ARG PUID=1000
+ARG PGID=1000
 
-# Copy built assets from the builder stage
-COPY --from=builder /app/public ./public
+# Create user and group with corrected, more robust logic
+# This handles cases where the GID already exists in the container (common on Synology)
+RUN \
+  if ! getent group ${PGID} > /dev/null 2>&1; then \
+    echo "--- Group with GID ${PGID} does not exist, creating it as 'nodejsgroup' ---"; \
+    addgroup -g ${PGID} -S nodejsgroup; \
+  else \
+    echo "--- Group with GID ${PGID} already exists, will use it ---"; \
+  fi && \
+  adduser -u ${PUID} -S nodejs -G $(getent group ${PGID} | cut -d: -f1)
+
+# Copy built application files from the builder stage
 COPY --from=builder /app/.next/standalone ./
 COPY --from=builder /app/.next/static ./.next/static
 COPY --from=builder /app/package.json .
+COPY --from=builder /app/public ./public
 
-# Create a non-root user and group to run the app
-ARG PUID=1026
-ARG PGID=100
-RUN addgroup -g ${PGID} -S nodejs
-RUN adduser -u ${PUID} -S nodejs -G nodejs
-
-# Change ownership of the app directory
-RUN chown -R nodejs:nodejs /app
+# Set ownership of the application files to the newly created user
+# This is crucial for file write permissions (e.g., database, uploads)
+RUN chown -R nodejs:$(getent group ${PGID} | cut -d: -f1) .
 
 # Switch to the non-root user
 USER nodejs
@@ -50,5 +46,5 @@ USER nodejs
 # Expose the port the app runs on
 EXPOSE 4000
 
-# The command to run the application
+# The command to start the application
 CMD ["node", "server.js"]
