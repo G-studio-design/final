@@ -41,6 +41,7 @@ export async function verifyUserCredentials(usernameInput: string, passwordInput
         return null;
     }
 
+    // --- FIX: Reverted to simple string comparison ---
     const isMatch = passwordInput === user.password;
 
     if (!isMatch) {
