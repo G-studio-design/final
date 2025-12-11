@@ -8,7 +8,9 @@ import { sanitizeForPath } from '@/lib/path-utils';
 import { addFilesToProject } from '@/services/project-service';
 
 const MAX_FILE_SIZE = 20 * 1024 * 1024; // 20MB
-const PROJECT_FILES_BASE_DIR = path.resolve(process.cwd(), 'database', 'project_files');
+const DB_BASE_PATH = process.env.DATABASE_PATH || path.resolve(process.cwd(), 'database');
+const PROJECT_FILES_BASE_DIR = path.join(DB_BASE_PATH, 'project_files');
+
 
 async function ensureDirectoryExists(directoryPath: string) {
   try {
@@ -50,6 +52,7 @@ export async function POST(req: NextRequest) {
         await writeFile(absoluteFilePath, buffer);
         
         // Use a relative path (from the base dir) for storage in the JSON database
+        // This makes the path relative to the `project_files` directory
         const relativePath = path.join(projectId, safeFilenameForPath).replace(/\\/g, '/');
 
         const fileEntry = {

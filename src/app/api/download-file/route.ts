@@ -7,7 +7,8 @@ import { NextRequest } from 'next/server';
 
 export async function GET(request: NextRequest) {
   // Define base directory safely within the handler
-  const PROJECT_FILES_BASE_DIR = path.resolve(process.cwd(), 'database', 'project_files');
+  const DB_BASE_PATH = process.env.DATABASE_PATH || path.resolve(process.cwd(), 'database');
+  const PROJECT_FILES_BASE_DIR = path.join(DB_BASE_PATH, 'project_files');
 
   const searchParams = request.nextUrl.searchParams;
   const filePathParam = searchParams.get('filePath');

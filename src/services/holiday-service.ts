@@ -4,6 +4,9 @@
 import * as path from 'path';
 import { readDb } from '@/lib/database-utils';
 
+const DB_BASE_PATH = process.env.DATABASE_PATH || path.resolve(process.cwd(), 'database');
+const DB_PATH = path.join(DB_BASE_PATH, 'holidays.json');
+
 export interface HolidayEntry {
   id: string;
   date: string; // YYYY-MM-DD
@@ -11,8 +14,6 @@ export interface HolidayEntry {
   type: "National Holiday" | "Religious Holiday" | "Company Event" | "Other";
   description?: string;
 }
-
-const DB_PATH = path.resolve(process.cwd(), 'database', 'holidays.json');
 
 export async function getAllHolidays(): Promise<HolidayEntry[]> {
   const holidays = await readDb<HolidayEntry[]>(DB_PATH, []);

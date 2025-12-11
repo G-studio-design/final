@@ -7,6 +7,10 @@ import { getAppSettings } from './settings-service';
 import { notifyUsersByRole, type NotificationPayload } from './notification-service';
 import { readDb, writeDb } from '@/lib/database-utils';
 
+const DB_BASE_PATH = process.env.DATABASE_PATH || path.resolve(process.cwd(), 'database');
+const DB_PATH = path.join(DB_BASE_PATH, 'attendance.json');
+
+
 export interface AttendanceRecord {
   id: string;
   userId: string;
@@ -42,8 +46,6 @@ export interface CheckOutResult {
   record?: AttendanceRecord;
   error?: string;
 }
-
-const DB_PATH = path.resolve(process.cwd(), 'database', 'attendance.json');
 
 // Helper function to calculate distance between two lat/lon points in meters
 function getDistanceInMeters(lat1: number, lon1: number, lat2: number, lon2: number): number {

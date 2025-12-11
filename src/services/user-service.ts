@@ -5,7 +5,8 @@ import * as path from 'path';
 import type { User, AddUserData, UpdateProfileData, UpdatePasswordData, UpdateUserGoogleTokensData } from '../types/user-types';
 import { readDb, writeDb } from '../lib/database-utils';
 
-const DB_PATH_USERS = path.resolve(process.cwd(), 'database', 'users.json');
+const DB_BASE_PATH = process.env.DATABASE_PATH || path.resolve(process.cwd(), 'database');
+const DB_PATH_USERS = path.join(DB_BASE_PATH, 'users.json');
 
 async function getAllUsers(): Promise<User[]> {
     return await readDb<User[]>(DB_PATH_USERS, []);
@@ -41,7 +42,6 @@ export async function verifyUserCredentials(usernameInput: string, passwordInput
         return null;
     }
 
-    // --- FIX: Reverted to simple string comparison ---
     const isMatch = passwordInput === user.password;
 
     if (!isMatch) {

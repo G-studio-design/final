@@ -18,7 +18,9 @@ export async function GET(request: Request) {
 }
 
 export async function POST(request: Request) {
-  const PROJECT_FILES_BASE_DIR = path.resolve(process.cwd(), 'database', 'project_files');
+  const DB_BASE_PATH = process.env.DATABASE_PATH || path.resolve(process.cwd(), 'database');
+  const PROJECT_FILES_BASE_DIR = path.join(DB_BASE_PATH, 'project_files');
+  
   let newProjectId: string | null = null;
 
   try {

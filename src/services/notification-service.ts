@@ -6,6 +6,10 @@ import webPush, { type PushSubscription } from 'web-push';
 import { readDb, writeDb } from '../lib/database-utils';
 import { getAllUsers } from './user-service';
 
+const DB_BASE_PATH = process.env.DATABASE_PATH || path.resolve(process.cwd(), 'database');
+const DB_PATH_NOTIFICATIONS = path.join(DB_BASE_PATH, 'notifications.json');
+const DB_PATH_SUBSCRIPTIONS = path.join(DB_BASE_PATH, 'subscriptions.json');
+
 export interface Notification {
     id: string;
     userId: string;
@@ -26,9 +30,6 @@ interface StoredSubscription {
   userId: string;
   subscription: PushSubscription;
 }
-
-const DB_PATH_NOTIFICATIONS = path.resolve(process.cwd(), 'database', 'notifications.json');
-const DB_PATH_SUBSCRIPTIONS = path.resolve(process.cwd(), 'database', 'subscriptions.json');
 
 const NOTIFICATION_LIMIT = 300;
 

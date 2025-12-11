@@ -4,6 +4,9 @@
 import * as path from 'path';
 import { readDb, writeDb } from '@/lib/database-utils';
 
+const DB_BASE_PATH = process.env.DATABASE_PATH || path.resolve(process.cwd(), 'database');
+const DB_PATH = path.join(DB_BASE_PATH, 'app_settings.json');
+
 interface WorkingHours {
   isWorkDay: boolean;
   checkIn: string; // "HH:mm"
@@ -44,8 +47,6 @@ const DEFAULT_SETTINGS: AppSettings = {
     sunday: { isWorkDay: false, checkIn: "09:00", checkOut: "17:00" },
   }
 };
-
-const DB_PATH = path.resolve(process.cwd(), 'database', 'app_settings.json');
 
 export async function getAppSettings(): Promise<AppSettings> {
   return await readDb<AppSettings>(DB_PATH, DEFAULT_SETTINGS);

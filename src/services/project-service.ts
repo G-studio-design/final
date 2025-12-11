@@ -12,7 +12,9 @@ import { readDb, writeDb } from '../lib/database-utils';
 
 export type { Project, AddProjectData, UpdateProjectParams, FileEntry, ScheduleDetails, SurveyDetails, WorkflowHistoryEntry };
 
-const DB_PATH = path.resolve(process.cwd(), 'database', 'projects.json');
+const DB_BASE_PATH = process.env.DATABASE_PATH || path.resolve(process.cwd(), 'database');
+const DB_PATH = path.join(DB_BASE_PATH, 'projects.json');
+
 
 export async function addProject(projectData: Omit<AddProjectData, 'initialFiles'>): Promise<Project> {
     const projects = await readDb<Project[]>(DB_PATH, []);
