@@ -1,70 +1,57 @@
 # Dockerfile
 
-# Tahap 1: Instalasi Dependensi
-# Menggunakan base image node-alpine untuk ukuran yang lebih kecil
-FROM node:20-alpine AS deps
-# Atur direktori kerja di dalam image
-WORKDIR /app
-# Salin package.json dan package-lock.json (atau yarn.lock)
-COPY package.json package-lock.json* ./
-# Install dependencies
-RUN npm install
-
-# Tahap 2: Build Aplikasi
-# Menggunakan base image yang sama
+# ==================================
+# Builder Stage
+# ==================================
 FROM node:20-alpine AS builder
-# Argumen untuk User dan Group ID, default ke 1000
-ARG PUID=1000
-ARG PGID=1000
-
-# Buat grup dan pengguna terlebih dahulu
-RUN if ! getent group ${PGID} > /dev/null 2>&1; then \
-        addgroup -g ${PGID} nodejs; \
-    fi && \
-    adduser -S -u ${PUID} -G $(getent group ${PGID} | cut -d: -f1) nextjs
 
 WORKDIR /app
 
-# Salin dependensi dari tahap 'deps'
-COPY --from=deps /app/node_modules ./node_modules
-# Salin sisa file aplikasi
+# Copy package files and install dependencies
+COPY package.json package-lock.json* ./
+RUN npm install --production
+
+# Copy the rest of the application source code
 COPY . .
 
-# Build aplikasi Next.js
+# Build the Next.js application
 RUN npm run build
 
-# Tahap 3: Produksi
-# Menggunakan base image yang sama
+# ==================================
+# Runner Stage
+# ==================================
 FROM node:20-alpine AS runner
-ARG PUID=1000
-ARG PGID=1000
+
 WORKDIR /app
 
-# Atur environment variable
-ENV NODE_ENV=production
+# --- User and Group Management ---
+# Add build arguments for user and group IDs
+ARG PUID=1000
+ARG PGID=1000
 
-# Buat grup dan pengguna (sama seperti tahap builder)
-RUN if ! getent group ${PGID} > /dev/null 2>&1; then \
-        addgroup -g ${PGID} nodejs; \
-    fi && \
-    adduser -S -u ${PUID} -G $(getent group ${PGID} | cut -d: -f1) nextjs
+# Create a group and user
+RUN \
+  if ! getent group ${PGID} > /dev/null 2>&1; then \
+    addgroup -g ${PGID} nodejs; \
+  else \
+    echo "Group with GID ${PGID} already exists."; \
+  fi && \
+  adduser -h /app -s /bin/sh -D -u ${PUID} nextjs && \
+  addgroup nextjs nodejs
 
-# Salin folder .next/standalone yang sudah di-build
+# --- File Copying and Permissions ---
+# Copy standalone output
 COPY --from=builder /app/.next/standalone ./
+# Copy public and database assets with correct permissions
+COPY --from=builder --chown=nextjs:nodejs /app/public ./public
+COPY --from=builder --chown=nextjs:nodejs /app/database ./database
 
-# Salin folder public dan .next/static
-COPY --from=builder --chown=nextjs:$(getent group ${PGID} | cut -d: -f1) /app/public ./public
-COPY --from=builder --chown=nextjs:$(getent group ${PGID} | cut -d: -f1) /app/.next/static ./.next/static
-COPY --from=builder --chown=nextjs:$(getent group ${PGID} | cut -d: -f1) /app/database ./database
-
-# Ganti pemilik semua file ke pengguna nextjs
-RUN chown -R nextjs:$(getent group ${PGID} | cut -d: -f1) .
-
-# Ganti ke pengguna non-root
+# Set the user to run the application
 USER nextjs
 
-# Expose port 4000
 EXPOSE 4000
+ENV PORT 4000
+ENV NODE_ENV=production
 
-# Jalankan aplikasi
+# The command to run the application
 CMD ["node", "server.js"]
