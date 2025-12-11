@@ -1,4 +1,3 @@
-
 // src/services/attendance-service.ts
 'use server';
 
@@ -44,7 +43,7 @@ export interface CheckOutResult {
   error?: string;
 }
 
-const DB_PATH = path.resolve(process.cwd(), 'database', 'attendance.json');
+const DB_PATH = path.resolve('/database', 'attendance.json');
 
 // Helper function to calculate distance between two lat/lon points in meters
 function getDistanceInMeters(lat1: number, lon1: number, lat2: number, lon2: number): number {

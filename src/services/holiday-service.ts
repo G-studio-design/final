@@ -1,4 +1,3 @@
-
 // src/services/holiday-service.ts
 'use server';
 
@@ -13,7 +12,7 @@ export interface HolidayEntry {
   description?: string;
 }
 
-const DB_PATH = path.resolve(process.cwd(), 'database', 'holidays.json');
+const DB_PATH = path.resolve('/database', 'holidays.json');
 
 export async function getAllHolidays(): Promise<HolidayEntry[]> {
   const holidays = await readDb<HolidayEntry[]>(DB_PATH, []);
