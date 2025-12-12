@@ -245,6 +245,8 @@ export async function updateUserProfilePicture(userId: string, newRelativePath: 
   const updatedUser: User = {
     ...users[userIndex],
     profilePictureUrl: newRelativePath,
+    // Add a cache-busting parameter by updating the accessTokenExpiresAt timestamp
+    accessTokenExpiresAt: Date.now(), 
   };
 
   users[userIndex] = updatedUser;

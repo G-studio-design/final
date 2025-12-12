@@ -298,6 +298,7 @@ export default function SettingsPageClient() {
       const result = await response.json();
       if (!response.ok) throw new Error(result.message);
       
+      // CRUCIAL STEP: Update the entire user context with the response from the API
       updateAuthContextUser(result.user);
       
       toast({ title: 'Success', description: 'Profile picture updated successfully.' });
@@ -311,7 +312,9 @@ export default function SettingsPageClient() {
   };
 
   const avatarUrl = React.useMemo(() => {
-    if (!isClient || !currentUser) return undefined;
+    if (!isClient || !currentUser?.id) return undefined;
+    // Use the user's 'accessTokenExpiresAt' as a cache-busting query parameter.
+    // This value is updated on the user object whenever the profile picture changes.
     return `/api/users/${currentUser.id}/avatar?v=${currentUser.accessTokenExpiresAt || Date.now()}`;
   }, [isClient, currentUser]);
 

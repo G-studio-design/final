@@ -321,10 +321,12 @@ export default function DashboardLayoutWrapper({ children, attendanceEnabled }: 
   
   const avatarUrl = useMemo(() => {
     if (isClient && currentUser?.id) {
-        return `/api/users/${currentUser.id}/avatar?v=${currentUser.accessTokenExpiresAt || Date.now()}`;
+      // Use the 'accessTokenExpiresAt' as a cache-busting parameter.
+      // This value is updated in the user object whenever the profile picture changes.
+      return `/api/users/${currentUser.id}/avatar?v=${currentUser.accessTokenExpiresAt || Date.now()}`;
     }
     return undefined;
-}, [isClient, currentUser]);
+  }, [isClient, currentUser]);
 
 
   return (

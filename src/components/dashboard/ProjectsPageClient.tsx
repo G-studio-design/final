@@ -1213,11 +1213,15 @@ export default function ProjectsPageClient({ initialProjects }: ProjectsPageClie
     }, [selectedProject, currentUser]);
     
     const showAdminFileUploadSection = React.useMemo(() => {
-        if (!selectedProject || !currentUser || !Array.isArray(currentUser.roles)) return false;
-        const canTakeAction = currentUser.roles.includes('Admin Proyek');
-        const isProjectActive = !['Completed', 'Canceled'].includes(selectedProject.status);
-        const hasCompletedAdminFilesStep = selectedProject.workflowHistory.some(h => h.action.includes('submitted for "Unggah Berkas Administrasi"'));
-        return isProjectActive && canTakeAction && hasCompletedAdminFilesStep;
+      if (!selectedProject || !currentUser || !Array.isArray(currentUser.roles)) return false;
+      const canTakeAction = currentUser.roles.includes('Admin Proyek');
+      const isProjectActive = !['Completed', 'Canceled'].includes(selectedProject.status);
+      const hasCompletedAdminFilesStep = selectedProject.workflowHistory.some(
+        (h) => h.action.includes('approved: Setujui Faktur DP')
+      );
+      return (
+        isProjectActive && canTakeAction && hasCompletedAdminFilesStep
+      );
     }, [selectedProject, currentUser]);
 
 
