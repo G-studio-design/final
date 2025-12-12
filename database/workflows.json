@@ -728,7 +728,7 @@
             "targetProgress": 98,
             "notification": {
               "division": ["Admin Proyek", "Owner"],
-              "message": "Invoice Pelunasan untuk proyek '{projectName}' telah diunggah oleh {actorUsername}."
+              "message": "Invoice Pelunasan untuk proyek '{projectName}' telah diunggah oleh {actorUsername}. Admin Proyek, mohon lanjutkan ke tahap dokumen akhir."
             }
           }
         }
@@ -790,3 +790,5 @@
     ]
   }
 ]
+
+    
