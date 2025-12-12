@@ -297,8 +297,7 @@ export default function SettingsPageClient() {
 
       const result = await response.json();
       if (!response.ok) throw new Error(result.message);
-
-      // This is the key change: update the user in the context with the full user object from the API response
+      
       updateAuthContextUser(result.user);
       
       toast({ title: 'Success', description: 'Profile picture updated successfully.' });
@@ -310,6 +309,11 @@ export default function SettingsPageClient() {
       setIsUploadingAvatar(false);
     }
   };
+
+  const avatarUrl = React.useMemo(() => {
+    if (!isClient || !currentUser) return undefined;
+    return `/api/users/${currentUser.id}/avatar?v=${currentUser.accessTokenExpiresAt || Date.now()}`;
+  }, [isClient, currentUser]);
 
 
   if (!isClient || !currentUser) {
@@ -336,7 +340,7 @@ export default function SettingsPageClient() {
                  <CardContent className="space-y-4">
                      <div className="flex flex-col sm:flex-row items-center sm:items-start space-y-4 sm:space-y-0 sm:space-x-4">
                           <Avatar className="h-20 w-20 border-2 border-primary/30">
-                            <AvatarImage src={avatarPreview || currentUser.profilePictureUrl || undefined} alt={currentUser.displayName || currentUser.username} />
+                            <AvatarImage src={avatarPreview || avatarUrl} alt={currentUser.displayName || currentUser.username} />
                             <AvatarFallback className="text-xl bg-muted">{getUserInitials(currentUser.displayName || currentUser.username)}</AvatarFallback>
                           </Avatar>
                           <div className="flex-grow space-y-2 text-center sm:text-left">

@@ -1,0 +1,48 @@
+version: '3.8'
+
+# Mendefinisikan jaringan kustom agar kontainer bisa saling berkomunikasi
+networks:
+  msarch-net:
+    driver: bridge
+
+services:
+  # Layanan untuk aplikasi Next.js Anda
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        # GANTI DENGAN PUID DAN PGID DARI PENGGUNA NAS ANDA
+        # Jalankan 'id <username>' via SSH di NAS untuk mendapatkannya.
+        - PUID=1026
+        - PGID=100
+    container_name: msarch-app-prod
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      # PENTING: Arahkan DATABASE_PATH ke folder data di dalam kontainer.
+      # Path ini harus cocok dengan path target dari volume di bawah.
+      - DATABASE_PATH=/app/data
+    volumes:
+      # Map folder data eksternal Anda di NAS ke folder data di dalam kontainer.
+      - ./msarch-data/database:/app/data/database
+      # Map folder unggahan eksternal Anda di NAS ke folder data/uploads di dalam kontainer.
+      - ./msarch-data/uploads:/app/data/uploads
+      # Map folder file proyek eksternal Anda di NAS ke folder data/project_files di dalam kontainer.
+      - ./msarch-data/project_files:/app/data/project_files
+    # Menambahkan layanan 'app' ke jaringan 'msarch-net'
+    networks:
+      - msarch-net
+
+  # Layanan untuk Cloudflare Tunnel
+  tunnel:
+    image: cloudflare/cloudflared:latest
+    container_name: msarch-tunnel-connector
+    restart: unless-stopped
+    command: tunnel --no-autoupdate run
+    environment:
+      - TUNNEL_TOKEN=${CLOUDFLARED_TOKEN}
+    # Menambahkan layanan 'tunnel' ke jaringan yang sama
+    networks:
+      - msarch-net

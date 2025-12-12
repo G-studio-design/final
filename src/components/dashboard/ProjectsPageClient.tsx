@@ -1142,7 +1142,7 @@ export default function ProjectsPageClient({ initialProjects }: ProjectsPageClie
       if (!canTakeAction) return false;
 
       const statusesExpectingUpload = [
-          'Pending Offer', 'Pending DP Invoice', 'Pending Admin Files',
+          'Pending Offer', 'Pending DP Invoice',
           'Pending Architect Files', 'Pending Structure Files', 'Pending MEP Files',
           'Pending Consultation Docs', 'Pending Pelunasan Invoice', 'Pending Sidang Registration Proof'
       ];
@@ -1216,7 +1216,8 @@ export default function ProjectsPageClient({ initialProjects }: ProjectsPageClie
         if (!selectedProject || !currentUser || !Array.isArray(currentUser.roles)) return false;
         const canTakeAction = currentUser.roles.includes('Admin Proyek');
         const isProjectActive = !['Completed', 'Canceled'].includes(selectedProject.status);
-        return isProjectActive && canTakeAction;
+        const hasCompletedAdminFilesStep = selectedProject.workflowHistory.some(h => h.action.includes('submitted for "Unggah Berkas Administrasi"'));
+        return isProjectActive && canTakeAction && hasCompletedAdminFilesStep;
     }, [selectedProject, currentUser]);
 
 

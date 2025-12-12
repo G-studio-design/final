@@ -318,6 +318,13 @@ export default function DashboardLayoutWrapper({ children, attendanceEnabled }: 
     logout();
     setIsSheetOpen(false);
   };
+  
+  const avatarUrl = useMemo(() => {
+    if (isClient && currentUser?.id) {
+        return `/api/users/${currentUser.id}/avatar?v=${currentUser.accessTokenExpiresAt || Date.now()}`;
+    }
+    return undefined;
+}, [isClient, currentUser]);
 
 
   return (
@@ -433,7 +440,7 @@ export default function DashboardLayoutWrapper({ children, attendanceEnabled }: 
                        <div className="flex items-center gap-3 rounded-md p-2">
                          <Avatar className="h-10 w-10 border-2 border-primary-foreground/30">
                            <AvatarImage
-                                src={currentUser.profilePictureUrl || undefined}
+                                src={avatarUrl}
                                 alt={currentUser.displayName || currentUser.username}
                             />
                            <AvatarFallback className="bg-primary-foreground/20 text-primary-foreground">

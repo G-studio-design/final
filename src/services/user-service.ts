@@ -9,7 +9,7 @@ import { getAllUsers as getAllUsersFromDb } from './data-access/user-data';
 
 const DB_BASE_PATH = process.env.DATABASE_PATH || path.resolve(process.cwd(), 'database');
 const DB_PATH_USERS = path.join(DB_BASE_PATH, 'database', 'users.json');
-const PUBLIC_UPLOADS_BASE_DIR = path.join(process.cwd(), 'public');
+const AVATAR_UPLOAD_DIR = path.join(process.cwd(), 'data', 'uploads');
 
 
 async function getAllUsers(): Promise<User[]> {
@@ -99,7 +99,7 @@ export async function deleteUser(userId: string): Promise<void> {
     
     // Clean up avatar file if it exists
     if (userToDelete.profilePictureUrl) {
-        const oldAvatarPath = path.join(PUBLIC_UPLOADS_BASE_DIR, userToDelete.profilePictureUrl.split('?')[0]);
+        const oldAvatarPath = path.join(AVATAR_UPLOAD_DIR, userToDelete.profilePictureUrl);
         try {
             await fs.unlink(oldAvatarPath);
             console.log(`[UserService/deleteUser] Cleaned up avatar for deleted user ${userId}: ${oldAvatarPath}`);
@@ -231,7 +231,7 @@ export async function clearUserGoogleTokens(userId: string): Promise<Omit<User, 
     return userWithoutPassword;
 }
 
-export async function updateUserProfilePicture(userId: string, newPictureUrl: string): Promise<Omit<User, 'password'>> {
+export async function updateUserProfilePicture(userId: string, newRelativePath: string): Promise<Omit<User, 'password'>> {
   let users = await getAllUsers();
   const userIndex = users.findIndex(u => u.id === userId);
 
@@ -239,29 +239,25 @@ export async function updateUserProfilePicture(userId: string, newPictureUrl: st
     throw new Error('USER_NOT_FOUND');
   }
 
-  // Get the old picture URL *before* updating the user record
-  const oldPictureUrl = users[userIndex].profilePictureUrl;
+  const oldRelativePath = users[userIndex].profilePictureUrl;
 
-  // Add a cache-busting query parameter to the new URL
-  const finalPictureUrl = `${newPictureUrl}?v=${Date.now()}`;
-
-  const updatedUser = {
+  const updatedUser: User = {
     ...users[userIndex],
-    profilePictureUrl: finalPictureUrl,
+    profilePictureUrl: newRelativePath,
+    accessTokenExpiresAt: Date.now() 
   };
 
   users[userIndex] = updatedUser;
   await writeDb(DB_PATH_USERS, users);
 
-  // After successfully updating the DB, try to delete the old avatar file
-  if (oldPictureUrl && oldPictureUrl.split('?')[0] !== newPictureUrl) {
-    const oldAvatarPath = path.join(PUBLIC_UPLOADS_BASE_DIR, oldPictureUrl.split('?')[0]);
+  if (oldRelativePath && oldRelativePath !== newRelativePath) {
+    const oldAbsolutePath = path.join(AVATAR_UPLOAD_DIR, oldRelativePath);
     try {
-      await fs.unlink(oldAvatarPath);
-      console.log(`[UserService/updateUserProfilePicture] Successfully deleted old avatar: ${oldAvatarPath}`);
+      await fs.unlink(oldAbsolutePath);
+      console.log(`[UserService] Successfully deleted old avatar: ${oldAbsolutePath}`);
     } catch (error: any) {
       if (error.code !== 'ENOENT') {
-        console.warn(`[UserService/updateUserProfilePicture] Could not delete old avatar file ${oldAvatarPath}:`, error.message);
+        console.warn(`[UserService] Could not delete old avatar file ${oldAbsolutePath}:`, error.message);
       }
     }
   }
