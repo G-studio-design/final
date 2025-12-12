@@ -23,14 +23,6 @@ const nextConfig = {
   eslint: {
     ignoreDuringBuilds: false,
   },
-   async rewrites() {
-    return [
-      {
-        source: '/api/users/:userId/avatar',
-        destination: '/api/users/:userId/avatar',
-      },
-    ]
-  },
 };
 
 module.exports = nextConfig;

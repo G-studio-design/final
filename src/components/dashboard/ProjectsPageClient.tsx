@@ -1206,17 +1206,16 @@ export default function ProjectsPageClient({ initialProjects }: ProjectsPageClie
     }, [selectedProject, currentUser]);
     
     const showAdminFileUploadSection = React.useMemo(() => {
-      if (!selectedProject || !currentUser || !Array.isArray(currentUser.roles)) return false;
-      const canTakeAction = currentUser.roles.includes('Admin Proyek');
-      const isProjectActive = !['Completed', 'Canceled'].includes(selectedProject.status);
-      
-      const hasCompletedAdminFilesStep = selectedProject.workflowHistory.some(h =>
-          h.action.toLowerCase().includes('berkas administrasi')
-      );
+        if (!selectedProject || !currentUser || !Array.isArray(currentUser.roles)) return false;
+        const canTakeAction = currentUser.roles.includes('Admin Proyek');
+        const isProjectActive = !['Completed', 'Canceled'].includes(selectedProject.status);
+        
+        // Check if the "Pending Admin Files" step has been passed
+        const hasCompletedAdminFilesStep = selectedProject.workflowHistory.some(h => 
+            h.action.toLowerCase().includes('berkas administrasi')
+        );
 
-      return (
-        isProjectActive && canTakeAction && hasCompletedAdminFilesStep && selectedProject.status !== 'Pending Admin Files'
-      );
+        return isProjectActive && canTakeAction && hasCompletedAdminFilesStep && selectedProject.status !== 'Pending Admin Files';
     }, [selectedProject, currentUser]);
 
 

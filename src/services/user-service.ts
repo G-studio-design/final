@@ -5,7 +5,6 @@ import * as path from 'path';
 import * as fs from 'fs/promises';
 import type { User, AddUserData, UpdateProfileData, UpdatePasswordData, UpdateUserGoogleTokensData } from '../types/user-types';
 import { readDb, writeDb } from '../lib/database-utils';
-import { getAllUsers as getAllUsersFromDb } from './data-access/user-data';
 
 const DB_BASE_PATH = process.env.DATABASE_PATH || path.resolve(process.cwd(), 'database');
 const DB_PATH_USERS = path.join(DB_BASE_PATH, 'users.json');
@@ -13,8 +12,7 @@ const AVATAR_UPLOAD_DIR = path.join(DB_BASE_PATH, 'uploads', 'avatars');
 
 
 async function getAllUsers(): Promise<User[]> {
-    // This now uses the separated data-access function
-    return await getAllUsersFromDb();
+    return await readDb<User[]>(DB_PATH_USERS, []);
 }
 
 export async function findUserByUsername(username: string): Promise<User | null> {

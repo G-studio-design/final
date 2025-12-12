@@ -5,8 +5,7 @@ import { join } from 'path';
 import mime from 'mime';
 import { updateUserProfilePicture, findUserById } from '@/services/user-service';
 
-const DB_BASE_PATH = process.env.DATABASE_PATH || join(process.cwd(), 'database');
-const UPLOAD_DIR = join(DB_BASE_PATH, 'uploads', 'avatars');
+const UPLOAD_DIR = join(process.env.DATABASE_PATH || join(process.cwd(), 'database'), 'uploads', 'avatars');
 
 
 async function ensureDirectoryExists(directoryPath: string) {
@@ -37,14 +36,18 @@ export async function GET(
     }
 
     const filename = user.profilePictureUrl;
+    // IMPORTANT: Construct the absolute path to the file on the server's filesystem
     const filePath = join(UPLOAD_DIR, filename);
 
     const fileBuffer = await readFile(filePath);
     
+    // Determine content type from filename
     const contentType = mime.getType(filePath) || 'application/octet-stream';
 
+    // Create headers to serve the image
     const headers = new Headers();
     headers.set('Content-Type', contentType);
+    // Add cache-control headers to prevent browser caching of this dynamic endpoint
     headers.set('Cache-Control', 'no-cache, no-store, must-revalidate');
     headers.set('Pragma', 'no-cache');
     headers.set('Expires', '0');
