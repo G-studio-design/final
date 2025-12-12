@@ -5,7 +5,9 @@ import { join } from 'path';
 import mime from 'mime';
 import { updateUserProfilePicture, findUserById } from '@/services/user-service';
 
-const UPLOAD_DIR = join(process.cwd(), 'public', 'uploads', 'avatars');
+const DB_BASE_PATH = process.env.DATABASE_PATH || join(process.cwd(), 'database');
+const UPLOAD_DIR = join(DB_BASE_PATH, 'uploads', 'avatars');
+
 
 async function ensureDirectoryExists(directoryPath: string) {
   try {
@@ -16,6 +18,46 @@ async function ensureDirectoryExists(directoryPath: string) {
     } else {
       throw error;
     }
+  }
+}
+
+export async function GET(
+  request: NextRequest,
+  { params }: { params: { userId: string } }
+) {
+  const userId = params.userId;
+  if (!userId) {
+    return new NextResponse('User ID is required', { status: 400 });
+  }
+
+  try {
+    const user = await findUserById(userId);
+    if (!user || !user.profilePictureUrl) {
+      return new NextResponse('Avatar not found', { status: 404 });
+    }
+
+    const filename = user.profilePictureUrl;
+    const filePath = join(UPLOAD_DIR, filename);
+
+    const fileBuffer = await readFile(filePath);
+    
+    const contentType = mime.getType(filePath) || 'application/octet-stream';
+
+    const headers = new Headers();
+    headers.set('Content-Type', contentType);
+    headers.set('Cache-Control', 'no-cache, no-store, must-revalidate');
+    headers.set('Pragma', 'no-cache');
+    headers.set('Expires', '0');
+
+
+    return new NextResponse(fileBuffer, { status: 200, headers });
+
+  } catch (error: any) {
+    if (error.code === 'ENOENT') {
+        return new NextResponse('Avatar file not found on disk', { status: 404 });
+    }
+    console.error(`[API/Avatar GET] Error for user ${userId}:`, error);
+    return new NextResponse('Internal Server Error', { status: 500 });
   }
 }
 
@@ -43,9 +85,9 @@ export async function POST(
     const uniqueSuffix = `${Date.now()}_${Math.round(Math.random() * 1E9)}`;
     const fileExtension = mime.getExtension(file.type) || 'jpg';
     const filename = `${userId}_${uniqueSuffix}.${fileExtension}`;
-    const relativePath = join('/uploads', 'avatars', filename);
-
-    const updatedUser = await updateUserProfilePicture(userId, relativePath);
+    
+    // The service now only needs the filename
+    const updatedUser = await updateUserProfilePicture(userId, filename);
 
     const absolutePath = join(UPLOAD_DIR, filename);
     await writeFile(absolutePath, buffer);

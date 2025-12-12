@@ -8,8 +8,8 @@ import { readDb, writeDb } from '../lib/database-utils';
 import { getAllUsers as getAllUsersFromDb } from './data-access/user-data';
 
 const DB_BASE_PATH = process.env.DATABASE_PATH || path.resolve(process.cwd(), 'database');
-const DB_PATH_USERS = path.join(DB_BASE_PATH, 'database', 'users.json');
-const AVATAR_UPLOAD_DIR = path.join(process.cwd(), 'public', 'uploads');
+const DB_PATH_USERS = path.join(DB_BASE_PATH, 'users.json');
+const AVATAR_UPLOAD_DIR = path.join(DB_BASE_PATH, 'uploads', 'avatars');
 
 
 async function getAllUsers(): Promise<User[]> {
@@ -99,7 +99,7 @@ export async function deleteUser(userId: string): Promise<void> {
     
     // Clean up avatar file if it exists
     if (userToDelete.profilePictureUrl) {
-        const oldAvatarPath = path.join(AVATAR_UPLOAD_DIR, userToDelete.profilePictureUrl);
+        const oldAvatarPath = path.join(AVATAR_UPLOAD_DIR, path.basename(userToDelete.profilePictureUrl));
         try {
             await fs.unlink(oldAvatarPath);
             console.log(`[UserService/deleteUser] Cleaned up avatar for deleted user ${userId}: ${oldAvatarPath}`);
@@ -231,7 +231,7 @@ export async function clearUserGoogleTokens(userId: string): Promise<Omit<User, 
     return userWithoutPassword;
 }
 
-export async function updateUserProfilePicture(userId: string, newRelativePath: string): Promise<Omit<User, 'password'>> {
+export async function updateUserProfilePicture(userId: string, newFilename: string): Promise<Omit<User, 'password'>> {
   let users = await getAllUsers();
   const userIndex = users.findIndex(u => u.id === userId);
 
@@ -239,25 +239,23 @@ export async function updateUserProfilePicture(userId: string, newRelativePath: 
     throw new Error('USER_NOT_FOUND');
   }
 
-  // Important: Read the old path BEFORE updating the database
   const oldRelativePath = users[userIndex].profilePictureUrl;
 
+  // The URL stored in the DB is just the filename now
   const updatedUser: User = {
     ...users[userIndex],
-    profilePictureUrl: newRelativePath,
+    profilePictureUrl: newFilename,
   };
 
   users[userIndex] = updatedUser;
   await writeDb(DB_PATH_USERS, users);
 
-  // After successfully updating the DB, delete the old file
-  if (oldRelativePath && oldRelativePath !== newRelativePath) {
-    const oldAbsolutePath = path.join(process.cwd(), 'public', oldRelativePath);
+  if (oldRelativePath) {
+    const oldAbsolutePath = path.join(AVATAR_UPLOAD_DIR, path.basename(oldRelativePath));
     try {
       await fs.unlink(oldAbsolutePath);
       console.log(`[UserService] Successfully deleted old avatar: ${oldAbsolutePath}`);
     } catch (error: any) {
-      // Don't throw error if file doesn't exist, just log a warning
       if (error.code !== 'ENOENT') {
         console.warn(`[UserService] Could not delete old avatar file ${oldAbsolutePath}:`, error.message);
       }

@@ -100,10 +100,22 @@ export default function DashboardLayoutWrapper({ children, attendanceEnabled }: 
   const [isClient, setIsClient] = useState(false);
   const [isSheetOpen, setIsSheetOpen] = useState(false);
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+  
+  // This state is to force re-render of Avatar when user object changes
+  const [avatarKey, setAvatarKey] = useState(Date.now());
+
 
   useEffect(() => {
     setIsClient(true);
   }, []);
+  
+  // Update the avatarKey whenever the profile picture URL changes in the context
+  useEffect(() => {
+      if (currentUser?.profilePictureUrl) {
+          setAvatarKey(Date.now());
+      }
+  }, [currentUser?.profilePictureUrl]);
+
 
   // Listener for messages from the Service Worker
   useEffect(() => {
@@ -431,7 +443,7 @@ export default function DashboardLayoutWrapper({ children, attendanceEnabled }: 
                      {isClient && currentUser ? (
                        <div className="flex items-center gap-3 rounded-md p-2">
                          <Avatar className="h-10 w-10 border-2 border-primary-foreground/30">
-                           <AvatarImage src={currentUser.profilePictureUrl || undefined} alt={currentUser.displayName || currentUser.username} />
+                           <AvatarImage key={avatarKey} src={`/api/users/${currentUser.id}/avatar?v=${avatarKey}`} alt={currentUser.displayName || currentUser.username} />
                            <AvatarFallback className="bg-primary-foreground/20 text-primary-foreground">
                                {getUserInitials(currentUser.displayName || currentUser.username)}
                            </AvatarFallback>

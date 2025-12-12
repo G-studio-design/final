@@ -70,6 +70,9 @@ export default function SettingsPageClient() {
 
    const [notificationPermission, setNotificationPermission] = React.useState('default');
    const [isSubscribing, setIsSubscribing] = React.useState(false);
+   
+   // This key will be used to force the AvatarImage to re-render
+   const [avatarKey, setAvatarKey] = React.useState(Date.now());
 
 
    React.useEffect(() => {
@@ -298,12 +301,12 @@ export default function SettingsPageClient() {
       const result = await response.json();
       if (!response.ok) throw new Error(result.message);
       
-      // CRUCIAL STEP: Update the entire user context with the response from the API
       updateAuthContextUser(result.user);
       
       toast({ title: 'Success', description: 'Profile picture updated successfully.' });
       setAvatarFile(null);
       setAvatarPreview(null);
+      setAvatarKey(Date.now()); // Force re-render
     } catch (error: any) {
       toast({ variant: 'destructive', title: 'Upload Failed', description: error.message });
     } finally {
@@ -336,7 +339,7 @@ export default function SettingsPageClient() {
                  <CardContent className="space-y-4">
                      <div className="flex flex-col sm:flex-row items-center sm:items-start space-y-4 sm:space-y-0 sm:space-x-4">
                           <Avatar className="h-20 w-20 border-2 border-primary/30">
-                            <AvatarImage src={avatarPreview || currentUser.profilePictureUrl || undefined} alt={currentUser.displayName || currentUser.username} />
+                            <AvatarImage src={avatarPreview || `/api/users/${currentUser.id}/avatar?v=${avatarKey}`} alt={currentUser.displayName || currentUser.username} />
                             <AvatarFallback className="text-xl bg-muted">{getUserInitials(currentUser.displayName || currentUser.username)}</AvatarFallback>
                           </Avatar>
                           <div className="flex-grow space-y-2 text-center sm:text-left">

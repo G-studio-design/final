@@ -1121,27 +1121,27 @@ export default function ProjectsPageClient({ initialProjects }: ProjectsPageClie
     }, [currentUser, selectedProject, revisionNote, projectsDict, toast, getTranslatedStatus]);
 
     const showUploadSection = React.useMemo(() => {
-      if (!selectedProject || !currentUser || !Array.isArray(currentUser.roles) || !actingRole) {
-          return false;
-      }
-  
-      if (currentUser.roles.includes('Owner')) {
-          return false; 
-      }
-      
-      if (!selectedProject.assignedDivision) return false;
+        if (!selectedProject || !currentUser || !Array.isArray(currentUser.roles) || !actingRole) {
+            return false;
+        }
 
-      const canTakeAction = currentUser.roles.includes(selectedProject.assignedDivision.trim());
-      if (!canTakeAction) return false;
+        if (currentUser.roles.includes('Owner')) {
+            return false;
+        }
+        
+        if (!selectedProject.assignedDivision) return false;
 
-      const statusesExpectingUpload = [
-          'Pending Offer', 'Pending DP Invoice', 'Pending Admin Files',
-          'Pending Architect Files', 'Pending Structure Files', 'Pending MEP Files',
-          'Pending Consultation Docs', 'Pending Pelunasan Invoice', 'Pending Sidang Registration Proof'
-      ];
-  
-      return statusesExpectingUpload.includes(selectedProject.status);
-  }, [selectedProject, currentUser, actingRole]);
+        const canTakeAction = currentUser.roles.includes(selectedProject.assignedDivision.trim());
+        if (!canTakeAction) return false;
+
+        const statusesExpectingUpload = [
+            'Pending Offer', 'Pending DP Invoice', 'Pending Admin Files',
+            'Pending Architect Files', 'Pending Structure Files', 'Pending MEP Files',
+            'Pending Consultation Docs', 'Pending Pelunasan Invoice', 'Pending Sidang Registration Proof'
+        ];
+
+        return statusesExpectingUpload.includes(selectedProject.status);
+    }, [selectedProject, currentUser, actingRole]);
 
     const showSharedDesignChecklistSection = React.useMemo(() => {
         if (!selectedProject || !currentUser || !Array.isArray(currentUser.roles)) return false;
@@ -1211,12 +1211,11 @@ export default function ProjectsPageClient({ initialProjects }: ProjectsPageClie
       const isProjectActive = !['Completed', 'Canceled'].includes(selectedProject.status);
       
       const hasCompletedAdminFilesStep = selectedProject.workflowHistory.some(h =>
-          h.action.includes('submitted for "Unggah Berkas Administrasi"') || // When admin submits files
-          h.action.includes('approved: Setujui Faktur DP') // The moment DP is approved, this step is next
+          h.action.toLowerCase().includes('berkas administrasi')
       );
 
       return (
-        isProjectActive && canTakeAction && hasCompletedAdminFilesStep
+        isProjectActive && canTakeAction && hasCompletedAdminFilesStep && selectedProject.status !== 'Pending Admin Files'
       );
     }, [selectedProject, currentUser]);
 
