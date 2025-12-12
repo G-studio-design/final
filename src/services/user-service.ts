@@ -237,7 +237,7 @@ export async function updateUserProfilePicture(userId: string, newFilename: stri
     throw new Error('USER_NOT_FOUND');
   }
 
-  const oldRelativePath = users[userIndex].profilePictureUrl;
+  const oldFilename = users[userIndex].profilePictureUrl;
 
   // The URL stored in the DB is just the filename now
   const updatedUser: User = {
@@ -248,8 +248,9 @@ export async function updateUserProfilePicture(userId: string, newFilename: stri
   users[userIndex] = updatedUser;
   await writeDb(DB_PATH_USERS, users);
 
-  if (oldRelativePath) {
-    const oldAbsolutePath = path.join(AVATAR_UPLOAD_DIR, path.basename(oldRelativePath));
+  // Clean up the old file
+  if (oldFilename) {
+    const oldAbsolutePath = path.join(AVATAR_UPLOAD_DIR, oldFilename);
     try {
       await fs.unlink(oldAbsolutePath);
       console.log(`[UserService] Successfully deleted old avatar: ${oldAbsolutePath}`);

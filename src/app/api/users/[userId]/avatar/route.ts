@@ -5,6 +5,7 @@ import { join } from 'path';
 import mime from 'mime';
 import { updateUserProfilePicture, findUserById } from '@/services/user-service';
 
+// Correctly define the UPLOAD_DIR based on the environment variable from docker-compose.yml
 const UPLOAD_DIR = join(process.env.DATABASE_PATH || join(process.cwd(), 'database'), 'uploads', 'avatars');
 
 
@@ -35,8 +36,9 @@ export async function GET(
       return new NextResponse('Avatar not found', { status: 404 });
     }
 
+    // The profilePictureUrl now only stores the filename
     const filename = user.profilePictureUrl;
-    // IMPORTANT: Construct the absolute path to the file on the server's filesystem
+    // Construct the absolute path to the file on the server's filesystem inside the container
     const filePath = join(UPLOAD_DIR, filename);
 
     const fileBuffer = await readFile(filePath);
@@ -44,19 +46,18 @@ export async function GET(
     // Determine content type from filename
     const contentType = mime.getType(filePath) || 'application/octet-stream';
 
-    // Create headers to serve the image
+    // Create headers to serve the image and prevent caching
     const headers = new Headers();
     headers.set('Content-Type', contentType);
-    // Add cache-control headers to prevent browser caching of this dynamic endpoint
     headers.set('Cache-Control', 'no-cache, no-store, must-revalidate');
     headers.set('Pragma', 'no-cache');
     headers.set('Expires', '0');
-
 
     return new NextResponse(fileBuffer, { status: 200, headers });
 
   } catch (error: any) {
     if (error.code === 'ENOENT') {
+        // This is a common case if the file was deleted or never existed.
         return new NextResponse('Avatar file not found on disk', { status: 404 });
     }
     console.error(`[API/Avatar GET] Error for user ${userId}:`, error);
