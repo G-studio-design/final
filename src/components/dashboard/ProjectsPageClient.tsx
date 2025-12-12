@@ -1121,33 +1121,25 @@ export default function ProjectsPageClient({ initialProjects }: ProjectsPageClie
     }, [currentUser, selectedProject, revisionNote, projectsDict, toast, getTranslatedStatus]);
 
     const showUploadSection = React.useMemo(() => {
-      if (!selectedProject || !currentUser || !Array.isArray(currentUser.roles) || !actingRole) {
-          return false;
-      }
+        if (!selectedProject || !currentUser || !Array.isArray(currentUser.roles) || !actingRole) {
+            return false;
+        }
+    
+        if (currentUser.roles.includes('Owner')) {
+            return false; 
+        }
+        
+        if (!selectedProject.assignedDivision) return false;
+        const canTakeAction = currentUser.roles.includes(selectedProject.assignedDivision.trim());
+        if (!canTakeAction) return false;
   
-      if (currentUser.roles.includes('Owner')) {
-          return false; 
-      }
-      
-      const designRoles = ['Arsitek', 'Struktur', 'MEP'];
-      const userIsDesignRole = currentUser.roles.some(role => designRoles.includes(role));
-
-      if (selectedProject.status === 'Pending Parallel Design Uploads' || selectedProject.status === 'Pending Post-Sidang Revision') {
-          // This section is now replaced by the per-item upload, so return false here.
-          return false;
-      }
-  
-      if (!selectedProject.assignedDivision) return false;
-      const canTakeAction = currentUser.roles.includes(selectedProject.assignedDivision.trim());
-      if (!canTakeAction) return false;
-
-      const statusesExpectingUpload = [
-          'Pending Offer', 'Pending DP Invoice', 'Pending Admin Files',
-          'Pending Architect Files', 'Pending Structure Files', 'Pending MEP Files',
-          'Pending Consultation Docs', 'Pending Pelunasan Invoice', 'Pending Sidang Registration Proof'
-      ];
-  
-      return statusesExpectingUpload.includes(selectedProject.status);
+        const statusesExpectingUpload = [
+            'Pending Offer', 'Pending DP Invoice', 'Pending Admin Files',
+            'Pending Architect Files', 'Pending Structure Files', 'Pending MEP Files',
+            'Pending Consultation Docs', 'Pending Pelunasan Invoice', 'Pending Sidang Registration Proof'
+        ];
+    
+        return statusesExpectingUpload.includes(selectedProject.status);
     }, [selectedProject, currentUser, actingRole]);
 
     const showSharedDesignChecklistSection = React.useMemo(() => {
