@@ -9,7 +9,7 @@ import { getAllUsers as getAllUsersFromDb } from './data-access/user-data';
 
 const DB_BASE_PATH = process.env.DATABASE_PATH || path.resolve(process.cwd(), 'database');
 const DB_PATH_USERS = path.join(DB_BASE_PATH, 'database', 'users.json');
-const AVATAR_UPLOAD_DIR = path.join(process.cwd(), 'data', 'uploads');
+const AVATAR_UPLOAD_DIR = path.join(process.cwd(), 'public', 'uploads');
 
 
 async function getAllUsers(): Promise<User[]> {
@@ -245,8 +245,6 @@ export async function updateUserProfilePicture(userId: string, newRelativePath: 
   const updatedUser: User = {
     ...users[userIndex],
     profilePictureUrl: newRelativePath,
-    // Add a cache-busting parameter by updating the accessTokenExpiresAt timestamp
-    accessTokenExpiresAt: Date.now(), 
   };
 
   users[userIndex] = updatedUser;
@@ -254,7 +252,7 @@ export async function updateUserProfilePicture(userId: string, newRelativePath: 
 
   // After successfully updating the DB, delete the old file
   if (oldRelativePath && oldRelativePath !== newRelativePath) {
-    const oldAbsolutePath = path.join(process.cwd(), 'data', 'uploads', oldRelativePath);
+    const oldAbsolutePath = path.join(process.cwd(), 'public', oldRelativePath);
     try {
       await fs.unlink(oldAbsolutePath);
       console.log(`[UserService] Successfully deleted old avatar: ${oldAbsolutePath}`);

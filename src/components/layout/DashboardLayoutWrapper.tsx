@@ -318,16 +318,6 @@ export default function DashboardLayoutWrapper({ children, attendanceEnabled }: 
     logout();
     setIsSheetOpen(false);
   };
-  
-  const avatarUrl = useMemo(() => {
-    if (isClient && currentUser?.id) {
-      // Use the 'accessTokenExpiresAt' as a cache-busting parameter.
-      // This value is updated in the user object whenever the profile picture changes.
-      return `/api/users/${currentUser.id}/avatar?v=${currentUser.accessTokenExpiresAt || Date.now()}`;
-    }
-    return undefined;
-  }, [isClient, currentUser]);
-
 
   return (
     <div className="flex min-h-screen w-full bg-muted/40">
@@ -441,10 +431,7 @@ export default function DashboardLayoutWrapper({ children, attendanceEnabled }: 
                      {isClient && currentUser ? (
                        <div className="flex items-center gap-3 rounded-md p-2">
                          <Avatar className="h-10 w-10 border-2 border-primary-foreground/30">
-                           <AvatarImage
-                                src={avatarUrl}
-                                alt={currentUser.displayName || currentUser.username}
-                            />
+                           <AvatarImage src={currentUser.profilePictureUrl || undefined} alt={currentUser.displayName || currentUser.username} />
                            <AvatarFallback className="bg-primary-foreground/20 text-primary-foreground">
                                {getUserInitials(currentUser.displayName || currentUser.username)}
                            </AvatarFallback>

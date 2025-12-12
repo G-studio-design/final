@@ -5,7 +5,7 @@ import { join } from 'path';
 import mime from 'mime';
 import { updateUserProfilePicture, findUserById } from '@/services/user-service';
 
-const UPLOAD_DIR = join(process.cwd(), 'data', 'uploads', 'avatars');
+const UPLOAD_DIR = join(process.cwd(), 'public', 'uploads', 'avatars');
 
 async function ensureDirectoryExists(directoryPath: string) {
   try {
@@ -43,11 +43,8 @@ export async function POST(
     const uniqueSuffix = `${Date.now()}_${Math.round(Math.random() * 1E9)}`;
     const fileExtension = mime.getExtension(file.type) || 'jpg';
     const filename = `${userId}_${uniqueSuffix}.${fileExtension}`;
-    
-    const relativePath = join('avatars', filename);
+    const relativePath = join('/uploads', 'avatars', filename);
 
-    // This service function now handles logic for deleting the old file
-    // and storing the new relative path.
     const updatedUser = await updateUserProfilePicture(userId, relativePath);
 
     const absolutePath = join(UPLOAD_DIR, filename);
@@ -62,46 +59,4 @@ export async function POST(
     console.error(`[API/AvatarUpload POST] Error for user ${userId}:`, error);
     return NextResponse.json({ message: error.message || 'Failed to upload avatar.' }, { status: 500 });
   }
-}
-
-export async function GET(
-  request: NextRequest,
-  { params }: { params: { userId: string } }
-) {
-    const userId = params.userId;
-    if (!userId) {
-        return new NextResponse('User ID is required', { status: 400 });
-    }
-
-    try {
-        const user = await findUserById(userId);
-
-        if (!user || !user.profilePictureUrl) {
-            // Return a 404 Not Found if the user or their avatar doesn't exist
-            return new NextResponse('Avatar not found', { status: 404 });
-        }
-        
-        // IMPORTANT: The profilePictureUrl now stores a relative path within the data directory
-        // e.g., "avatars/usr_123_abc.png"
-        const filePath = join(process.cwd(), 'data', 'uploads', user.profilePictureUrl);
-
-        const fileBuffer = await readFile(filePath);
-        const contentType = mime.getType(filePath) || 'application/octet-stream';
-
-        return new NextResponse(fileBuffer, {
-            status: 200,
-            headers: {
-                'Content-Type': contentType,
-                'Cache-Control': 'no-cache, no-store, must-revalidate',
-            },
-        });
-
-    } catch (error: any) {
-        if (error.code === 'ENOENT') {
-            console.warn(`[API/Avatar GET] Avatar file not found on disk for user ${userId}. Path: ${error.path}`);
-            return new NextResponse('Avatar file not found on disk', { status: 404 });
-        }
-        console.error(`[API/Avatar GET] Error serving avatar for user ${userId}:`, error);
-        return new NextResponse('Internal server error', { status: 500 });
-    }
 }

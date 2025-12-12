@@ -311,13 +311,6 @@ export default function SettingsPageClient() {
     }
   };
 
-  const avatarUrl = React.useMemo(() => {
-    if (!isClient || !currentUser?.id) return undefined;
-    // Use the user's 'accessTokenExpiresAt' as a cache-busting query parameter.
-    // This value is updated on the user object whenever the profile picture changes.
-    return `/api/users/${currentUser.id}/avatar?v=${currentUser.accessTokenExpiresAt || Date.now()}`;
-  }, [isClient, currentUser]);
-
 
   if (!isClient || !currentUser) {
       return (
@@ -343,7 +336,7 @@ export default function SettingsPageClient() {
                  <CardContent className="space-y-4">
                      <div className="flex flex-col sm:flex-row items-center sm:items-start space-y-4 sm:space-y-0 sm:space-x-4">
                           <Avatar className="h-20 w-20 border-2 border-primary/30">
-                            <AvatarImage src={avatarPreview || avatarUrl} alt={currentUser.displayName || currentUser.username} />
+                            <AvatarImage src={avatarPreview || currentUser.profilePictureUrl || undefined} alt={currentUser.displayName || currentUser.username} />
                             <AvatarFallback className="text-xl bg-muted">{getUserInitials(currentUser.displayName || currentUser.username)}</AvatarFallback>
                           </Avatar>
                           <div className="flex-grow space-y-2 text-center sm:text-left">
