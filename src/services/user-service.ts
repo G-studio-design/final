@@ -239,23 +239,25 @@ export async function updateUserProfilePicture(userId: string, newRelativePath: 
     throw new Error('USER_NOT_FOUND');
   }
 
+  // Important: Read the old path BEFORE updating the database
   const oldRelativePath = users[userIndex].profilePictureUrl;
 
   const updatedUser: User = {
     ...users[userIndex],
     profilePictureUrl: newRelativePath,
-    accessTokenExpiresAt: Date.now() 
   };
 
   users[userIndex] = updatedUser;
   await writeDb(DB_PATH_USERS, users);
 
+  // After successfully updating the DB, delete the old file
   if (oldRelativePath && oldRelativePath !== newRelativePath) {
-    const oldAbsolutePath = path.join(AVATAR_UPLOAD_DIR, oldRelativePath);
+    const oldAbsolutePath = path.join(process.cwd(), 'data', 'uploads', oldRelativePath);
     try {
       await fs.unlink(oldAbsolutePath);
       console.log(`[UserService] Successfully deleted old avatar: ${oldAbsolutePath}`);
     } catch (error: any) {
+      // Don't throw error if file doesn't exist, just log a warning
       if (error.code !== 'ENOENT') {
         console.warn(`[UserService] Could not delete old avatar file ${oldAbsolutePath}:`, error.message);
       }

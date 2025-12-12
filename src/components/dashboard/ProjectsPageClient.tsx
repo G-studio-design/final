@@ -1142,7 +1142,7 @@ export default function ProjectsPageClient({ initialProjects }: ProjectsPageClie
       if (!canTakeAction) return false;
 
       const statusesExpectingUpload = [
-          'Pending Offer', 'Pending DP Invoice',
+          'Pending Offer', 'Pending DP Invoice', 'Pending Admin Files',
           'Pending Architect Files', 'Pending Structure Files', 'Pending MEP Files',
           'Pending Consultation Docs', 'Pending Pelunasan Invoice', 'Pending Sidang Registration Proof'
       ];
