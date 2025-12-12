@@ -1209,8 +1209,7 @@ export default function ProjectsPageClient({ initialProjects }: ProjectsPageClie
       const canTakeAction = currentUser.roles.includes('Admin Proyek');
       const isProjectActive = !['Completed', 'Canceled'].includes(selectedProject.status);
       
-      // Check if project has passed the 'Pending Admin Files' stage.
-      const hasCompletedAdminFilesStep = project.workflowHistory.some(h =>
+      const hasCompletedAdminFilesStep = selectedProject.workflowHistory.some(h =>
           h.action.includes('submitted for "Unggah Berkas Administrasi"') || // When admin submits files
           h.action.includes('approved: Setujui Faktur DP') // The moment DP is approved, this step is next
       );
