@@ -1394,9 +1394,11 @@ export default function ProjectsPageClient({ initialProjects }: ProjectsPageClie
                 const allKeywordsMatch = reqKeywords.every(keyword => fileNameLower.includes(keyword));
                 
                 if (reqName === 'Bukti Pembayaran' || reqName === 'Pelunasan') {
-                    return allKeywordsMatch && (file.uploadedBy === 'Owner' || file.uploadedBy === 'Akuntan');
+                    // For payment-related docs, allow Owner or Accountant
+                    return allKeywordsMatch && (file.uploadedBy === 'Owner' || file.uploadedBy === 'Akuntan' || file.uploadedBy === 'Admin Proyek');
                 }
                 
+                // For other docs, only Admin Proyek
                 return allKeywordsMatch && file.uploadedBy === 'Admin Proyek';
             });
             return { name: reqName, uploaded: !!uploadedFile, filePath: uploadedFile?.path, originalFileName: uploadedFile?.name, uploadedBy: uploadedFile?.uploadedBy };
@@ -1574,8 +1576,11 @@ export default function ProjectsPageClient({ initialProjects }: ProjectsPageClie
           const displayName = item.originalFileName || item.name;
           
           const isPaymentDoc = item.name === 'Bukti Pembayaran' || item.name === 'Pelunasan';
+          
           const canAccountantUpload = isPaymentDoc && currentUser?.roles.includes('Akuntan');
-          const canAdminUpload = !isPaymentDoc && currentUser?.roles.includes('Admin Proyek');
+          const canAdminUpload = (!isPaymentDoc && currentUser?.roles.includes('Admin Proyek')) || (isPaymentDoc && currentUser?.roles.includes('Admin Proyek'));
+          const canOwnerUpload = isPaymentDoc && currentUser?.roles.includes('Owner');
+
 
           // Check if previous item is uploaded
           const isPreviousUploaded = index === 0 || allItems[index - 1].uploaded;
@@ -1617,7 +1622,7 @@ export default function ProjectsPageClient({ initialProjects }: ProjectsPageClie
                     </div>
                 )}
 
-                {!item.uploaded && (canAdminUpload || canAccountantUpload) && (
+                {!item.uploaded && (canAdminUpload || canAccountantUpload || canOwnerUpload) && (
                     <Button
                         variant="outline"
                         size="sm"
