@@ -6,8 +6,6 @@ import path from 'path';
 import { sanitizeForPath } from '@/lib/path-utils';
 import { getProjectById, deleteProjectFile } from '@/services/project-service';
 
-const MAX_FILE_SIZE = 20 * 1024 * 1024; // 20MB
-
 const DB_BASE_PATH = process.env.DATABASE_PATH || path.resolve(process.cwd(), 'data');
 const PROJECT_FILES_BASE_DIR = path.join(DB_BASE_PATH, 'project_files');
 
@@ -36,9 +34,6 @@ export async function POST(req: NextRequest) {
         }
 
         const buffer = Buffer.from(await file.arrayBuffer());
-        if (buffer.length > MAX_FILE_SIZE) {
-            return NextResponse.json({ message: 'File size exceeds the limit of 20MB' }, { status: 413 });
-        }
         
         const projectSpecificDir = path.join(PROJECT_FILES_BASE_DIR, projectId);
         await ensureDirectoryExists(projectSpecificDir);
