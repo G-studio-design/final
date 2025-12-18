@@ -5,8 +5,6 @@ import { stat, mkdir, unlink, rename } from 'fs/promises';
 import path from 'path';
 import { sanitizeForPath } from '@/lib/path-utils';
 import { getProjectById, deleteProjectFile, addFilesToProject } from '@/services/project-service';
-import { Readable } from 'stream';
-import { pipeline } from 'stream/promises';
 
 export const maxDuration = 300; // 5 minutes timeout
 
@@ -53,9 +51,7 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ message: 'Project not found.' }, { status: 404 });
     }
     
-    // Check for existing files associated with the same checklist item to perform revision
     if (associatedChecklistItem) {
-        // Simplified logic: find any file whose name indicates it belongs to this checklist item.
         const fileToDelete = project.files.find(f => 
             f.name.toLowerCase().includes(associatedChecklistItem.toLowerCase()) || 
             f.path.toLowerCase().includes(sanitizedItemName)
@@ -72,15 +68,23 @@ export async function POST(req: NextRequest) {
     if (!req.body) {
         throw new Error("Request body is null.");
     }
-    const webStream = req.body;
-    const nodeReadable = Readable.fromWeb(webStream as any);
-    const fileWriteStream = createWriteStream(tempFilePath);
     
-    await pipeline(nodeReadable, fileWriteStream);
+    // --- New Robust Streaming Logic ---
+    const readableStream = req.body.getReader();
+    const fileWriteStream = createWriteStream(tempFilePath);
+
+    while (true) {
+        const { done, value } = await readableStream.read();
+        if (done) {
+            break;
+        }
+        fileWriteStream.write(value);
+    }
+    fileWriteStream.end();
+    // --- End of New Logic ---
     
     console.log(`[API/StreamUpload] Successfully wrote temp file: ${tempFilePath}`);
 
-    // Atomically move the file to its final destination
     await rename(tempFilePath, absoluteFilePath);
     console.log(`[API/StreamUpload] Renamed temp file to final destination: ${absoluteFilePath}`);
 
