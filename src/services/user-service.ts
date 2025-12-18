@@ -6,6 +6,10 @@ import * as fs from 'fs/promises';
 import type { User, AddUserData, UpdateProfileData, UpdatePasswordData, UpdateUserGoogleTokensData } from '../types/user-types';
 import { readDb, writeDb } from '../lib/database-utils';
 
+// KOMENTAR SEMENTARA:
+// Variabel `DATABASE_PATH` ini diambil dari `docker-compose.yml` (environment: - DATABASE_PATH=/app/data).
+// Sehingga, path ini akan menunjuk ke `/app/data/database/users.json` di dalam container,
+// yang terhubung langsung ke `msarch-data/database/users.json` di NAS Anda.
 const DB_BASE_PATH = process.env.DATABASE_PATH || path.resolve(process.cwd());
 const DB_PATH_USERS = path.join(DB_BASE_PATH, 'database', 'users.json');
 const AVATAR_UPLOAD_DIR = path.join(DB_BASE_PATH, 'database', 'uploads', 'avatars');
