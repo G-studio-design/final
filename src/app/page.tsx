@@ -1,10 +1,6 @@
 // src/app/page.tsx
 import LoginPage from '@/components/auth/login-page';
 
-export default function Home() {
-  return (
-    <main>
-      <LoginPage />
-    </main>
-  );
+export default async function Home() {
+  return <LoginPage />;
 }
