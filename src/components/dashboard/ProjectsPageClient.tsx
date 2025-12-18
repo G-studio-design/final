@@ -136,6 +136,12 @@ interface UploadDialogState {
   division: string | null;
 }
 
+interface UploadProgress {
+  fileName: string;
+  progress: number; // 0-100
+}
+
+
 interface ProjectsPageClientProps {
     initialProjects: Project[];
 }
@@ -206,6 +212,7 @@ export default function ProjectsPageClient({ initialProjects }: ProjectsPageClie
   const [isUploadingAdminFiles, setIsUploadingAdminFiles] = React.useState(false);
   
   const [uploadDialogState, setUploadDialogState] = React.useState<UploadDialogState>({ isOpen: false, item: null, division: null });
+  const [uploadProgress, setUploadProgress] = React.useState<UploadProgress[]>([]);
 
 
   const projectIdFromUrl = searchParams.get('projectId');
@@ -506,6 +513,65 @@ export default function ProjectsPageClient({ initialProjects }: ProjectsPageClie
     return currentUser.roles[0];
   }, [currentUser, selectedProject]);
 
+  const uploadFileWithProgress = (file: File, headers: Headers): Promise<any> => {
+    return new Promise((resolve, reject) => {
+        const xhr = new XMLHttpRequest();
+        xhr.open('POST', '/api/upload/stream', true);
+
+        // Set headers
+        for (const [key, value] of headers.entries()) {
+            xhr.setRequestHeader(key, value);
+        }
+
+        xhr.upload.onprogress = (event) => {
+            if (event.lengthComputable) {
+                const progress = Math.round((event.loaded / event.total) * 100);
+                setUploadProgress(prev => {
+                    const existingIndex = prev.findIndex(p => p.fileName === file.name);
+                    if (existingIndex > -1) {
+                        const newProgress = [...prev];
+                        newProgress[existingIndex] = { ...newProgress[existingIndex], progress };
+                        return newProgress;
+                    }
+                    return [...prev, { fileName: file.name, progress }];
+                });
+            }
+        };
+
+        xhr.onload = () => {
+            if (xhr.status >= 200 && xhr.status < 300) {
+                try {
+                    resolve(JSON.parse(xhr.responseText));
+                } catch (e) {
+                    reject(new Error('Invalid JSON response from server.'));
+                }
+            } else {
+                try {
+                    const errorResponse = JSON.parse(xhr.responseText);
+                    reject(new Error(errorResponse.message || `Server error: ${xhr.statusText}`));
+                } catch (e) {
+                    reject(new Error(`Server error: ${xhr.statusText}`));
+                }
+            }
+             // Clear progress for this file
+            setUploadProgress(prev => prev.filter(p => p.fileName !== file.name));
+        };
+
+        xhr.onerror = () => {
+            reject(new Error('Network error during upload.'));
+            // Clear progress for this file
+            setUploadProgress(prev => prev.filter(p => p.fileName !== file.name));
+        };
+        
+        xhr.onabort = () => {
+            reject(new Error('Upload was aborted.'));
+            setUploadProgress(prev => prev.filter(p => p.fileName !== file.name));
+        };
+
+        xhr.send(file);
+    });
+};
+
 
   const handleProgressSubmit = React.useCallback(async (actionTaken: string = 'submitted', filesToSubmit?: File[], descriptionForSubmit?: string, associatedChecklistItem?: string, divisionForFile?: string) => {
     if (!currentUser || !Array.isArray(currentUser.roles) || !selectedProject) {
@@ -523,6 +589,8 @@ export default function ProjectsPageClient({ initialProjects }: ProjectsPageClie
     
     setIsSubmitting(true);
     if (isArchitectInitialImageUpload) setIsSubmittingInitialImages(true);
+     setUploadProgress([]);
+
 
     try {
         if (!isDecisionOrTerminalAction && !isSchedulingAction && !isSurveySchedulingAction && !isArchitectInitialImageUpload && !currentDescription && currentFiles.length === 0 ) {
@@ -549,19 +617,9 @@ export default function ProjectsPageClient({ initialProjects }: ProjectsPageClie
                 if (associatedChecklistItem) {
                     headers.append('x-checklist-item', associatedChecklistItem);
                 }
-
+                
                 try {
-                    const response = await fetch('/api/upload/stream', {
-                        method: 'POST',
-                        headers,
-                        body: file,
-                    });
-
-                    if (!response.ok) {
-                        const errorData = await response.json().catch(() => ({ message: `Failed to upload ${file.name}` }));
-                        throw new Error(errorData.message || `Failed to upload ${file.name}`);
-                    }
-                    const result = await response.json();
+                    const result = await uploadFileWithProgress(file, headers);
                      uploadedFileEntries.push({
                         name: result.name,
                         path: result.path,
@@ -673,6 +731,7 @@ export default function ProjectsPageClient({ initialProjects }: ProjectsPageClie
       } finally {
          setIsSubmitting(false);
          if (isArchitectInitialImageUpload) setIsSubmittingInitialImages(false);
+         setUploadProgress([]);
       }
   }, [currentUser, selectedProject, uploadedFiles, description, scheduleDate, scheduleTime, scheduleLocation, surveyDate, surveyTime, surveyDescription, projectsDict, toast, getTranslatedStatus, initialImageFiles, initialImageDescription, rescheduleDate, rescheduleTime, actingRole, uploadDialogState.isOpen]);
 
@@ -1893,6 +1952,19 @@ export default function ProjectsPageClient({ initialProjects }: ProjectsPageClie
                                <Upload className="h-5 w-5 text-muted-foreground flex-shrink-0" />
                              </div>
                            </div>
+                            {uploadProgress.length > 0 && (
+                                <div className="space-y-2">
+                                    {uploadProgress.map(up => (
+                                        <div key={up.fileName}>
+                                            <div className="flex justify-between text-xs mb-1">
+                                                <span className="truncate max-w-xs">{up.fileName}</span>
+                                                <span className="font-semibold">{up.progress}%</span>
+                                            </div>
+                                            <Progress value={up.progress} className="h-2" />
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
                            {uploadedFiles.length > 0 && (
                              <div className="space-y-2 rounded-md border p-3">
                                <Label>{projectsDict.selectedFilesLabel} ({uploadedFiles.length})</Label>
@@ -1922,6 +1994,19 @@ export default function ProjectsPageClient({ initialProjects }: ProjectsPageClie
                                             {finalDocsChecklistStatus?.map((item, index, allItems) => renderFinalDocsChecklistItem(item, index, allItems))}
                                         </ul>
                                     </div>
+                                    {uploadProgress.length > 0 && (
+                                        <div className="space-y-2">
+                                            {uploadProgress.map(up => (
+                                                <div key={up.fileName}>
+                                                    <div className="flex justify-between text-xs mb-1">
+                                                        <span className="truncate max-w-xs">{up.fileName}</span>
+                                                        <span className="font-semibold">{up.progress}%</span>
+                                                    </div>
+                                                    <Progress value={up.progress} className="h-2" />
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
                                 </CardContent>
                                 {currentUser?.roles.includes('Admin Proyek') && (
                                 <CardFooter className="p-4 sm:p-6 border-t">
@@ -1973,6 +2058,19 @@ export default function ProjectsPageClient({ initialProjects }: ProjectsPageClie
                                 {project.surveyDetails?.date && <p className="text-sm text-muted-foreground">{projectsDict.surveyCompletion.scheduledFor}: {formatDateOnly(project.surveyDetails.date)} @ {project.surveyDetails.time}</p>}
                                 <div className="space-y-1.5"><Label htmlFor="surveyReportDescription">{projectsDict.surveyCompletion.reportNotesLabel}</Label><Textarea id="surveyReportDescription" placeholder={projectsDict.surveyCompletion.reportNotesPlaceholder} value={description} onChange={(e) => setDescription(e.target.value)} disabled={isSubmitting}/></div>
                                 <div className="grid w-full items-center gap-1.5"><Label htmlFor="survey-report-files">{projectsDict.attachFilesLabel} ({projectsDict.optionalReportLabel})</Label><div className="flex flex-col sm:flex-row items-center gap-2"><Input id="survey-report-files" type="file" multiple onChange={handleFileChange} disabled={isSubmitting} className="flex-grow"/><Upload className="h-5 w-5 text-muted-foreground flex-shrink-0" /></div></div>
+                                  {uploadProgress.length > 0 && (
+                                      <div className="space-y-2">
+                                          {uploadProgress.map(up => (
+                                              <div key={up.fileName}>
+                                                  <div className="flex justify-between text-xs mb-1">
+                                                      <span className="truncate max-w-xs">{up.fileName}</span>
+                                                      <span className="font-semibold">{up.progress}%</span>
+                                                  </div>
+                                                  <Progress value={up.progress} className="h-2" />
+                                              </div>
+                                          ))}
+                                      </div>
+                                  )}
                                   {uploadedFiles.length > 0 && (
                                      <div className="space-y-2 rounded-md border p-3">
                                          <Label>{projectsDict.selectedFilesLabel} ({uploadedFiles.length})</Label>
@@ -2247,6 +2345,19 @@ export default function ProjectsPageClient({ initialProjects }: ProjectsPageClie
                             <Label htmlFor="checklist-files">File</Label>
                             <Input id="checklist-files" type="file" multiple onChange={handleFileChange} disabled={isSubmitting} />
                           </div>
+                            {uploadProgress.length > 0 && (
+                                <div className="space-y-2">
+                                    {uploadProgress.map(up => (
+                                        <div key={up.fileName}>
+                                            <div className="flex justify-between text-xs mb-1">
+                                                <span className="truncate max-w-xs">{up.fileName}</span>
+                                                <span className="font-semibold">{up.progress}%</span>
+                                            </div>
+                                            <Progress value={up.progress} className="h-2" />
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
                            {uploadedFiles.length > 0 && (
                              <div className="space-y-2 rounded-md border p-3">
                                <Label>{projectsDict.selectedFilesLabel} ({uploadedFiles.length})</Label>
