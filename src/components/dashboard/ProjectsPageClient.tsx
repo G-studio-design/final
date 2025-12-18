@@ -541,28 +541,29 @@ export default function ProjectsPageClient({ initialProjects }: ProjectsPageClie
         const uploadedFileEntries: Omit<FileEntry, 'timestamp'>[] = [];
         if (currentFiles.length > 0) {
             for (const file of currentFiles) {
-                // Construct a new filename that includes the checklist item name for context
-                const sanitizedItemName = (associatedChecklistItem || "file").replace(/[^a-zA-Z0-9]/g, '_').toLowerCase();
-                const newFileName = `${sanitizedItemName}_${file.name}`;
-                const fileToUpload = new File([file], newFileName, { type: file.type });
-
-
-                const formData = new FormData();
-                formData.append('file', fileToUpload);
-                formData.append('projectId', selectedProject.id);
-                formData.append('userId', currentUser.id);
-                // Use the explicit division passed for the file, or the acting role
-                formData.append('uploaderRole', divisionForFile || actingRole || currentUser.roles[0]);
+                const headers = new Headers();
+                headers.append('x-project-id', selectedProject.id);
+                headers.append('x-file-name', file.name);
+                headers.append('x-user-id', currentUser.id);
+                headers.append('x-uploader-role', divisionForFile || actingRole || currentUser.roles[0]);
+                if (associatedChecklistItem) {
+                    headers.append('x-checklist-item', associatedChecklistItem);
+                }
 
                 try {
-                    const response = await fetch('/api/upload-file', { method: 'POST', body: formData });
+                    const response = await fetch('/api/upload/stream', {
+                        method: 'POST',
+                        headers,
+                        body: file,
+                    });
+
                     if (!response.ok) {
                         const errorData = await response.json().catch(() => ({ message: `Failed to upload ${file.name}` }));
                         throw new Error(errorData.message || `Failed to upload ${file.name}`);
                     }
                     const result = await response.json();
                      uploadedFileEntries.push({
-                        name: result.name, // The server will return the contextual name
+                        name: result.name,
                         path: result.path,
                         uploadedBy: result.uploadedBy,
                     });
@@ -1394,11 +1395,9 @@ export default function ProjectsPageClient({ initialProjects }: ProjectsPageClie
                 const allKeywordsMatch = reqKeywords.every(keyword => fileNameLower.includes(keyword));
                 
                 if (reqName === 'Bukti Pembayaran' || reqName === 'Pelunasan') {
-                    // For payment-related docs, allow Owner or Accountant
                     return allKeywordsMatch && (file.uploadedBy === 'Owner' || file.uploadedBy === 'Akuntan' || file.uploadedBy === 'Admin Proyek');
                 }
                 
-                // For other docs, only Admin Proyek
                 return allKeywordsMatch && file.uploadedBy === 'Admin Proyek';
             });
             return { name: reqName, uploaded: !!uploadedFile, filePath: uploadedFile?.path, originalFileName: uploadedFile?.name, uploadedBy: uploadedFile?.uploadedBy };
