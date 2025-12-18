@@ -52,6 +52,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 import type { Notification } from '@/services/notification-service';
+import { API_BASE_URL } from '@/config/api-config';
 
 type LayoutDict = ReturnType<typeof getDictionary>['dashboardLayout'];
 
@@ -174,7 +175,7 @@ export default function DashboardLayoutWrapper({ children, attendanceEnabled }: 
   const fetchNotifications = useCallback(async () => {
     if (isClient && currentUser) {
       try {
-        const response = await fetch(`/api/notifications?userId=${currentUser.id}`);
+        const response = await fetch(`${API_BASE_URL}/api/notifications?userId=${currentUser.id}`);
         if (!response.ok) {
            console.error("Failed to fetch notifications from API");
            return;
@@ -279,7 +280,7 @@ export default function DashboardLayoutWrapper({ children, attendanceEnabled }: 
     
     if (!notification.isRead) {
         try {
-            await fetch(`/api/notifications/mark-as-read`, {
+            await fetch(`${API_BASE_URL}/api/notifications/mark-as-read`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ notificationId: notification.id }),
@@ -308,7 +309,7 @@ export default function DashboardLayoutWrapper({ children, attendanceEnabled }: 
 
           if (subscription) {
             console.log("Unsubscribing from push notifications...");
-            await fetch('/api/notifications/unsubscribe', {
+            await fetch(`${API_BASE_URL}/api/notifications/unsubscribe`, {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({ subscription }),
@@ -443,7 +444,7 @@ export default function DashboardLayoutWrapper({ children, attendanceEnabled }: 
                      {isClient && currentUser ? (
                        <div className="flex items-center gap-3 rounded-md p-2">
                          <Avatar className="h-10 w-10 border-2 border-primary-foreground/30">
-                           <AvatarImage key={avatarKey} src={`/api/users/${currentUser.id}/avatar?v=${avatarKey}`} alt={currentUser.displayName || currentUser.username} />
+                           <AvatarImage key={avatarKey} src={`${API_BASE_URL}/api/users/${currentUser.id}/avatar?v=${avatarKey}`} alt={currentUser.displayName || currentUser.username} />
                            <AvatarFallback className="bg-primary-foreground/20 text-primary-foreground">
                                {getUserInitials(currentUser.displayName || currentUser.username)}
                            </AvatarFallback>
