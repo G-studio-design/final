@@ -5,6 +5,9 @@ import path from 'path';
 import { sanitizeForPath } from '@/lib/path-utils';
 import { addFilesToProject } from '@/services/project-service';
 
+// Increase the timeout for this specific route to 5 minutes (300 seconds)
+export const maxDuration = 300;
+
 const DB_BASE_PATH = process.env.DATABASE_PATH || path.resolve(process.cwd(), 'database');
 const PROJECT_FILES_BASE_DIR = path.join(DB_BASE_PATH, 'project_files');
 
