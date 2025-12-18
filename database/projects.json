@@ -286,9 +286,33 @@
         "division": "Akuntan",
         "action": "oksi (Akuntan) submitted for \"Unggah Invoice Pelunasan\"",
         "timestamp": "2025-10-11T11:30:00.000Z"
+      },
+      {
+        "division": "usr_1747799008584_4r22a",
+        "action": "Uploaded additional file(s): IG - UCAPAN NYEPI 1.jpg",
+        "timestamp": "2025-12-18T10:02:29.160Z",
+        "note": "File administrasi tambahan diunggah oleh usr_1747799008584_4r22a. Catatan: Dokumen Final"
+      },
+      {
+        "division": "Admin Proyek, MEP",
+        "action": "komangmerta (Admin Proyek, MEP) submitted for \"Unggah dokumen penyelesaian proyek: Berita Acara, SKRD, Ijin Terbit, Susunan Dokumen Final, Tanda Terima.\"",
+        "timestamp": "2025-12-18T10:02:30.221Z"
       }
     ],
-    "files": [],
+    "files": [
+      {
+        "name": "IG - UCAPAN NYEPI 1.jpg",
+        "path": "project_11_pending_final_docs/dokumen_final_ig_-_ucapan_nyepi_1.jpg",
+        "uploadedBy": "Admin Proyek",
+        "timestamp": "2025-12-18T10:02:29.160Z"
+      },
+      {
+        "name": "IG - UCAPAN NYEPI 1.jpg",
+        "path": "project_11_pending_final_docs/dokumen_final_ig_-_ucapan_nyepi_1.jpg",
+        "uploadedBy": "Admin Proyek",
+        "timestamp": "2025-12-18T10:02:30.221Z"
+      }
+    ],
     "createdAt": "2025-10-11T11:00:00.000Z",
     "createdBy": "sudina"
   },

@@ -1,5 +1,14 @@
 [
   {
+    "id": "notif_1766052150228_jw1in",
+    "userId": "usr_owner_default",
+    "projectId": "project_11_pending_final_docs",
+    "message": "komangmerta (Admin Proyek, MEP) telah mengunggah dokumen baru untuk tahap akhir proyek.",
+    "url": "/dashboard/projects?projectId=project_11_pending_final_docs",
+    "timestamp": "2025-12-18T10:02:30.228Z",
+    "isRead": false
+  },
+  {
     "id": "notif_1765457362696_mjiz5",
     "userId": "usr_1747799008584_4r22a",
     "projectId": "project_1765457362682_df0dd",
