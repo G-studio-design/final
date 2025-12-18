@@ -69,8 +69,11 @@ export async function POST(req: NextRequest) {
     
     console.log(`[API/StreamUpload] Starting robust stream to temp file: ${tempFilePath}`);
     
-    const webStream = req.body as ReadableStream<Uint8Array>;
-    const nodeReadable = Readable.fromWeb(webStream);
+    if (!req.body) {
+        throw new Error("Request body is null.");
+    }
+    const webStream = req.body;
+    const nodeReadable = Readable.fromWeb(webStream as any);
     const fileWriteStream = createWriteStream(tempFilePath);
     
     await pipeline(nodeReadable, fileWriteStream);
