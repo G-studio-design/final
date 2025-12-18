@@ -558,24 +558,18 @@ export default function ProjectsPageClient({ initialProjects }: ProjectsPageClie
             return;
         }
 
-        const uploadedFileEntries: Omit<FileEntry, 'timestamp'>[] = [];
+        // New Logic: Upload files one by one using FormData
         if (currentFiles.length > 0) {
             for (const file of currentFiles) {
                 const formDataPayload: Record<string, string | null> = {
                   projectId: selectedProject.id,
                   userId: currentUser.id,
                   uploaderRole: divisionForFile || actingRole || currentUser.roles[0],
-                  note: currentDescription,
+                  note: currentDescription, // The note is associated with each file upload
                   associatedChecklistItem: associatedChecklistItem || null,
                 };
                 try {
-                  // Using FormData upload instead of stream
-                  const result = await uploadFileWithFormData(file, formDataPayload);
-                  uploadedFileEntries.push({
-                      name: result.name,
-                      path: result.path,
-                      uploadedBy: result.uploadedBy,
-                  });
+                  await uploadFileWithFormData(file, formDataPayload);
                 } catch (error: any) {
                     console.error("Error uploading file:", file.name, error);
                     toast({ variant: 'destructive', title: projectsDict.toast.uploadError, description: error.message });
@@ -584,39 +578,38 @@ export default function ProjectsPageClient({ initialProjects }: ProjectsPageClie
                     return; // Stop on first upload error
                 }
             }
-        } else {
-            // If no files, we still need to submit the progress update
-            const updatePayload: UpdateProjectParams = {
-                projectId: selectedProject.id,
-                updaterRoles: currentUser.roles,
-                updaterUsername: currentUser.username,
-                actionTaken: actionTaken,
-                note: currentDescription || undefined,
-                scheduleDetails: (selectedProject.status === 'Pending Scheduling' && actionTaken === 'scheduled' && scheduleDate) ? {
-                    date: format(scheduleDate, 'yyyy-MM-dd'),
-                    time: scheduleTime,
-                    location: scheduleLocation
-                } : undefined,
-                 surveyDetails: (selectedProject.status === 'Pending Survey Details' || selectedProject.status === 'Survey Scheduled') && (actionTaken === 'submitted' || actionTaken === 'reschedule_survey') ? {
-                    date: (actionTaken === 'reschedule_survey' && rescheduleDate) ? format(rescheduleDate, 'yyyy-MM-dd') : (surveyDate ? format(surveyDate, 'yyyy-MM-dd') : ''),
-                    time: (actionTaken === 'reschedule_survey') ? rescheduleTime : surveyTime,
-                    description: surveyDescription
-                } : undefined,
-            };
-
-            const response = await fetch(`/api/projects/update`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(updatePayload),
-            });
-
-            if (!response.ok) {
-                const errorResult = await response.json();
-                throw new Error(errorResult.message);
-            }
         }
         
-        // After all uploads (or if no uploads), fetch the final state of the project
+        // After all files are uploaded (or if no files), submit the final workflow update
+        const updatePayload: UpdateProjectParams = {
+            projectId: selectedProject.id,
+            updaterRoles: currentUser.roles,
+            updaterUsername: currentUser.username,
+            actionTaken: actionTaken,
+            note: currentFiles.length > 0 ? undefined : (currentDescription || undefined), // Only send note if no files were part of this action
+            scheduleDetails: (selectedProject.status === 'Pending Scheduling' && actionTaken === 'scheduled' && scheduleDate) ? {
+                date: format(scheduleDate, 'yyyy-MM-dd'),
+                time: scheduleTime,
+                location: scheduleLocation
+            } : undefined,
+             surveyDetails: (selectedProject.status === 'Pending Survey Details' || selectedProject.status === 'Survey Scheduled') && (actionTaken === 'submitted' || actionTaken === 'reschedule_survey') ? {
+                date: (actionTaken === 'reschedule_survey' && rescheduleDate) ? format(rescheduleDate, 'yyyy-MM-dd') : (surveyDate ? format(surveyDate, 'yyyy-MM-dd') : ''),
+                time: (actionTaken === 'reschedule_survey') ? rescheduleTime : surveyTime,
+                description: surveyDescription
+            } : undefined,
+        };
+
+        const response = await fetch(`/api/projects/update`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(updatePayload),
+        });
+
+        if (!response.ok) {
+            const errorResult = await response.json();
+            throw new Error(errorResult.message);
+        }
+        
         const newlyUpdatedProject = await fetchProjectById(selectedProject.id);
         
         if (newlyUpdatedProject) {
@@ -647,7 +640,7 @@ export default function ProjectsPageClient({ initialProjects }: ProjectsPageClie
          setIsSubmitting(false);
          if (isArchitectInitialImageUpload) setIsSubmittingInitialImages(false);
       }
-  }, [currentUser, selectedProject, uploadedFiles, description, scheduleDate, scheduleTime, scheduleLocation, surveyDate, surveyTime, surveyDescription, projectsDict, toast, getTranslatedStatus, initialImageFiles, initialImageDescription, rescheduleDate, rescheduleTime, actingRole, uploadDialogState.isOpen]);
+  }, [currentUser, selectedProject, uploadedFiles, description, scheduleDate, scheduleTime, scheduleLocation, surveyDate, surveyTime, surveyDescription, projectsDict, toast, actingRole, uploadDialogState.isOpen, rescheduleDate, rescheduleTime]);
 
   const handleAdminFileUpload = async () => {
     if (!currentUser || !Array.isArray(currentUser.roles) || !selectedProject || adminFiles.length === 0) {
