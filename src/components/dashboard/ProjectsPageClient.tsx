@@ -137,12 +137,6 @@ interface UploadDialogState {
   division: string | null;
 }
 
-interface UploadProgress {
-  fileName: string;
-  progress: number; // 0-100
-}
-
-
 interface ProjectsPageClientProps {
     initialProjects: Project[];
 }
@@ -213,7 +207,6 @@ export default function ProjectsPageClient({ initialProjects }: ProjectsPageClie
   const [isUploadingAdminFiles, setIsUploadingAdminFiles] = React.useState(false);
   
   const [uploadDialogState, setUploadDialogState] = React.useState<UploadDialogState>({ isOpen: false, item: null, division: null });
-  const [uploadProgress, setUploadProgress] = React.useState<UploadProgress[]>([]);
 
 
   const projectIdFromUrl = searchParams.get('projectId');
@@ -514,65 +507,26 @@ export default function ProjectsPageClient({ initialProjects }: ProjectsPageClie
     return currentUser.roles[0];
   }, [currentUser, selectedProject]);
 
-  const uploadFileWithProgress = (file: File, headers: Headers): Promise<any> => {
-    return new Promise((resolve, reject) => {
-        const xhr = new XMLHttpRequest();
-        xhr.open('POST', `${API_BASE_URL}/api/upload/stream`, true);
+  const uploadFileWithFormData = async (file: File, formDataPayload: Record<string, string | null>): Promise<any> => {
+      const formData = new FormData();
+      formData.append('file', file);
+      for (const key in formDataPayload) {
+          if (formDataPayload[key] !== null) {
+              formData.append(key, formDataPayload[key]!);
+          }
+      }
 
-        // Set headers
-        for (const [key, value] of headers.entries()) {
-            xhr.setRequestHeader(key, value);
-        }
+      const response = await fetch(`${API_BASE_URL}/api/upload-file`, {
+          method: 'POST',
+          body: formData,
+      });
 
-        xhr.upload.onprogress = (event) => {
-            if (event.lengthComputable) {
-                const progress = Math.round((event.loaded / event.total) * 100);
-                setUploadProgress(prev => {
-                    const existingIndex = prev.findIndex(p => p.fileName === file.name);
-                    if (existingIndex > -1) {
-                        const newProgress = [...prev];
-                        newProgress[existingIndex] = { ...newProgress[existingIndex], progress };
-                        return newProgress;
-                    }
-                    return [...prev, { fileName: file.name, progress }];
-                });
-            }
-        };
-
-        xhr.onload = () => {
-            if (xhr.status >= 200 && xhr.status < 300) {
-                try {
-                    resolve(JSON.parse(xhr.responseText));
-                } catch (e) {
-                    reject(new Error('Invalid JSON response from server.'));
-                }
-            } else {
-                try {
-                    const errorResponse = JSON.parse(xhr.responseText);
-                    reject(new Error(errorResponse.message || `Server error: ${xhr.statusText}`));
-                } catch (e) {
-                    reject(new Error(`Server error: ${xhr.statusText}`));
-                }
-            }
-             // Clear progress for this file
-            setUploadProgress(prev => prev.filter(p => p.fileName !== file.name));
-        };
-
-        xhr.onerror = () => {
-            reject(new Error('Network error during upload.'));
-            // Clear progress for this file
-            setUploadProgress(prev => prev.filter(p => p.fileName !== file.name));
-        };
-        
-        xhr.onabort = () => {
-            reject(new Error('Upload was aborted.'));
-            setUploadProgress(prev => prev.filter(p => p.fileName !== file.name));
-        };
-
-        xhr.send(file);
-    });
-};
-
+      if (!response.ok) {
+          const errorData = await response.json().catch(() => ({ message: `Server error: ${response.statusText}` }));
+          throw new Error(errorData.message || `Failed to upload ${file.name}.`);
+      }
+      return response.json();
+  };
 
   const handleProgressSubmit = React.useCallback(async (actionTaken: string = 'submitted', filesToSubmit?: File[], descriptionForSubmit?: string, associatedChecklistItem?: string, divisionForFile?: string) => {
     if (!currentUser || !Array.isArray(currentUser.roles) || !selectedProject) {
@@ -590,8 +544,6 @@ export default function ProjectsPageClient({ initialProjects }: ProjectsPageClie
     
     setIsSubmitting(true);
     if (isArchitectInitialImageUpload) setIsSubmittingInitialImages(true);
-     setUploadProgress([]);
-
 
     try {
         if (!isDecisionOrTerminalAction && !isSchedulingAction && !isSurveySchedulingAction && !isArchitectInitialImageUpload && !currentDescription && currentFiles.length === 0 ) {
@@ -610,111 +562,74 @@ export default function ProjectsPageClient({ initialProjects }: ProjectsPageClie
         const uploadedFileEntries: Omit<FileEntry, 'timestamp'>[] = [];
         if (currentFiles.length > 0) {
             for (const file of currentFiles) {
-                const headers = new Headers();
-                headers.append('x-project-id', selectedProject.id);
-                headers.append('x-file-name', file.name);
-                headers.append('x-user-id', currentUser.id);
-                headers.append('x-uploader-role', divisionForFile || actingRole || currentUser.roles[0]);
-                if (associatedChecklistItem) {
-                    headers.append('x-checklist-item', associatedChecklistItem);
-                }
-                
+                const formDataPayload: Record<string, string | null> = {
+                  projectId: selectedProject.id,
+                  userId: currentUser.id,
+                  uploaderRole: divisionForFile || actingRole || currentUser.roles[0],
+                  note: currentDescription,
+                  associatedChecklistItem: associatedChecklistItem || null,
+                };
                 try {
-                    const result = await uploadFileWithProgress(file, headers);
-                     uploadedFileEntries.push({
-                        name: result.name,
-                        path: result.path,
-                        uploadedBy: result.uploadedBy,
-                    });
+                  // Using FormData upload instead of stream
+                  const result = await uploadFileWithFormData(file, formDataPayload);
+                  uploadedFileEntries.push({
+                      name: result.name,
+                      path: result.path,
+                      uploadedBy: result.uploadedBy,
+                  });
                 } catch (error: any) {
                     console.error("Error uploading file:", file.name, error);
-                    toast({ variant: 'destructive', title: projectsDict.toast.uploadError, description: error.message || `Failed to upload ${file.name}.` });
+                    toast({ variant: 'destructive', title: projectsDict.toast.uploadError, description: error.message });
                     setIsSubmitting(false);
                     if (isArchitectInitialImageUpload) setIsSubmittingInitialImages(false);
-                    return;
+                    return; // Stop on first upload error
                 }
             }
+        } else {
+            // If no files, we still need to submit the progress update
+            const updatePayload: UpdateProjectParams = {
+                projectId: selectedProject.id,
+                updaterRoles: currentUser.roles,
+                updaterUsername: currentUser.username,
+                actionTaken: actionTaken,
+                note: currentDescription || undefined,
+                scheduleDetails: (selectedProject.status === 'Pending Scheduling' && actionTaken === 'scheduled' && scheduleDate) ? {
+                    date: format(scheduleDate, 'yyyy-MM-dd'),
+                    time: scheduleTime,
+                    location: scheduleLocation
+                } : undefined,
+                 surveyDetails: (selectedProject.status === 'Pending Survey Details' || selectedProject.status === 'Survey Scheduled') && (actionTaken === 'submitted' || actionTaken === 'reschedule_survey') ? {
+                    date: (actionTaken === 'reschedule_survey' && rescheduleDate) ? format(rescheduleDate, 'yyyy-MM-dd') : (surveyDate ? format(surveyDate, 'yyyy-MM-dd') : ''),
+                    time: (actionTaken === 'reschedule_survey') ? rescheduleTime : surveyTime,
+                    description: surveyDescription
+                } : undefined,
+            };
+
+            const response = await fetch(`${API_BASE_URL}/api/projects/update`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(updatePayload),
+            });
+
+            if (!response.ok) {
+                const errorResult = await response.json();
+                throw new Error(errorResult.message);
+            }
         }
-
-        const updatePayload: UpdateProjectParams = {
-            projectId: selectedProject.id,
-            updaterRoles: currentUser.roles,
-            updaterUsername: currentUser.username,
-            actionTaken: actionTaken,
-            files: uploadedFileEntries.length > 0 ? uploadedFileEntries : undefined,
-            note: currentDescription || undefined,
-            scheduleDetails: (selectedProject.status === 'Pending Scheduling' && actionTaken === 'scheduled' && scheduleDate) ? {
-                date: format(scheduleDate, 'yyyy-MM-dd'),
-                time: scheduleTime,
-                location: scheduleLocation
-            } : undefined,
-             surveyDetails: (selectedProject.status === 'Pending Survey Details' || selectedProject.status === 'Survey Scheduled') && (actionTaken === 'submitted' || actionTaken === 'reschedule_survey') ? {
-                date: (actionTaken === 'reschedule_survey' && rescheduleDate) ? format(rescheduleDate, 'yyyy-MM-dd') : (surveyDate ? format(surveyDate, 'yyyy-MM-dd') : ''),
-                time: (actionTaken === 'reschedule_survey') ? rescheduleTime : surveyTime,
-                description: surveyDescription
-            } : undefined,
-        };
-
-        const response = await fetch(`${API_BASE_URL}/api/projects/update`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(updatePayload),
-        });
-
-        const newlyUpdatedProjectResult = await response.json();
-        if (!response.ok) throw new Error(newlyUpdatedProjectResult.message);
         
+        // After all uploads (or if no uploads), fetch the final state of the project
         const newlyUpdatedProject = await fetchProjectById(selectedProject.id);
         
         if (newlyUpdatedProject) {
             setAllProjects(prev => prev.map(p => p.id === newlyUpdatedProject.id ? newlyUpdatedProject : p));
             setSelectedProject(newlyUpdatedProject); 
         }
-        
-        let toastMessage = "";
-        switch (actionTaken) {
-            case 'all_files_confirmed':
-                toastMessage = projectsDict.toast.allDesignsConfirmedDesc.replace('{projectName}', newlyUpdatedProjectResult?.title || '');
-                break;
-            case 'reschedule_survey':
-                 toastMessage = projectsDict.toast.surveyRescheduledDesc?.replace('{projectName}', newlyUpdatedProjectResult?.title || '') || `Survey for {projectName} rescheduled.`;
-                 break;
-            case 'reschedule_survey_from_parallel':
-                 toastMessage = `Proyek '${newlyUpdatedProjectResult?.title || ''}' dikembalikan ke tahap survei.`;
-                 break;
-            case 'reschedule_sidang':
-                 toastMessage = `Sidang untuk proyek '${newlyUpdatedProjectResult?.title || ''}' telah diminta untuk dijadwalkan ulang. Admin Proyek telah diberitahu.`;
-                 break;
-            case 'submitted':
-                if (selectedProject.status === 'Pending Parallel Design Uploads') {
-                    toastMessage = projectsDict.toast.parallelUploadSubmittedDesc.replace('{uploaderRole}', getTranslatedStatus(currentUser.roles[0])).replace('{projectName}', newlyUpdatedProjectResult?.title || '');
-                } else if (selectedProject.status === 'Pending Post-Sidang Revision') {
-                    toastMessage = (projectsDict.toast.revisionFilesUploadedDesc || "Your revised files for project '{projectName}' have been uploaded successfully. Admin Proyek has been notified.")
-                        .replace('{projectName}', newlyUpdatedProject?.title || '');
-                } else if (selectedProject.status === 'Pending Final Documents') {
-                    toastMessage = `Dokumen baru untuk proyek '${newlyUpdatedProject?.title || ''}' telah diunggah.`;
-                } else if (selectedProject.status === 'Pending Pelunasan Invoice') {
-                    toastMessage = `Invoice Pelunasan untuk proyek '${newlyUpdatedProject?.title || ''}' telah diunggah.`;
-                }
-                else {
-                    toastMessage = projectsDict.toast.notifiedNextStep.replace('{division}', getTranslatedStatus(newlyUpdatedProjectResult?.assignedDivision || ''));
-                }
-                break;
-            default:
-                if (newlyUpdatedProjectResult?.status === 'Completed') {
-                    toastMessage = projectsDict.toast.projectCompletedSuccessfully.replace('{title}', newlyUpdatedProjectResult?.title || '');
-                } else if (newlyUpdatedProjectResult?.status === 'Canceled') {
-                    toastMessage = projectsDict.toast.projectCanceledSuccessfully.replace('{title}', newlyUpdatedProjectResult?.title || '');
-                } else {
-                    toastMessage = projectsDict.toast.notifiedNextStep.replace('{division}', getTranslatedStatus(newlyUpdatedProjectResult?.assignedDivision || ''));
-                }
-        }
-        toast({ title: projectsDict.toast.progressSubmitted, description: toastMessage });
 
-        if (actionTaken === 'submitted' || !isDecisionOrTerminalAction) {
-            setDescription('');
-            setUploadedFiles([]);
-        }
+        toast({ title: projectsDict.toast.progressSubmitted, description: "Project has been updated successfully." });
+
+        // Reset form states
+        setDescription('');
+        setUploadedFiles([]);
         if (actionTaken.includes('revise')) { setRevisionNote(''); }
         if (isArchitectInitialImageUpload) {
             setInitialImageFiles([]);
@@ -732,7 +647,6 @@ export default function ProjectsPageClient({ initialProjects }: ProjectsPageClie
       } finally {
          setIsSubmitting(false);
          if (isArchitectInitialImageUpload) setIsSubmittingInitialImages(false);
-         setUploadProgress([]);
       }
   }, [currentUser, selectedProject, uploadedFiles, description, scheduleDate, scheduleTime, scheduleLocation, surveyDate, surveyTime, surveyDescription, projectsDict, toast, getTranslatedStatus, initialImageFiles, initialImageDescription, rescheduleDate, rescheduleTime, actingRole, uploadDialogState.isOpen]);
 
@@ -743,45 +657,17 @@ export default function ProjectsPageClient({ initialProjects }: ProjectsPageClie
 
     setIsUploadingAdminFiles(true);
     try {
-        const filesToUpload = adminFiles.map(file => ({
-            name: file.name,
-            file: file,
-        }));
-
-        const uploadedFileEntries: { name: string; path: string; uploadedBy: string }[] = [];
-
-        for (const { name, file } of filesToUpload) {
-            const formData = new FormData();
-            formData.append('file', file);
-            formData.append('projectId', selectedProject.id);
-            formData.append('userId', currentUser.id);
-            formData.append('uploaderRole', currentUser.roles[0]);
-
-            const response = await fetch(`${API_BASE_URL}/api/upload-file`, {
-                method: 'POST',
-                body: formData,
-            });
-
-            if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.message || `Gagal mengunggah file ${name}.`);
-            }
-            
-            const uploadedFileInfo = await response.json();
-            uploadedFileEntries.push({
-                name: uploadedFileInfo.name,
-                path: uploadedFileInfo.path,
-                uploadedBy: uploadedFileInfo.uploadedBy
-            });
+        for (const file of adminFiles) {
+            const formDataPayload = {
+              projectId: selectedProject.id,
+              userId: currentUser.id,
+              uploaderRole: currentUser.roles[0],
+              note: adminFileNote,
+              associatedChecklistItem: null,
+            };
+            await uploadFileWithFormData(file, formDataPayload);
         }
         
-        await addFilesToProjectService(
-            selectedProject.id, 
-            uploadedFileEntries, 
-            currentUser.username,
-            adminFileNote
-        );
-
         const newlyUpdatedProject = await fetchProjectById(selectedProject.id);
         if (newlyUpdatedProject) {
             setAllProjects(prev => prev.map(p => (p.id === newlyUpdatedProject.id ? newlyUpdatedProject : p)));
@@ -1953,19 +1839,6 @@ export default function ProjectsPageClient({ initialProjects }: ProjectsPageClie
                                <Upload className="h-5 w-5 text-muted-foreground flex-shrink-0" />
                              </div>
                            </div>
-                            {uploadProgress.length > 0 && (
-                                <div className="space-y-2">
-                                    {uploadProgress.map(up => (
-                                        <div key={up.fileName}>
-                                            <div className="flex justify-between text-xs mb-1">
-                                                <span className="truncate max-w-xs">{up.fileName}</span>
-                                                <span className="font-semibold">{up.progress}%</span>
-                                            </div>
-                                            <Progress value={up.progress} className="h-2" />
-                                        </div>
-                                    ))}
-                                </div>
-                            )}
                            {uploadedFiles.length > 0 && (
                              <div className="space-y-2 rounded-md border p-3">
                                <Label>{projectsDict.selectedFilesLabel} ({uploadedFiles.length})</Label>
@@ -1995,19 +1868,6 @@ export default function ProjectsPageClient({ initialProjects }: ProjectsPageClie
                                             {finalDocsChecklistStatus?.map((item, index, allItems) => renderFinalDocsChecklistItem(item, index, allItems))}
                                         </ul>
                                     </div>
-                                    {uploadProgress.length > 0 && (
-                                        <div className="space-y-2">
-                                            {uploadProgress.map(up => (
-                                                <div key={up.fileName}>
-                                                    <div className="flex justify-between text-xs mb-1">
-                                                        <span className="truncate max-w-xs">{up.fileName}</span>
-                                                        <span className="font-semibold">{up.progress}%</span>
-                                                    </div>
-                                                    <Progress value={up.progress} className="h-2" />
-                                                </div>
-                                            ))}
-                                        </div>
-                                    )}
                                 </CardContent>
                                 {currentUser?.roles.includes('Admin Proyek') && (
                                 <CardFooter className="p-4 sm:p-6 border-t">
@@ -2059,19 +1919,6 @@ export default function ProjectsPageClient({ initialProjects }: ProjectsPageClie
                                 {project.surveyDetails?.date && <p className="text-sm text-muted-foreground">{projectsDict.surveyCompletion.scheduledFor}: {formatDateOnly(project.surveyDetails.date)} @ {project.surveyDetails.time}</p>}
                                 <div className="space-y-1.5"><Label htmlFor="surveyReportDescription">{projectsDict.surveyCompletion.reportNotesLabel}</Label><Textarea id="surveyReportDescription" placeholder={projectsDict.surveyCompletion.reportNotesPlaceholder} value={description} onChange={(e) => setDescription(e.target.value)} disabled={isSubmitting}/></div>
                                 <div className="grid w-full items-center gap-1.5"><Label htmlFor="survey-report-files">{projectsDict.attachFilesLabel} ({projectsDict.optionalReportLabel})</Label><div className="flex flex-col sm:flex-row items-center gap-2"><Input id="survey-report-files" type="file" multiple onChange={handleFileChange} disabled={isSubmitting} className="flex-grow"/><Upload className="h-5 w-5 text-muted-foreground flex-shrink-0" /></div></div>
-                                  {uploadProgress.length > 0 && (
-                                      <div className="space-y-2">
-                                          {uploadProgress.map(up => (
-                                              <div key={up.fileName}>
-                                                  <div className="flex justify-between text-xs mb-1">
-                                                      <span className="truncate max-w-xs">{up.fileName}</span>
-                                                      <span className="font-semibold">{up.progress}%</span>
-                                                  </div>
-                                                  <Progress value={up.progress} className="h-2" />
-                                              </div>
-                                          ))}
-                                      </div>
-                                  )}
                                   {uploadedFiles.length > 0 && (
                                      <div className="space-y-2 rounded-md border p-3">
                                          <Label>{projectsDict.selectedFilesLabel} ({uploadedFiles.length})</Label>
@@ -2346,19 +2193,6 @@ export default function ProjectsPageClient({ initialProjects }: ProjectsPageClie
                             <Label htmlFor="checklist-files">File</Label>
                             <Input id="checklist-files" type="file" multiple onChange={handleFileChange} disabled={isSubmitting} />
                           </div>
-                            {uploadProgress.length > 0 && (
-                                <div className="space-y-2">
-                                    {uploadProgress.map(up => (
-                                        <div key={up.fileName}>
-                                            <div className="flex justify-between text-xs mb-1">
-                                                <span className="truncate max-w-xs">{up.fileName}</span>
-                                                <span className="font-semibold">{up.progress}%</span>
-                                            </div>
-                                            <Progress value={up.progress} className="h-2" />
-                                        </div>
-                                    ))}
-                                </div>
-                            )}
                            {uploadedFiles.length > 0 && (
                              <div className="space-y-2 rounded-md border p-3">
                                <Label>{projectsDict.selectedFilesLabel} ({uploadedFiles.length})</Label>

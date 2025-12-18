@@ -421,7 +421,7 @@ export async function markParallelUploadsAsCompleteByDivision(
         const payload: NotificationPayload = {
             title: `Progres Proyek: ${project.title}`,
             body: `"${username} (${division})" telah menyelesaikan unggahan mereka untuk proyek "${project.title}".`,
-            url: `/dashboard/projects?projectId=${projectId}`
+            url: `/dashboard/projects?projectId=${project.id}`
         };
         await notifyUsersByRole(['Admin Proyek', 'Owner'], payload, projectId);
         return project;
