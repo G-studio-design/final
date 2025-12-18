@@ -2,12 +2,11 @@
 'use server';
 import { NextResponse, NextRequest } from 'next/server';
 import { stat, mkdir, createWriteStream } from 'fs';
-import { unlink } from 'fs/promises';
 import path from 'path';
-import { Readable } from 'stream';
 import { pipeline } from 'stream/promises';
 import { sanitizeForPath } from '@/lib/path-utils';
 import { getProjectById, deleteProjectFile } from '@/services/project-service';
+import { Readable } from 'stream';
 
 const DB_BASE_PATH = process.env.DATABASE_PATH || path.resolve(process.cwd(), 'data');
 const PROJECT_FILES_BASE_DIR = path.join(DB_BASE_PATH, 'project_files');
@@ -70,10 +69,21 @@ export async function POST(req: NextRequest) {
         }
         // --- END REVISION LOGIC ---
 
-        // Pipe the file stream directly to the filesystem
-        const readableStream = file.stream();
+        // Convert Web Stream to Node.js Readable stream
+        const bodyReader = file.stream().getReader();
+        const readableNodeStream = new Readable({
+            async read() {
+                const { done, value } = await bodyReader.read();
+                if (done) {
+                    this.push(null); // End of stream
+                } else {
+                    this.push(value);
+                }
+            }
+        });
+
         const writableStream = createWriteStream(absoluteFilePath);
-        await pipeline(readableStream, writableStream);
+        await pipeline(readableNodeStream, writableStream);
         
         const fileEntry = {
             name: originalFilename,
