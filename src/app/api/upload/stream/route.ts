@@ -5,11 +5,12 @@ import { stat, mkdir } from 'fs/promises';
 import { pipeline } from 'stream/promises';
 import path from 'path';
 import { sanitizeForPath } from '@/lib/path-utils';
-import { deleteProjectFile, getProjectById } from '@/services/project-service';
+import { getProjectById, deleteProjectFile } from '@/services/project-service'; // Adjusted import
 import { Readable } from 'stream';
 
+export const maxDuration = 300; // Increase timeout to 5 minutes
 
-const DB_BASE_PATH = process.env.DATABASE_PATH || path.resolve(process.cwd(), 'data');
+const DB_BASE_PATH = process.env.DATABASE_PATH || path.resolve(process.cwd(), 'database'); // Corrected path
 const PROJECT_FILES_BASE_DIR = path.join(DB_BASE_PATH, 'project_files');
 
 
@@ -54,9 +55,27 @@ export async function POST(req: NextRequest) {
     // --- REVISION LOGIC ---
     const project = await getProjectById(projectId);
     if (project) {
-        const existingFile = project.files.find(f => path.basename(f.path) === safeFilenameForPath);
+        // Corrected logic: find file by checking if the base name matches the newly generated safe name
+        const existingFile = project.files.find(f => {
+            const checklistItemName = f.name.toLowerCase().split(' ').filter(k => k);
+            const sanitizedExistingItem = (checklistItemName ? sanitizeForPath(f.name) : "file").replace(/[^a-zA-Z0-9]/g, '_').toLowerCase();
+            const existingSafeName = `${sanitizedExistingItem}_${sanitizeForPath(f.name) || `unnamed_${Date.now()}`}`;
+            
+            // This is a simplification. A more robust solution might store the checklist item key with the file.
+            // For now, we assume a file for a checklist item will be named similarly.
+            const isForSameChecklistItem = associatedChecklistItem && f.name.includes(associatedChecklistItem);
+            
+            // Let's be more direct: if a file for this checklist item exists, replace it.
+            // This is tricky without a direct link. A simpler rule: if a file with the *exact same generated path* would be created, delete the old one.
+            const existingGeneratedPath = path.join(projectId, existingSafeName).replace(/\\/g, '/');
+
+            // The most direct comparison is if the new path we are about to write to already exists in the records.
+            return f.path === relativePath;
+        });
+
         if (existingFile) {
-            console.log(`[API/StreamUpload] Revision detected. Deleting old file: ${existingFile.path}`);
+            console.log(`[API/StreamUpload] Revision detected. Deleting old file record and physical file for: ${existingFile.path}`);
+            // The service function handles both DB record and physical file
             await deleteProjectFile(projectId, existingFile.path, 'system-revision');
         }
     }
