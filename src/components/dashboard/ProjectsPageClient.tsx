@@ -97,6 +97,7 @@ import {
 import { format, parseISO } from 'date-fns';
 import { id as IndonesianLocale, enUS as EnglishLocale } from 'date-fns/locale';
 import { addFilesToProject as addFilesToProjectService } from '@/services/project-service';
+import { API_BASE_URL } from '@/config/api-config';
 
 
 const defaultGlobalDict = getDictionary('en');
@@ -220,7 +221,7 @@ export default function ProjectsPageClient({ initialProjects }: ProjectsPageClie
   const fetchAllProjects = React.useCallback(async () => {
     setIsLoadingProjects(true);
     try {
-        const response = await fetch('/api/projects');
+        const response = await fetch(`${API_BASE_URL}/api/projects`);
         if (!response.ok) {
             throw new Error('Failed to fetch projects');
         }
@@ -249,7 +250,7 @@ export default function ProjectsPageClient({ initialProjects }: ProjectsPageClie
 
   const fetchProjectById = async (id: string): Promise<Project | null> => {
     try {
-      const response = await fetch(`/api/projects/${id}`);
+      const response = await fetch(`${API_BASE_URL}/api/projects/${id}`);
       if (!response.ok) {
         throw new Error(`Failed to fetch project ${id}`);
       }
@@ -516,7 +517,7 @@ export default function ProjectsPageClient({ initialProjects }: ProjectsPageClie
   const uploadFileWithProgress = (file: File, headers: Headers): Promise<any> => {
     return new Promise((resolve, reject) => {
         const xhr = new XMLHttpRequest();
-        xhr.open('POST', '/api/upload/stream', true);
+        xhr.open('POST', `${API_BASE_URL}/api/upload/stream`, true);
 
         // Set headers
         for (const [key, value] of headers.entries()) {
@@ -654,7 +655,7 @@ export default function ProjectsPageClient({ initialProjects }: ProjectsPageClie
             } : undefined,
         };
 
-        const response = await fetch('/api/projects/update', {
+        const response = await fetch(`${API_BASE_URL}/api/projects/update`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(updatePayload),
@@ -756,7 +757,7 @@ export default function ProjectsPageClient({ initialProjects }: ProjectsPageClie
             formData.append('userId', currentUser.id);
             formData.append('uploaderRole', currentUser.roles[0]);
 
-            const response = await fetch('/api/upload-file', {
+            const response = await fetch(`${API_BASE_URL}/api/upload-file`, {
                 method: 'POST',
                 body: formData,
             });
@@ -963,7 +964,7 @@ export default function ProjectsPageClient({ initialProjects }: ProjectsPageClie
 
       try {
         setIsAddingToCalendar(true);
-        const response = await fetch('/api/calendar/create-event', {
+        const response = await fetch(`${API_BASE_URL}/api/calendar/create-event`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ userId: currentUser.id, eventDetails }),
@@ -1043,7 +1044,7 @@ export default function ProjectsPageClient({ initialProjects }: ProjectsPageClie
    const handleDownloadFile = React.useCallback(async (file: FileEntry) => {
         setIsDownloading(true);
         try {
-            const response = await fetch(`/api/download-file?filePath=${encodeURIComponent(file.path)}`);
+            const response = await fetch(`${API_BASE_URL}/api/download-file?filePath=${encodeURIComponent(file.path)}`);
             if (!response.ok) {
                 let errorDetails = `Failed to download ${file.name}. Status: ${response.status}`;
                 let responseText = "";
@@ -1085,7 +1086,7 @@ export default function ProjectsPageClient({ initialProjects }: ProjectsPageClie
 
         setIsDeletingFile(filePath);
         try {
-            const response = await fetch('/api/delete-file', {
+            const response = await fetch(`${API_BASE_URL}/api/delete-file`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -1140,7 +1141,7 @@ export default function ProjectsPageClient({ initialProjects }: ProjectsPageClie
       setIsGenericRevisionDialogOpen(false);
 
       try {
-        const response = await fetch('/api/projects/update', {
+        const response = await fetch(`${API_BASE_URL}/api/projects/update`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -1302,7 +1303,7 @@ export default function ProjectsPageClient({ initialProjects }: ProjectsPageClie
         if (!selectedProject || !currentUser || !Array.isArray(currentUser.roles)) return;
         setIsSubmitting(true);
         try {
-            const response = await fetch('/api/projects/update', {
+            const response = await fetch(`${API_BASE_URL}/api/projects/update`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -1335,7 +1336,7 @@ export default function ProjectsPageClient({ initialProjects }: ProjectsPageClie
         if (!selectedProject || !currentUser) return;
         setIsSubmitting(true);
         try {
-            const response = await fetch('/api/notify-division', {
+            const response = await fetch(`${API_BASE_URL}/api/notify-division`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({

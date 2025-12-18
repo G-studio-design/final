@@ -24,6 +24,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useAuth } from '@/context/AuthContext';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useSearchParams, useRouter } from 'next/navigation';
+import { API_BASE_URL } from '@/config/api-config';
 
 const defaultDict = getDictionary('en');
 
@@ -146,7 +147,7 @@ export default function SettingsPageClient() {
             return;
         }
 
-        const response = await fetch('/api/notifications/vapid-public-key');
+        const response = await fetch(`${API_BASE_URL}/api/notifications/vapid-public-key`);
         if (!response.ok) throw new Error("Could not fetch VAPID public key.");
         const vapidPublicKey = await response.text();
         const applicationServerKey = urlBase64ToUint8Array(vapidPublicKey);
@@ -156,7 +157,7 @@ export default function SettingsPageClient() {
             applicationServerKey: applicationServerKey
         });
         
-        await fetch('/api/notifications/subscribe', {
+        await fetch(`${API_BASE_URL}/api/notifications/subscribe`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ userId: currentUser.id, subscription: subscription })
@@ -193,7 +194,7 @@ export default function SettingsPageClient() {
             whatsappNumber: whatsappNumber,
         };
 
-        const response = await fetch(`/api/users/${currentUser.id}`, {
+        const response = await fetch(`${API_BASE_URL}/api/users/${currentUser.id}`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(payload)
@@ -228,7 +229,7 @@ export default function SettingsPageClient() {
 
     setIsUpdatingPassword(true);
     try {
-        const response = await fetch(`/api/users/${currentUser.id}/password`, {
+        const response = await fetch(`${API_BASE_URL}/api/users/${currentUser.id}/password`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ currentPassword, newPassword })
@@ -251,7 +252,7 @@ export default function SettingsPageClient() {
     if (!currentUser) return;
     setIsDisconnectingGoogle(true);
     try {
-        const response = await fetch('/api/auth/google/disconnect', {
+        const response = await fetch(`${API_BASE_URL}/api/auth/google/disconnect`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ userId: currentUser.id }),
@@ -293,7 +294,7 @@ export default function SettingsPageClient() {
       const formData = new FormData();
       formData.append('avatar', avatarFile);
 
-      const response = await fetch(`/api/users/${currentUser.id}/avatar`, {
+      const response = await fetch(`${API_BASE_URL}/api/users/${currentUser.id}/avatar`, {
         method: 'POST',
         body: formData,
       });
@@ -339,7 +340,7 @@ export default function SettingsPageClient() {
                  <CardContent className="space-y-4">
                      <div className="flex flex-col sm:flex-row items-center sm:items-start space-y-4 sm:space-y-0 sm:space-x-4">
                           <Avatar className="h-20 w-20 border-2 border-primary/30">
-                            <AvatarImage src={avatarPreview || `/api/users/${currentUser.id}/avatar?v=${avatarKey}`} alt={currentUser.displayName || currentUser.username} />
+                            <AvatarImage src={avatarPreview || `${API_BASE_URL}/api/users/${currentUser.id}/avatar?v=${avatarKey}`} alt={currentUser.displayName || currentUser.username} />
                             <AvatarFallback className="text-xl bg-muted">{getUserInitials(currentUser.displayName || currentUser.username)}</AvatarFallback>
                           </Avatar>
                           <div className="flex-grow space-y-2 text-center sm:text-left">
@@ -430,7 +431,7 @@ export default function SettingsPageClient() {
                     ) : (
                         <div className="space-y-4">
                             <p className="text-sm text-muted-foreground">{settingsDict.googleCalendarConnectDesc}</p>
-                            <Button asChild className="accent-teal w-full sm:w-auto"><a href="/api/auth/google/connect"><LinkIcon className="mr-2 h-4 w-4" />{settingsDict.connectGoogleCalendar}</a></Button>
+                            <Button asChild className="accent-teal w-full sm:w-auto"><a href={`${API_BASE_URL}/api/auth/google/connect`}><LinkIcon className="mr-2 h-4 w-4" />{settingsDict.connectGoogleCalendar}</a></Button>
                         </div>
                     )}
                  </CardContent>

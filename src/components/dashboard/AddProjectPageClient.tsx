@@ -18,6 +18,7 @@ import { getDictionary } from '@/lib/translations';
 import { Loader2, Upload, Trash2 } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { DEFAULT_WORKFLOW_ID } from '@/config/workflow-constants';
+import { API_BASE_URL } from '@/config/api-config';
 
 const getAddProjectSchema = (dictValidation: ReturnType<typeof getDictionary>['addProjectPage']['validation']) => z.object({
   title: z.string().min(5, dictValidation.titleMin),
@@ -95,7 +96,7 @@ export default function AddProjectPageClient() {
       formData.append('userId', currentUser.id);
       selectedFiles.forEach(file => formData.append('files', file));
 
-      const response = await fetch('/api/projects', {
+      const response = await fetch(`${API_BASE_URL}/api/projects`, {
         method: 'POST',
         body: formData,
       });
