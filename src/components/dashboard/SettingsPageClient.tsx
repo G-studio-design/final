@@ -18,7 +18,7 @@ import {
 import { useLanguage } from '@/context/LanguageContext';
 import { getDictionary } from '@/lib/translations';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, Upload, Link as LinkIcon, Unlink, BellPlus, BellOff, XCircle } from 'lucide-react';
+import { Loader2, Upload, Link as LinkIcon, Unlink, BellPlus, BellOff, XCircle, ShieldOff } from 'lucide-react';
 import type { User, UpdateProfileData } from '@/types/user-types';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useAuth } from '@/context/AuthContext';
@@ -74,6 +74,7 @@ export default function SettingsPageClient() {
    
    // This key will be used to force the AvatarImage to re-render
    const [avatarKey, setAvatarKey] = React.useState(Date.now());
+   const [isSecureContext, setIsSecureContext] = React.useState(false);
 
 
    React.useEffect(() => {
@@ -86,8 +87,11 @@ export default function SettingsPageClient() {
 
    React.useEffect(() => {
      setIsClient(true);
-     if ('Notification' in window) {
-       setNotificationPermission(Notification.permission);
+     if (typeof window !== 'undefined') {
+        setIsSecureContext(window.isSecureContext);
+        if ('Notification' in window) {
+           setNotificationPermission(Notification.permission);
+        }
      }
    }, []);
 
@@ -392,19 +396,25 @@ export default function SettingsPageClient() {
                     <CardDescription>{settingsDict.pushNotificationsDesc}</CardDescription>
                 </CardHeader>
                 <CardContent>
-                    {notificationPermission === 'granted' && (
+                    {!isSecureContext ? (
+                        <div className="flex items-center gap-2 text-amber-600">
+                            <ShieldOff className="h-5 w-5" />
+                            <div>
+                                <p className="font-medium">Koneksi Tidak Aman</p>
+                                <p className="text-xs">Notifikasi push hanya tersedia pada koneksi HTTPS.</p>
+                            </div>
+                        </div>
+                    ) : notificationPermission === 'granted' ? (
                         <div className="flex items-center gap-2 text-green-600">
                             <BellPlus className="h-5 w-5" />
                             <p className="font-medium">{notificationsDict.permissionGrantedTitle}</p>
                         </div>
-                    )}
-                    {notificationPermission === 'default' && (
+                    ) : notificationPermission === 'default' ? (
                         <Button onClick={handleEnableNotifications} disabled={isSubscribing} className="w-full sm:w-auto">
                             {isSubscribing ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <BellPlus className="mr-2 h-4 w-4" />}
                             {settingsDict.enablePushNotificationsButton}
                         </Button>
-                    )}
-                    {notificationPermission === 'denied' && (
+                    ) : notificationPermission === 'denied' ? (
                         <div className="flex items-center gap-2 text-destructive">
                             <BellOff className="h-5 w-5" />
                             <div>
@@ -412,8 +422,7 @@ export default function SettingsPageClient() {
                                 <p className="text-xs">{notificationsDict.permissionDeniedDesc}</p>
                             </div>
                         </div>
-                    )}
-                    {notificationPermission !== 'granted' && notificationPermission !== 'default' && notificationPermission !== 'denied' && (
+                    ) : (
                          <div className="flex items-center gap-2 text-muted-foreground">
                             <XCircle className="h-5 w-5" />
                             <p className="font-medium">{notificationsDict.notSupportedTitle}</p>
