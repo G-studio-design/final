@@ -10,28 +10,33 @@ interface AuthContextProps {
   currentUser: User | null;
   setCurrentUser: Dispatch<SetStateAction<User | null>>;
   logout: () => void;
+  isHydrated: boolean;
 }
 
 const AuthContext = createContext<AuthContextProps | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const router = useRouter();
-  const [currentUser, setCurrentUser] = useState<User | null>(() => {
-    if (typeof window !== 'undefined') {
-      const storedUser = localStorage.getItem('currentUser');
-      try {
-        return storedUser ? (JSON.parse(storedUser) as User) : null;
-      } catch (error) {
-        console.error("Failed to parse stored user:", error);
-        localStorage.removeItem('currentUser');
-        return null;
-      }
-    }
-    return null;
-  });
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
+  const [isHydrated, setIsHydrated] = useState(false);
 
   useEffect(() => {
-    if (typeof window !== 'undefined') {
+    // This effect runs only on the client
+    try {
+      const storedUser = localStorage.getItem('currentUser');
+      if (storedUser) {
+        setCurrentUser(JSON.parse(storedUser) as User);
+      }
+    } catch (error) {
+      console.error("Failed to parse stored user:", error);
+      localStorage.removeItem('currentUser');
+    }
+    setIsHydrated(true); // Signal that hydration is complete
+  }, []);
+
+  useEffect(() => {
+    // This effect persists changes to localStorage, only runs on client when currentUser changes
+    if (typeof window !== 'undefined' && isHydrated) {
       if (currentUser) {
         const { password, ...userToStore } = currentUser;
         localStorage.setItem('currentUser', JSON.stringify(userToStore));
@@ -39,7 +44,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         localStorage.removeItem('currentUser');
       }
     }
-  }, [currentUser]);
+  }, [currentUser, isHydrated]);
 
   const logout = useCallback(() => {
     setCurrentUser(null);
@@ -47,9 +52,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     router.push('/');
   }, [router]);
 
-
   return (
-    <AuthContext.Provider value={{ currentUser, setCurrentUser, logout }}>
+    <AuthContext.Provider value={{ currentUser, setCurrentUser, logout, isHydrated }}>
       {children}
     </AuthContext.Provider>
   );

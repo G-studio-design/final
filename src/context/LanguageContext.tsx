@@ -14,24 +14,24 @@ interface LanguageContextProps {
 const LanguageContext = createContext<LanguageContextProps | undefined>(undefined);
 
 export const LanguageProvider = ({ children }: { children: ReactNode }) => {
-  // Initialize state from localStorage or default to 'en'
-  const [language, setLanguage] = useState<Language>(() => {
-      // Check localStorage only on the client-side
-      if (typeof window !== 'undefined') {
-          const storedLang = localStorage.getItem('appLanguage');
-          if (storedLang === 'id' || storedLang === 'en') {
-              return storedLang;
-          }
-      }
-    return 'en'; // Default language
-  });
+  const [language, setLanguage] = useState<Language>('en'); // Default to 'en' on server and initial client render
+  const [isHydrated, setIsHydrated] = useState(false);
+
+  useEffect(() => {
+    // This effect runs only on the client
+    const storedLang = localStorage.getItem('appLanguage');
+    if (storedLang === 'id' || storedLang === 'en') {
+      setLanguage(storedLang);
+    }
+    setIsHydrated(true); // Signal that hydration is complete
+  }, []);
 
   // Persist language changes to localStorage
   useEffect(() => {
-      if (typeof window !== 'undefined') {
+      if (isHydrated) { // Only run after initial hydration
          localStorage.setItem('appLanguage', language);
       }
-  }, [language]);
+  }, [language, isHydrated]);
 
   return (
     <LanguageContext.Provider value={{ language, setLanguage }}>

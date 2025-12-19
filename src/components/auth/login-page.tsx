@@ -26,6 +26,7 @@ import { useLanguage } from '@/context/LanguageContext';
 import { getDictionary } from '@/lib/translations';
 import type { User } from '@/types/user-types';
 import { useAuth } from '@/context/AuthContext';
+import { Skeleton } from '../ui';
 
 const defaultDict = getDictionary('en');
 
@@ -121,6 +122,7 @@ export default function LoginPage() {
   };
 
   if (!isClient) {
+    // Render a skeleton or null on the server and initial client render
     return null;
   }
 
