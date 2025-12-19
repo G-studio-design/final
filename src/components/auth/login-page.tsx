@@ -122,7 +122,7 @@ export default function LoginPage() {
   };
 
   if (!isClient) {
-    // Render a skeleton or null on the server and initial client render
+    // Render nothing on the server and initial client render
     return null;
   }
 
