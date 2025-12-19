@@ -241,7 +241,7 @@ export default function ProjectsPageClient({ initialProjects }: ProjectsPageClie
     };
   }, [fetchAllProjects]);
 
-  const fetchProjectById = async (id: string): Promise<Project | null> => {
+  const fetchProjectById = React.useCallback(async (id: string): Promise<Project | null> => {
     try {
       const response = await fetch(`${API_BASE_URL}/api/projects/${id}`);
       if (!response.ok) {
@@ -252,7 +252,7 @@ export default function ProjectsPageClient({ initialProjects }: ProjectsPageClie
       console.error(error);
       return null;
     }
-  };
+  }, []);
 
   React.useEffect(() => {
     if (allProjects.length > 0) {
@@ -611,12 +611,14 @@ export default function ProjectsPageClient({ initialProjects }: ProjectsPageClie
             throw new Error(errorResult.message);
         }
         
+        // **PERBAIKAN DIMULAI DI SINI**
         const newlyUpdatedProject = await fetchProjectById(selectedProject.id);
         
         if (newlyUpdatedProject) {
             setAllProjects(prev => prev.map(p => p.id === newlyUpdatedProject.id ? newlyUpdatedProject : p));
             setSelectedProject(newlyUpdatedProject); 
         }
+        // **PERBAIKAN SELESAI**
 
         toast({ title: projectsDict.toast.progressSubmitted, description: "Project has been updated successfully." });
 
@@ -641,7 +643,7 @@ export default function ProjectsPageClient({ initialProjects }: ProjectsPageClie
          setIsSubmitting(false);
          if (isArchitectInitialImageUpload) setIsSubmittingInitialImages(false);
       }
-  }, [currentUser, selectedProject, uploadedFiles, description, scheduleDate, scheduleTime, scheduleLocation, surveyDate, surveyTime, surveyDescription, projectsDict, toast, actingRole, uploadDialogState.isOpen, rescheduleDate, rescheduleTime]);
+  }, [currentUser, selectedProject, uploadedFiles, description, scheduleDate, scheduleTime, scheduleLocation, surveyDate, surveyTime, surveyDescription, projectsDict, toast, actingRole, uploadDialogState.isOpen, rescheduleDate, rescheduleTime, fetchProjectById]);
 
   const handleAdminFileUpload = async () => {
     if (!currentUser || !Array.isArray(currentUser.roles) || !selectedProject || adminFiles.length === 0) {
@@ -996,7 +998,7 @@ export default function ProjectsPageClient({ initialProjects }: ProjectsPageClie
         } finally {
             setIsDeletingFile(null);
         }
-    }, [selectedProject, currentUser, projectsDict.toast, toast]);
+    }, [selectedProject, currentUser, projectsDict.toast, toast, fetchProjectById]);
 
     const handleReviseSubmit = React.useCallback(async () => {
       if (!currentUser || !Array.isArray(currentUser.roles) || !selectedProject) {
@@ -1058,7 +1060,7 @@ export default function ProjectsPageClient({ initialProjects }: ProjectsPageClie
       } finally {
         setIsRevising(false);
       }
-    }, [currentUser, selectedProject, revisionNote, projectsDict, toast, getTranslatedStatus]);
+    }, [currentUser, selectedProject, revisionNote, projectsDict, toast, getTranslatedStatus, fetchProjectById]);
 
     const showUploadSection = React.useMemo(() => {
         if (!selectedProject || !currentUser || !Array.isArray(currentUser.roles) || !actingRole) {
@@ -1209,7 +1211,7 @@ export default function ProjectsPageClient({ initialProjects }: ProjectsPageClie
         } finally {
             setIsSubmitting(false);
         }
-    }, [selectedProject, currentUser, toast, projectsDict, getTranslatedStatus]);
+    }, [selectedProject, currentUser, toast, projectsDict, getTranslatedStatus, fetchProjectById]);
 
     const handleNotifyDivision = async (division: 'Arsitek' | 'Struktur' | 'MEP') => {
         if (!selectedProject || !currentUser) return;
