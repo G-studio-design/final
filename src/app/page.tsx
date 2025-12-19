@@ -3,12 +3,7 @@ import LoginPage from '@/components/auth/login-page';
 import { Suspense } from 'react';
 
 export default async function Home() {
-  // Wrap the client component in Suspense to prevent hydration errors.
-  // The server will render the fallback, and the client will match it
-  // before rendering the actual component content.
-  return (
-    <Suspense fallback={<div></div>}>
-      <LoginPage />
-    </Suspense>
-  );
+  // The Suspense boundary has been removed as the client component
+  // will now handle its own client-side rendering to prevent hydration errors.
+  return <LoginPage />;
 }

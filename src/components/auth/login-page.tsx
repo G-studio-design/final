@@ -43,6 +43,12 @@ export default function LoginPage() {
   const [dict, setDict] = React.useState(defaultDict.login);
   const [loginError, setLoginError] = React.useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = React.useState(false);
+  const [isClient, setIsClient] = React.useState(false);
+
+  React.useEffect(() => {
+    setIsClient(true);
+  }, []);
+
 
    React.useEffect(() => {
        const newDict = getDictionary(language);
@@ -113,6 +119,10 @@ export default function LoginPage() {
         setIsSubmitting(false);
     }
   };
+
+  if (!isClient) {
+    return null;
+  }
 
   return (
      <div className="flex min-h-screen items-center justify-center bg-secondary p-4">
