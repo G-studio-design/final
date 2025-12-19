@@ -1333,8 +1333,27 @@ export default function ProjectsPageClient({ initialProjects }: ProjectsPageClie
     const finalDocsChecklistStatus = React.useMemo(() => {
         if (selectedProject?.status !== 'Pending Final Documents') return null;
         const projectFiles = selectedProject.files || [];
+        
+        const hasGeneralFinalDoc = projectFiles.some(file => 
+            file.uploadedBy === 'Admin Proyek' && 
+            file.name.toLowerCase().includes('dokumen_final')
+        );
+
         return finalDocRequirements.map(reqName => {
             const reqKeywords = reqName.toLowerCase().split(' ').filter(k => k);
+            
+            // Special handling for the first item "Dokumen Final"
+            if (reqName === 'Dokumen Final' && hasGeneralFinalDoc) {
+                const uploadedFile = projectFiles.find(file => file.name.toLowerCase().includes('dokumen_final'));
+                return {
+                    name: reqName,
+                    uploaded: true,
+                    filePath: uploadedFile?.path,
+                    originalFileName: uploadedFile?.name,
+                    uploadedBy: uploadedFile?.uploadedBy
+                };
+            }
+
             const uploadedFile = projectFiles.find(file => {
                 const fileNameLower = file.name.toLowerCase();
                 const allKeywordsMatch = reqKeywords.every(keyword => fileNameLower.includes(keyword));
@@ -1345,7 +1364,14 @@ export default function ProjectsPageClient({ initialProjects }: ProjectsPageClie
                 
                 return allKeywordsMatch && file.uploadedBy === 'Admin Proyek';
             });
-            return { name: reqName, uploaded: !!uploadedFile, filePath: uploadedFile?.path, originalFileName: uploadedFile?.name, uploadedBy: uploadedFile?.uploadedBy };
+
+            return { 
+                name: reqName, 
+                uploaded: !!uploadedFile, 
+                filePath: uploadedFile?.path, 
+                originalFileName: uploadedFile?.name, 
+                uploadedBy: uploadedFile?.uploadedBy 
+            };
         });
     }, [selectedProject]);
     
