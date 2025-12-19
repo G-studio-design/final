@@ -120,6 +120,10 @@ export default function LoginPage() {
         setIsSubmitting(false);
     }
   };
+  
+  if (!isClient) {
+      return null;
+  }
 
   return (
      <div className="flex min-h-screen items-center justify-center bg-secondary p-4">
@@ -132,14 +136,14 @@ export default function LoginPage() {
             MsArch App
           </CardTitle>
             <CardDescription className="text-center text-muted-foreground">
-                {isClient ? dict.description : defaultDict.login.description}
+                {dict.description}
             </CardDescription>
         </CardHeader>
         <CardContent>
            {loginError && (
              <Alert variant="destructive" className="mb-4">
                <AlertTriangle className="h-4 w-4" />
-               <AlertTitle>{isClient ? dict.fail : defaultDict.login.fail}</AlertTitle>
+               <AlertTitle>{dict.fail}</AlertTitle>
                <AlertDescription>{loginError}</AlertDescription>
              </Alert>
            )}
@@ -151,10 +155,10 @@ export default function LoginPage() {
                 name="username"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>{isClient ? dict.usernameLabel : defaultDict.login.usernameLabel}</FormLabel>
+                    <FormLabel>{dict.usernameLabel}</FormLabel>
                     <FormControl>
                       <Input
-                         placeholder={isClient ? dict.usernamePlaceholder : defaultDict.login.usernamePlaceholder}
+                         placeholder={dict.usernamePlaceholder}
                          {...field}
                          autoComplete="off"
                          disabled={isSubmitting}
@@ -169,11 +173,11 @@ export default function LoginPage() {
                 name="password"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>{isClient ? dict.passwordLabel : defaultDict.login.passwordLabel}</FormLabel>
+                    <FormLabel>{dict.passwordLabel}</FormLabel>
                     <FormControl>
                       <Input
                         type="password"
-                        placeholder={isClient ? dict.passwordPlaceholder : defaultDict.login.passwordPlaceholder}
+                        placeholder={dict.passwordPlaceholder}
                         {...field}
                         autoComplete="current-password"
                         disabled={isSubmitting}
@@ -189,7 +193,7 @@ export default function LoginPage() {
                  disabled={isSubmitting}
               >
                 {isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <LogIn className="mr-2 h-4 w-4" />}
-                 {isClient ? (isSubmitting ? dict.loggingIn : dict.loginButton) : defaultDict.login.loginButton}
+                 {isSubmitting ? dict.loggingIn : dict.loginButton}
               </Button>
             </form>
           </Form>

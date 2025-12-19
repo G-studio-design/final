@@ -331,6 +331,23 @@ export default function DashboardLayoutWrapper({ children, attendanceEnabled }: 
     logout();
     setIsSheetOpen(false);
   };
+  
+  if (!isClient || !currentUser) {
+      return (
+          <div className="flex min-h-screen w-full bg-muted/40">
+             <div className="flex-1 flex flex-col">
+                  <header className="sticky top-0 z-30 flex h-14 items-center justify-between gap-2 border-b bg-background px-4 sm:px-6">
+                     {/* Skeleton Header */}
+                  </header>
+                  <main className="flex-1 overflow-y-auto p-4 md:p-6">
+                      <div className="flex justify-center items-center h-[calc(100vh-56px)]">
+                         <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                      </div>
+                 </main>
+             </div>
+         </div>
+      );
+  }
 
   return (
     <div className="flex min-h-screen w-full bg-muted/40">

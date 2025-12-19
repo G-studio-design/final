@@ -35,6 +35,9 @@ export default function AttendancePageClient({ initialData }: AttendancePageClie
   const { currentUser } = useAuth();
   const { language } = useLanguage();
   const { toast } = useToast();
+  
+  const [isClient, setIsClient] = React.useState(false);
+  React.useEffect(() => { setIsClient(true) }, []);
 
   const [dict, setDict] = React.useState(defaultDict.attendancePage);
 
@@ -73,12 +76,12 @@ export default function AttendancePageClient({ initialData }: AttendancePageClie
 
   React.useEffect(() => {
     const featureIsEnabledForUser = attendanceEnabled || (currentUser && currentUser.roles.includes('Admin Developer'));
-    if (featureIsEnabledForUser) {
+    if (isClient && featureIsEnabledForUser) {
       fetchData();
-    } else {
+    } else if (isClient) {
       setIsLoading(false);
     }
-  }, [attendanceEnabled, fetchData, currentUser]);
+  }, [attendanceEnabled, fetchData, currentUser, isClient]);
 
   const handleCheckIn = () => {
     if (!currentUser) return;
@@ -205,6 +208,19 @@ export default function AttendancePageClient({ initialData }: AttendancePageClie
 
 
   // Render logic
+  if (!isClient) {
+      return (
+          <div className="container mx-auto py-4 px-4 md:px-6 space-y-6">
+              <Skeleton className="h-8 w-1/3 mb-4" />
+              <div className="grid gap-6 md:grid-cols-2">
+                  <Card><CardHeader><Skeleton className="h-6 w-1/2" /></CardHeader><CardContent><Skeleton className="h-24 w-full" /></CardContent></Card>
+                  <Card><CardHeader><Skeleton className="h-6 w-1/2" /></CardHeader><CardContent><Skeleton className="h-64 w-full" /></CardContent></Card>
+              </div>
+          </div>
+      );
+  }
+
+
   const featureIsEnabledForUser = attendanceEnabled || (currentUser && currentUser.roles.includes('Admin Developer'));
   if (!featureIsEnabledForUser) {
     return (
