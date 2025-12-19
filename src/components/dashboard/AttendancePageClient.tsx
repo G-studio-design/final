@@ -233,6 +233,18 @@ export default function AttendancePageClient({ initialData }: AttendancePageClie
     );
   }
 
+  if (!currentUser) {
+    return (
+        <div className="container mx-auto py-4 px-4 md:px-6 space-y-6">
+              <Skeleton className="h-8 w-1/3 mb-4" />
+              <div className="grid gap-6 md:grid-cols-2">
+                  <Card><CardHeader><Skeleton className="h-6 w-1/2" /></CardHeader><CardContent><Skeleton className="h-24 w-full" /></CardContent></Card>
+                  <Card><CardHeader><Skeleton className="h-6 w-1/2" /></CardHeader><CardContent><Skeleton className="h-64 w-full" /></CardContent></Card>
+              </div>
+          </div>
+    );
+  }
+
   return (
     <div className="container mx-auto py-4 px-4 md:px-6 space-y-6">
       <h1 className="text-2xl md:text-3xl font-bold text-primary">{dict.title}</h1>

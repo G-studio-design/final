@@ -51,6 +51,8 @@ export default function AttendanceReportClient({ attendanceEnabled }: Attendance
   const { currentUser } = useAuth();
   const { language } = useLanguage();
   const { toast } = useToast();
+  const [isClient, setIsClient] = React.useState(false);
+  React.useEffect(() => { setIsClient(true) }, []);
 
   const [dict, setDict] = React.useState(defaultDict.attendanceReportPage);
   const [dictGlobal, setDictGlobal] = React.useState(defaultDict);
@@ -246,6 +248,15 @@ export default function AttendanceReportClient({ attendanceEnabled }: Attendance
       return 'Invalid';
     }
   };
+
+  if (!isClient) {
+    return (
+        <div className="container mx-auto py-4 px-4 md:px-6 space-y-6">
+            <Skeleton className="h-8 w-1/3" />
+            <Card><CardContent className="pt-6"><Skeleton className="h-48 w-full" /></CardContent></Card>
+        </div>
+    );
+  }
 
   const featureIsEnabledForUser = attendanceEnabled || (currentUser && currentUser.roles.includes('Admin Developer'));
   if (!canViewPage || !featureIsEnabledForUser) {

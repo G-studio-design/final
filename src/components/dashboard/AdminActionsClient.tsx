@@ -85,6 +85,9 @@ export default function AdminActionsClient({ initialData }: AdminActionsClientPr
   const { language } = useLanguage();
   const { currentUser } = useAuth();
   
+  const [isClient, setIsClient] = React.useState(false);
+  React.useEffect(() => { setIsClient(true) }, []);
+
   const dict = React.useMemo(() => getDictionary(language), [language]);
   const adminDict = React.useMemo(() => dict.adminActionsPage, [dict]);
   const dashboardDict = React.useMemo(() => dict.dashboardPage, [dict]);
@@ -288,21 +291,6 @@ export default function AdminActionsClient({ initialData }: AdminActionsClientPr
    const canDeleteProjects = currentUser && Array.isArray(currentUser.roles) && currentUser.roles.some(r => ['Owner', 'Akuntan', 'Admin Developer'].includes(r));
    const canClearNotifications = currentUser && Array.isArray(currentUser.roles) && currentUser.roles.some(r => ['Owner', 'Admin Developer'].includes(r));
 
-   if (!canPerformAdminActions) {
-       return (
-             <div className="container mx-auto py-4 px-4 md:px-6">
-                <Card className="border-destructive">
-                     <CardHeader>
-                         <CardTitle className="text-destructive">{adminDict.accessDeniedTitle}</CardTitle>
-                     </CardHeader>
-                     <CardContent>
-                         <p>{adminDict.accessDeniedDesc}</p>
-                     </CardContent>
-                </Card>
-            </div>
-       );
-   }
-
    const handleDeleteProject = async (projectId: string, projectTitle: string) => {
        if (!currentUser) return;
        setIsDeleting(true);
@@ -463,6 +451,37 @@ export default function AdminActionsClient({ initialData }: AdminActionsClientPr
 
   const showAttendanceSettingsCard = currentUser && Array.isArray(currentUser.roles) && currentUser.roles.some(r => ['Owner', 'Admin Developer'].includes(r));
 
+
+  if (!isClient) {
+    return (
+        <div className="container mx-auto py-4 px-4 md:px-6 space-y-6">
+           <Card>
+              <CardHeader>
+                <Skeleton className="h-7 w-3/5 mb-2" />
+                <Skeleton className="h-4 w-4/5" />
+              </CardHeader>
+              <CardContent>
+                <Skeleton className="h-40 w-full" />
+              </CardContent>
+           </Card>
+       </div>
+    );
+  }
+
+  if (!canPerformAdminActions) {
+       return (
+             <div className="container mx-auto py-4 px-4 md:px-6">
+                <Card className="border-destructive">
+                     <CardHeader>
+                         <CardTitle className="text-destructive">{adminDict.accessDeniedTitle}</CardTitle>
+                     </CardHeader>
+                     <CardContent>
+                         <p>{adminDict.accessDeniedDesc}</p>
+                     </CardContent>
+                </Card>
+            </div>
+       );
+   }
 
   return (
      <div className="container mx-auto py-4 px-4 md:px-6 space-y-6">
