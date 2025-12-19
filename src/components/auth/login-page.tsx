@@ -40,16 +40,10 @@ export default function LoginPage() {
   const { toast } = useToast();
   const router = useRouter();
   const { language } = useLanguage();
-  const { setCurrentUser } = useAuth();
+  const { setCurrentUser, isHydrated } = useAuth();
   const [dict, setDict] = React.useState(defaultDict.login);
   const [loginError, setLoginError] = React.useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = React.useState(false);
-  const [isClient, setIsClient] = React.useState(false);
-
-  React.useEffect(() => {
-    setIsClient(true);
-  }, []);
-
 
    React.useEffect(() => {
        const newDict = getDictionary(language);
@@ -120,14 +114,35 @@ export default function LoginPage() {
         setIsSubmitting(false);
     }
   };
-
-  if (!isClient) {
-    // Render nothing on the server and initial client render
-    return null;
-  }
+  
+  const LoginSkeleton = () => (
+    <Card className="w-full max-w-md shadow-lg">
+      <CardHeader>
+        <div className="flex justify-center mb-4">
+          <Skeleton className="h-16 w-16 rounded-full" />
+        </div>
+        <Skeleton className="h-7 w-2/3 mx-auto" />
+        <Skeleton className="h-4 w-1/2 mx-auto mt-2" />
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <div className="space-y-2">
+            <Skeleton className="h-4 w-20" />
+            <Skeleton className="h-10 w-full" />
+        </div>
+         <div className="space-y-2">
+            <Skeleton className="h-4 w-20" />
+            <Skeleton className="h-10 w-full" />
+        </div>
+        <Skeleton className="h-10 w-full" />
+      </CardContent>
+    </Card>
+  );
 
   return (
      <div className="flex min-h-screen items-center justify-center bg-secondary p-4">
+      {!isHydrated ? (
+        <LoginSkeleton />
+      ) : (
        <Card className="w-full max-w-md shadow-lg">
         <CardHeader>
            <div className="flex justify-center mb-4">
@@ -201,6 +216,7 @@ export default function LoginPage() {
 
         </CardContent>
       </Card>
+      )}
     </div>
   );
 }
