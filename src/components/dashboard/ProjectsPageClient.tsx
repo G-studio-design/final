@@ -545,17 +545,18 @@ export default function ProjectsPageClient({ initialProjects }: ProjectsPageClie
     setIsSubmitting(true);
     if (isArchitectInitialImageUpload) setIsSubmittingInitialImages(true);
 
+    let newlyUpdatedProject: Project | null = null;
+    let hadError = false;
+
     try {
         if (!isDecisionOrTerminalAction && !isSchedulingAction && !isSurveySchedulingAction && !isArchitectInitialImageUpload && !currentDescription && currentFiles.length === 0 ) {
           toast({ variant: 'destructive', title: projectsDict.toast.missingInput, description: projectsDict.toast.provideDescOrFile });
-          setIsSubmitting(false);
-          if (isArchitectInitialImageUpload) setIsSubmittingInitialImages(false);
+          hadError = true;
           return;
         }
         if (currentUser.roles.includes('Admin Proyek') && selectedProject.status === 'Pending Offer' && currentFiles.length === 0 && actionTaken === 'submitted') {
             toast({ variant: 'destructive', title: projectsDict.toast.missingInput, description: projectsDict.toast.provideOfferFile });
-            setIsSubmitting(false);
-            if (isArchitectInitialImageUpload) setIsSubmittingInitialImages(false);
+            hadError = true;
             return;
         }
 
@@ -574,8 +575,7 @@ export default function ProjectsPageClient({ initialProjects }: ProjectsPageClie
                 } catch (error: any) {
                     console.error("Error uploading file:", file.name, error);
                     toast({ variant: 'destructive', title: projectsDict.toast.uploadError, description: error.message });
-                    setIsSubmitting(false);
-                    if (isArchitectInitialImageUpload) setIsSubmittingInitialImages(false);
+                    hadError = true;
                     return; // Stop on first upload error
                 }
             }
@@ -611,15 +611,6 @@ export default function ProjectsPageClient({ initialProjects }: ProjectsPageClie
             throw new Error(errorResult.message);
         }
         
-        // **PERBAIKAN DIMULAI DI SINI**
-        const newlyUpdatedProject = await fetchProjectById(selectedProject.id);
-        
-        if (newlyUpdatedProject) {
-            setAllProjects(prev => prev.map(p => p.id === newlyUpdatedProject.id ? newlyUpdatedProject : p));
-            setSelectedProject(newlyUpdatedProject); 
-        }
-        // **PERBAIKAN SELESAI**
-
         toast({ title: projectsDict.toast.progressSubmitted, description: "Project has been updated successfully." });
 
         // Reset form states
@@ -638,8 +629,16 @@ export default function ProjectsPageClient({ initialProjects }: ProjectsPageClie
 
       } catch (error: any) {
          console.error("Error updating project:", error);
-         toast({ variant: 'destructive', title: projectsDict.toast.updateError, description: error.message || projectsDict.toast.failedToSubmitProgress });
+         if (!hadError) {
+            toast({ variant: 'destructive', title: projectsDict.toast.updateError, description: error.message || projectsDict.toast.failedToSubmitProgress });
+         }
       } finally {
+         // This block runs regardless of success or failure
+         newlyUpdatedProject = await fetchProjectById(selectedProject.id);
+         if (newlyUpdatedProject) {
+             setAllProjects(prev => prev.map(p => p.id === newlyUpdatedProject.id ? newlyUpdatedProject : p));
+             setSelectedProject(newlyUpdatedProject); 
+         }
          setIsSubmitting(false);
          if (isArchitectInitialImageUpload) setIsSubmittingInitialImages(false);
       }
