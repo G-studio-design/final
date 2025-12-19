@@ -208,6 +208,9 @@ export default function ProjectsPageClient({ initialProjects }: ProjectsPageClie
   
   const [uploadDialogState, setUploadDialogState] = React.useState<UploadDialogState>({ isOpen: false, item: null, division: null });
 
+  const [isClient, setIsClient] = React.useState(false);
+  React.useEffect(() => { setIsClient(true); }, []);
+
 
   const projectIdFromUrl = searchParams.get('projectId');
 
@@ -633,14 +636,16 @@ export default function ProjectsPageClient({ initialProjects }: ProjectsPageClie
             toast({ variant: 'destructive', title: projectsDict.toast.updateError, description: error.message || projectsDict.toast.failedToSubmitProgress });
          }
       } finally {
-         // This block runs regardless of success or failure
-         newlyUpdatedProject = await fetchProjectById(selectedProject.id);
-         if (newlyUpdatedProject) {
-             setAllProjects(prev => prev.map(p => p.id === newlyUpdatedProject.id ? newlyUpdatedProject : p));
-             setSelectedProject(newlyUpdatedProject); 
-         }
-         setIsSubmitting(false);
-         if (isArchitectInitialImageUpload) setIsSubmittingInitialImages(false);
+        // This block runs regardless of success or failure
+        if (selectedProject) {
+            newlyUpdatedProject = await fetchProjectById(selectedProject.id);
+            if (newlyUpdatedProject) {
+                setAllProjects(prev => prev.map(p => p.id === newlyUpdatedProject!.id ? newlyUpdatedProject! : p));
+                setSelectedProject(newlyUpdatedProject); 
+            }
+        }
+        setIsSubmitting(false);
+        if (isArchitectInitialImageUpload) setIsSubmittingInitialImages(false);
       }
   }, [currentUser, selectedProject, uploadedFiles, description, scheduleDate, scheduleTime, scheduleLocation, surveyDate, surveyTime, surveyDescription, projectsDict, toast, actingRole, uploadDialogState.isOpen, rescheduleDate, rescheduleTime, fetchProjectById]);
 
@@ -1355,6 +1360,20 @@ export default function ProjectsPageClient({ initialProjects }: ProjectsPageClie
       const canTakeAction = currentUser.roles.includes('Admin Proyek') || currentUser.roles.includes('Owner') || currentUser.roles.includes('Akuntan');
       return selectedProject.status === 'Pending Final Documents' && canTakeAction;
     }, [selectedProject, currentUser]);
+
+  if (!isClient) {
+    return (
+        <div className="container mx-auto py-4 px-4 md:px-6 space-y-6">
+            <Card className="shadow-md animate-pulse">
+                <CardHeader className="p-4 sm:p-6"><Skeleton className="h-7 w-3/5 mb-2" /><Skeleton className="h-4 w-4/5" /></CardHeader>
+                <CardContent className="p-4 sm:p-6 pt-0">
+                    <div className="flex justify-end mb-4"><Skeleton className="h-10 w-32" /></div>
+                    <div className="space-y-4">{[...Array(3)].map((_, i) => (<Card key={`project-skel-${i}`} className="opacity-50 border-muted/50"><CardHeader className="flex flex-col sm:flex-row items-start justify-between space-y-2 sm:space-y-0 pb-2 p-4 sm:p-6"><div><Skeleton className="h-5 w-3/5 mb-1" /><Skeleton className="h-3 w-4/5" /></div><div className="flex-shrink-0 mt-2 sm:mt-0"><Skeleton className="h-5 w-20 rounded-full" /></div></CardHeader><CardContent className="p-4 sm:p-6 pt-0"><div className="flex items-center gap-2"><Skeleton className="flex-1 h-2" /><Skeleton className="h-3 w-1/4" /></div></CardContent></Card>))}</div>
+                </CardContent>
+            </Card>
+        </div>
+    );
+  }
 
   const renderProjectList = () => {
        if (!projectsDict?.projectListTitle) {
